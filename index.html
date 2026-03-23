@@ -144,6 +144,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .flight-tab{padding:6px 14px;border:1px solid var(--border2);border-radius:20px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .15s;}
 .flight-tab:hover{border-color:var(--accent);color:var(--accent);}
 .flight-tab.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.flight-tab.booby-tab{border-color:#c94a2a;color:#c94a2a;}
+.flight-tab.booby-tab.active{background:#c94a2a;color:#fff;border-color:#c94a2a;}
 .podium{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin-bottom:18px;padding-top:8px;}
 .pod{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .pod-name{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;text-align:center;max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -489,10 +491,11 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         </select>
       </div>
       <div class="flight-tabs">
-        <div class="flight-tab active" onclick="setFlight(this,'')">ทุก Flight</div>
+        <div class="flight-tab active" onclick="setFlight(this,'lowgross')">🏌️ Low Gross</div>
         <div class="flight-tab" onclick="setFlight(this,'A')">Flight A <span style="font-size:10px;opacity:.7">(0-12)</span></div>
         <div class="flight-tab" onclick="setFlight(this,'B')">Flight B <span style="font-size:10px;opacity:.7">(13-24)</span></div>
         <div class="flight-tab" onclick="setFlight(this,'C')">Flight C <span style="font-size:10px;opacity:.7">(25-36)</span></div>
+        <div class="flight-tab booby-tab" onclick="setFlight(this,'booby')">🐔 Booby</div>
       </div>
       <div id="lbPodium"></div>
       <div id="lbTable"></div>
@@ -852,7 +855,7 @@ let scoreState = { scores:[], putts:[], pars:[], holes:18 };
 let tourneyList = [];
 let activeTourney = null;
 let lbData = [];
-let activeFlightFilter = '';
+let activeFlightFilter = 'lowgross';
 let adminEditPlayer = null;
 let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
 
@@ -904,7 +907,17 @@ function switchTab(t) {
     if (view) view.classList.toggle('hidden', x!==t);
   });
   if (t==='login' && adminIn) switchTab('admin');
-  if (t==='lb') { loadTourneyListForLb(); loadLeaderboard(); }
+  if (t==='lb') {
+    loadTourneyListForLb();
+    loadLeaderboard();
+    // reset ปุ่มให้ตรงกับ activeFlightFilter
+    document.querySelectorAll('.flight-tab').forEach(tab=>{
+      tab.classList.remove('active');
+    });
+    const tabs=document.querySelectorAll('.flight-tab');
+    // Low Gross เป็นปุ่มแรก
+    if(activeFlightFilter==='lowgross'&&tabs[0]) tabs[0].classList.add('active');
+  }
 }
 
 // ════════════════════════════════
@@ -1808,21 +1821,83 @@ function setFlight(el,flight){
 }
 function renderLb(data){
   let d=[...(data||[])];
-  if(activeFlightFilter) d=d.filter(r=>r.flight===activeFlightFilter);
-  d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
+  const isBooby=activeFlightFilter==='booby';
+  const isLowGross=activeFlightFilter==='lowgross';
+
+  // กรองตาม Flight (A/B/C เท่านั้น)
+  if(!isBooby&&!isLowGross&&activeFlightFilter){
+    d=d.filter(r=>r.flight===activeFlightFilter);
+  }
+
+  // จัดเรียง
+  if(isBooby){
+    // Booby: เอาทุก Flight, เรียง Gross มาก→น้อย (อันดับสุดท้ายขึ้นก่อน), tie-break H'cap สูงกว่า
+    d.sort((a,b)=>b.gross-a.gross||b.hcp-a.hcp);
+  }else if(isLowGross){
+    // Low Gross: เรียง Gross น้อย→มาก, tie-break H'cap ต่ำกว่า
+    d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
+  }else{
+    // Net (Flight A/B/C): เรียง Net น้อย→มาก, tie-break H'cap ต่ำกว่า
+    d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
+  }
+
   const podEl=document.getElementById('lbPodium'),tblEl=document.getElementById('lbTable');
   if(!d.length){podEl.innerHTML='';tblEl.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>';return;}
+
+  const medals=['🥇','🥈','🥉'];
+
+  if(isBooby){
+    // Booby: แสดงแค่ 2 คน — Booby Maker (อันดับ1) และ Booby (อันดับ2)
+    const top2=d.slice(0,2);
+    const boobyLabels=['🐔 Booby Maker','🐓 Booby'];
+    const boobyColors=['#c94a2a','#e07a40'];
+    podEl.innerHTML=`<div class="podium" style="justify-content:center;gap:20px;">${top2.map((p,rank)=>`
+      <div class="pod">
+        <div class="pod-name">${p.name}</div>
+        <div class="pod-net" style="color:${boobyColors[rank]}">${p.gross}</div>
+        <div class="pod-sub">Gross · H'cap ${p.hcp}<br>Net ${p.net} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+        <div class="pod-block" style="background:${boobyColors[rank]};height:${rank===0?68:50}px;width:80px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:22px;">🐔</div>
+      </div>`).join('')}</div>`;
+
+    tblEl.innerHTML=`<table class="lb-table">
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <tbody>${d.map((r,i)=>{
+        const diff=r.gross-(r.par||72);
+        const boobyTag=i===0
+          ?`<span style="background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;">🐔 Booby Maker</span>`
+          :i===1
+          ?`<span style="background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;">🐓 Booby</span>`
+          :'';
+        return `<tr class="${i<2?'rank-'+(i+1):''}">
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i+1}</td>
+          <td><div style="font-weight:600;font-size:14px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
+              <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
+            </div></td>
+          <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
+          <td>${r.hcp}</td>
+          <td class="lb-net" style="color:var(--text2);font-size:14px;">${r.net}</td>
+          <td style="text-align:center;">${boobyTag}</td>
+        </tr>`;}).join('')}</tbody></table>`;
+    return;
+  }
+
+  // Low Gross / Flight A/B/C — Podium ปกติ
   const top=d.slice(0,3);
   const podOrder=top.length>=2?[top[1],top[0],top[2]].filter(Boolean):[top[0]];
-  const podCls=['pod-2','pod-1','pod-3'],medals=['🥇','🥈','🥉'];
+  const podCls=['pod-2','pod-1','pod-3'];
+  const mainVal=r=>isLowGross?r.gross:r.net;
+  const mainLabel=isLowGross?'Gross':'Net';
   podEl.innerHTML=`<div class="podium">${podOrder.map(p=>{
     const rank=top.indexOf(p);
     return `<div class="pod">
       <div class="pod-name">${p.name}</div>
-      <div class="pod-net" style="color:${rank===0?'var(--gold)':rank===1?'#7a8a9a':'#a0673a'}">${p.net}</div>
-      <div class="pod-sub">Net · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+      <div class="pod-net" style="color:${rank===0?'var(--gold)':rank===1?'#7a8a9a':'#a0673a'}">${mainVal(p)}</div>
+      <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
       <div class="pod-block ${podCls[rank]}">${medals[rank]}</div>
     </div>`;}).join('')}</div>`;
+
+  // คอลัมน์ตาราง — Low Gross ให้เน้น Gross แทน Net
   tblEl.innerHTML=`<table class="lb-table">
     <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th></tr></thead>
     <tbody>${d.map((r,i)=>{
@@ -1833,9 +1908,9 @@ function renderLb(data){
           <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
             <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
           </div></td>
-        <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
+        <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
-        <td class="lb-net">${r.net}</td>
+        <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
       </tr>`;}).join('')}</tbody></table>`;
 }
 
