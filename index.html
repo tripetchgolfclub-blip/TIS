@@ -567,28 +567,33 @@ const DEF_PARS_9  = [4,4,3,5,4,3,4,5,4];
 // APPS SCRIPT CODE
 // ════════════════════════════════
 const APPS_SCRIPT_CODE = `function doGet(e) {
-  var action = e.parameter.action;
+  var action = e.parameter.action || '';
   var result;
   try {
     if (e.parameter.payload) {
+      // Write operations — ส่งมาเป็น GET + payload
       var data = JSON.parse(decodeURIComponent(e.parameter.payload));
-      if (action==='saveTourney')   result = saveTourney(data);
+      if (action==='saveTourney')        result = saveTourney(data);
       else if (action==='addPlayer')     result = addPlayer(data);
       else if (action==='bulkPlayers')   result = bulkPlayers(data);
       else if (action==='removePlayer')  result = removePlayer(data);
       else if (action==='clearPlayers')  result = clearPlayers(data);
       else if (action==='submitScore')   result = submitScore(data);
-      else result = {error:'unknown'};
+      else result = {error:'unknown action: '+action};
     } else {
+      // Read operations
       if (action==='getTourneyList')     result = getTourneyList();
       else if (action==='getTourney')    result = getTourney(e.parameter.name);
       else if (action==='getPlayers')    result = getPlayers(e.parameter.name);
       else if (action==='getScores')     result = getScores(e.parameter.name);
       else if (action==='findPlayer')    result = findPlayer(e.parameter.email);
-      else result = {error:'unknown'};
+      else result = {error:'unknown action: '+action};
     }
-  } catch(err) { result = {error:err.toString()}; }
-  return ContentService.createTextOutput(JSON.stringify(result))
+  } catch(err) {
+    result = {error: err.toString(), action: action};
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -827,8 +832,11 @@ async function apiPost(body) {
   if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
   const payload = encodeURIComponent(JSON.stringify(body));
   const r = await fetch(scriptUrl+'?action='+body.action+'&payload='+payload, {redirect:'follow'});
-  const json = JSON.parse(await r.text());
-  if (json && json.error) throw new Error(json.error);
+  const text = await r.text();
+  let json;
+  try { json = JSON.parse(text); }
+  catch(e) { throw new Error('Parse error: '+text.slice(0,120)); }
+  if (json && json.error) throw new Error('['+body.action+'] '+json.error);
   return json;
 }
 function loading(show, text='กำลังโหลด...') {
