@@ -9,7 +9,7 @@
   "theme_color": "#1a4a2a",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "TISGolfClub.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
