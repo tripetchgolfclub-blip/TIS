@@ -849,7 +849,7 @@ const DEF_PARS_18 = [4,4,3,5,4,3,4,5,4,4,3,5,4,4,3,5,4,4];
 const DEF_PARS_9  = [4,4,3,5,4,3,4,5,4];
 
 let adminIn = false;
-let scriptUrl = localStorage.getItem('golf_scriptUrl') || '';
+let scriptUrl = localStorage.getItem('golf_scriptUrl') || 'https://script.google.com/macros/s/AKfycbwGDVw99PpA1VcDxzOF2ydM2pV-89HsnfalNNuT3WbIjCdCO0uGvOpMPSreJ3pgzQlqkA/exec';
 let currentPlayer = null;
 let scoreState = { scores:[], putts:[], pars:[], holes:18 };
 let tourneyList = [];
@@ -1854,13 +1854,14 @@ function renderLb(data){
   const mainVal=r=>isLowGross?r.gross:r.net;
   const mainLabel=isLowGross?'Gross':'Net';
   const podMedals=isBooby?['🐔','🐓','🎗️']:medals;
-  podEl.innerHTML=`<div class="podium">${podOrder.map(p=>{
+  const medalColors=['var(--gold)','#7a8a9a','#a0673a'];
+  podEl.innerHTML=`<div class="podium">${podOrder.map((p,podIdx)=>{
     const rank=top.indexOf(p);
     return `<div class="pod">
       <div class="pod-name">${p.name}</div>
-      <div class="pod-net" style="color:${rank===0?'var(--gold)':rank===1?'#7a8a9a':'#a0673a'}">${mainVal(p)}</div>
+      <div class="pod-net" style="color:${medalColors[rank]}">${mainVal(p)}</div>
       <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
-      <div class="pod-block ${podCls[rank]}">${podMedals[rank]}</div>
+      <div class="pod-block ${podCls[podIdx]}">${podMedals[rank]}</div>
     </div>`;}).join('')}</div>`;
 
   // ─── TABLE ───
