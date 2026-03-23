@@ -1831,8 +1831,8 @@ function renderLb(data){
 
   // จัดเรียง
   if(isBooby){
-    // Booby: เอาทุก Flight, เรียง Gross มาก→น้อย (อันดับสุดท้ายขึ้นก่อน), tie-break H'cap สูงกว่า
-    d.sort((a,b)=>b.gross-a.gross||b.hcp-a.hcp);
+    // Booby: เอาทุก Flight, เรียง Net มาก→น้อย (คนแย่สุดขึ้นก่อน), tie-break H'cap สูงกว่า
+    d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
   }else if(isLowGross){
     // Low Gross: เรียง Gross น้อย→มาก, tie-break H'cap ต่ำกว่า
     d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
@@ -1854,8 +1854,8 @@ function renderLb(data){
     podEl.innerHTML=`<div class="podium" style="justify-content:center;gap:20px;">${top2.map((p,rank)=>`
       <div class="pod">
         <div class="pod-name">${p.name}</div>
-        <div class="pod-net" style="color:${boobyColors[rank]}">${p.gross}</div>
-        <div class="pod-sub">Gross · H'cap ${p.hcp}<br>Net ${p.net} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+        <div class="pod-net" style="color:${boobyColors[rank]}">${p.net}</div>
+        <div class="pod-sub">Net · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
         <div class="pod-block" style="background:${boobyColors[rank]};height:${rank===0?68:50}px;width:80px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:22px;">🐔</div>
       </div>`).join('')}</div>`;
 
