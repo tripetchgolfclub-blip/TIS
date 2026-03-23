@@ -253,19 +253,25 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         </div>
         <button class="btn-sm" onclick="loadTourneyList()" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;">🔄 โหลด</button>
       </div>
-      <!-- Active tourney display -->
-      <div class="ts-active hidden" id="tsActiveBar">
-        <div>
-          <div class="ts-active-name" id="tsActiveName">—</div>
-          <div class="ts-active-meta" id="tsActiveCourse">—</div>
+
+      <!-- Current tourney bar (default view) -->
+      <div id="tsActiveBar" class="hidden" style="padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--accent2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="tsActiveName">—</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="tsActiveCourse">—</div>
         </div>
-        <span class="ts-item-badge ts-badge-live" id="tsActiveBadge">ใช้งาน</span>
+        <button class="btn-sm" onclick="toggleTourneyDropdown()" id="tsDropdownBtn" style="flex-shrink:0;">
+          เปลี่ยน ▾
+        </button>
       </div>
-      <!-- Search -->
-      <div class="ts-search">
-        <input type="text" id="tsSearchInput" placeholder="🔍 ค้นหาชื่อการแข่งขัน..." oninput="filterTourneyList()">
+
+      <!-- Dropdown list (hidden by default) -->
+      <div id="tsDropdown" class="hidden">
+        <div class="ts-search">
+          <input type="text" id="tsSearchInput" placeholder="🔍 ค้นหาชื่อการแข่งขัน..." oninput="filterTourneyList()">
+        </div>
+        <div class="ts-list" id="tsList"><div class="ts-empty">กด 🔄 โหลดรายการ</div></div>
       </div>
-      <div class="ts-list" id="tsList"><div class="ts-empty">กด 🔄 โหลดรายการ</div></div>
     </div>
 
     <!-- Tournament Form -->
@@ -395,7 +401,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
   <div id="playerScorecard" class="hidden">
     <div class="main" style="animation:fadeUp .25s ease;">
       <div class="tourney-banner">
-        <div class="tb-title" id="bnrTitle">—</div>
+        <div class="tb-title" id="bnrTitle" style="display:inline-block;background:rgba(220,60,60,0.18);border-radius:6px;padding:2px 12px 3px;margin-bottom:4px;">—</div>
         <div class="tb-meta" id="bnrMeta">—</div>
       </div>
       <div class="round-bar">
@@ -440,6 +446,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div class="sum-grid" id="sumGrid"></div>
       </div>
       <button class="btn-send" id="btnSend" onclick="submitScore()">📤 ส่งสกอร์</button>
+      <button class="btn-send" onclick="showScoreCard()" style="background:#b8922a;">🏆 ดูและแชร์สกอร์การ์ด</button>
       <button class="btn-outline full" onclick="logoutPlayer()">← ออกจากระบบ</button>
     </div>
   </div>
@@ -553,9 +560,336 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
   </div>
 </div>
 
+<!-- ══ SCORECARD SHARE MODAL ══ -->
+<div id="scShareModal" class="hidden" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
+    <div style="background:#1a4a2a;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:#fff;">🏆 สกอร์การ์ด</span>
+      <button onclick="closeScoreCard()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
+    </div>
+    <div style="padding:16px;text-align:center;">
+      <canvas id="scCanvas" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.15);"></canvas>
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="downloadCard()" style="background:#1a4a2a;color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;">⬇️ บันทึกรูป</button>
+        <button onclick="shareCard()" style="background:#06c755;color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;">📤 แชร์ / LINE</button>
+      </div>
+      <div style="font-size:11px;color:#999;margin-top:8px;font-family:'IBM Plex Mono',monospace;">กด "บันทึกรูป" แล้วแชร์ผ่าน LINE ได้เลย</div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+// ════ SCORECARD CARD RENDER ════
+function showScoreCard() {
+  const { scores, pars, putts, holes } = scoreState;
+  const played = scores.filter(v=>v!==null).length;
+  if (!played) { toast('กรุณาบันทึกสกอร์ก่อนครับ','err'); return; }
+
+  const { gross, parSum, hcp, net } = calcTotals();
+  const flight = calcFlight(hcp);
+  const t = { title: document.getElementById('bnrTitle').textContent,
+               meta:  document.getElementById('bnrMeta').textContent };
+
+  document.getElementById('scShareModal').classList.remove('hidden');
+  requestAnimationFrame(() => renderCanvas(scores, pars, putts, holes, gross, parSum, hcp, net, flight, t));
+}
+
+function closeScoreCard() {
+  document.getElementById('scShareModal').classList.add('hidden');
+}
+
+function renderCanvas(scores, pars, putts, holes, gross, parSum, hcp, net, flight, t) {
+  const canvas = document.getElementById('scCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const W = 480, ROW_H = 30, HEADER_H = 110, FOOTER_H = 90;
+  const SUMMARY_H = 56;
+  const H = HEADER_H + (holes + 2) * ROW_H + SUMMARY_H + FOOTER_H + 16;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Colors
+  const C = {
+    green:  '#1a4a2a', green2: '#2c6e3f', green3: '#e8f5ed',
+    gold:   '#c9a830', goldL: '#f5e6a0',
+    cream:  '#fffdf5', white: '#ffffff',
+    red:    '#c94a2a', blue:  '#1a6b9a',
+    bogey:  '#b8922a', dbl:   '#8a3a1a',
+    text:   '#1c1a17', text2: '#5a5248', text3: '#9e9488',
+    border: '#d4c9b0'
+  };
+
+  // BG
+  ctx.fillStyle = C.cream;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── HEADER ──
+  ctx.fillStyle = C.green;
+  ctx.fillRect(0, 0, W, HEADER_H);
+
+  // Header texture stripes
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  for (let i=0;i<W;i+=8) { ctx.fillRect(i,0,4,HEADER_H); }
+
+  // Tournament name badge (red bg)
+  const tName = t.title || '—';
+  ctx.font = 'bold 13px "Sarabun", sans-serif';
+  const tnW = ctx.measureText(tName).width + 24;
+  const tnX = (W - tnW) / 2;
+  ctx.fillStyle = 'rgba(200,50,50,0.25)';
+  roundRect(ctx, tnX, 12, tnW, 22, 5);
+  ctx.fill();
+  ctx.fillStyle = '#ffcccc';
+  ctx.textAlign = 'center';
+  ctx.fillText(tName, W/2, 27);
+
+  // Player name
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px "Cormorant Garamond", serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(currentPlayer?.name || '—', W/2, 58);
+
+  // Sub info
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.font = '11px "IBM Plex Mono", monospace';
+  ctx.fillText(t.meta || '', W/2, 76);
+
+  // Flight badge
+  const flightColors = {A:'#0a5c2a',B:'#084298',C:'#664d03'};
+  const flightBg = {A:'#d1e7dd',B:'#cfe2ff',C:'#fff3cd'};
+  const fbW = 64, fbH = 20, fbX = W/2 - fbW/2;
+  ctx.fillStyle = flightBg[flight]||'#eee';
+  roundRect(ctx, fbX, 84, fbW, fbH, 10); ctx.fill();
+  ctx.fillStyle = flightColors[flight]||'#333';
+  ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Flight ' + flight, W/2, 98);
+
+  // ── TABLE ──
+  const tableTop = HEADER_H + 4;
+  const cols = [36, 36, 70, 64, 64, 50]; // H, Par, Score, ±Par, H'cap, Putt
+  const labels = ['H', 'Par', 'Score', '±Par', "H'cap", 'Putt'];
+  const colX = [0];
+  cols.forEach((w,i) => colX.push(colX[i]+w));
+  const TABLE_W = colX[cols.length];
+  const OFFSET_X = (W - TABLE_W) / 2;
+
+  // Table header
+  ctx.fillStyle = C.green;
+  ctx.fillRect(OFFSET_X, tableTop, TABLE_W, ROW_H);
+  ctx.fillStyle = C.goldL;
+  ctx.font = 'bold 10px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'center';
+  labels.forEach((lb,i) => {
+    ctx.fillText(lb, OFFSET_X + colX[i] + cols[i]/2, tableTop + 19);
+  });
+
+  // Rows
+  for (let i=0; i<holes; i++) {
+    const y = tableTop + ROW_H + i*ROW_H;
+    // Separator at hole 9
+    if (i===9) {
+      ctx.fillStyle = C.green2;
+      ctx.fillRect(OFFSET_X, y, TABLE_W, 2);
+    }
+    // Row bg
+    const isEven = i%2===0;
+    ctx.fillStyle = isEven ? C.white : C.green3;
+    ctx.fillRect(OFFSET_X, y, TABLE_W, ROW_H);
+
+    const s = scores[i], par = pars[i], p = putts[i];
+    const df = s!==null ? s-par : null;
+    const hcpH = holeHcp_c(s, par);
+
+    // Cell values
+    const cells = [
+      { v: String(i+1), col: 0 },
+      { v: String(par),  col: 1 },
+      { v: s!==null ? String(s) : '—', col: 2, score: true, df },
+      { v: df!==null ? dStr(df) : '—', col: 3, diff: df },
+      { v: hcpH!==null ? (hcpH===0?'·':String(hcpH)) : '—', col: 4, hcp: hcpH },
+      { v: p!==null ? String(p) : '—', col: 5 }
+    ];
+
+    cells.forEach(c => {
+      const cx = OFFSET_X + colX[c.col] + cols[c.col]/2;
+      const cy = y + 19;
+
+      // Score bubble
+      if (c.score && s!==null) {
+        const color = scoreColor(df);
+        ctx.fillStyle = color + '22';
+        roundRect(ctx, OFFSET_X+colX[c.col]+4, y+4, cols[c.col]-8, ROW_H-8, 4);
+        ctx.fill();
+        ctx.fillStyle = color;
+        ctx.font = 'bold 13px "IBM Plex Mono", monospace';
+      } else if (c.diff !== undefined && df!==null) {
+        ctx.fillStyle = scoreColor(df);
+        ctx.font = '11px "IBM Plex Mono", monospace';
+      } else if (c.hcp !== undefined && hcpH!==null && hcpH>0) {
+        ctx.fillStyle = hcpH===1 ? C.bogey : C.dbl;
+        ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+      } else {
+        ctx.fillStyle = c.col===0 ? C.text3 : c.col===1 ? C.text2 : C.text;
+        ctx.font = c.col===0 ? '11px "IBM Plex Mono", monospace' : '12px "IBM Plex Mono", monospace';
+      }
+      ctx.textAlign = 'center';
+      ctx.fillText(c.v, cx, cy);
+    });
+
+    // Row border
+    ctx.strokeStyle = C.border;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(OFFSET_X, y + ROW_H);
+    ctx.lineTo(OFFSET_X + TABLE_W, y + ROW_H);
+    ctx.stroke();
+  }
+
+  // Subtotal rows (OUT/IN if 18 holes)
+  const drawSubRow = (from, to, label, yPos, isTot=false) => {
+    const sc = scores.slice(from,to).reduce((a,v)=>a+(v||0),0);
+    const pr = pars.slice(from,to).reduce((a,v)=>a+v,0);
+    const hc = scores.slice(from,to).reduce((a,s,idx)=>a+(holeHcp_c(s,pars[from+idx])||0),0);
+    const pt = putts.slice(from,to).reduce((a,v)=>a+(v||0),0);
+    const fl = scores.slice(from,to).filter(v=>v!==null).length;
+
+    ctx.fillStyle = isTot ? C.green : '#e8f0e8';
+    ctx.fillRect(OFFSET_X, yPos, TABLE_W, ROW_H);
+    ctx.fillStyle = isTot ? C.goldL : C.green;
+    ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, OFFSET_X + 8, yPos + 19);
+    const subCells = [pr, fl?sc:'—', fl?dStr(sc-pr):'—', fl?hc:'—', pt||'—'];
+    subCells.forEach((v,i) => {
+      ctx.fillStyle = isTot ? C.goldL : C.green;
+      ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(v), OFFSET_X + colX[i+1] + cols[i+1]/2, yPos + 19);
+    });
+  };
+
+  const subY = tableTop + ROW_H + holes * ROW_H;
+  if (holes===18) {
+    // OUT row after hole 9 — drawn inline, skip
+  }
+  drawSubRow(0, holes, holes===18?'TOTAL':'TOTAL', subY, true);
+
+  // ── SUMMARY ──
+  const sumY = subY + ROW_H + 8;
+  const sumItems = [
+    { label:'Gross', val: String(gross) },
+    { label:"H'cap", val: String(hcp) },
+    { label:'Net',   val: String(net),  highlight:true },
+    { label:'Flight',val: 'Flight '+flight }
+  ];
+  const sW = (TABLE_W) / sumItems.length;
+  sumItems.forEach((item,i) => {
+    const sx = OFFSET_X + i*sW;
+    ctx.fillStyle = item.highlight ? C.green : '#f5f2ea';
+    roundRect(ctx, sx+2, sumY, sW-4, SUMMARY_H-4, 7); ctx.fill();
+    ctx.fillStyle = item.highlight ? 'rgba(255,255,255,0.6)' : C.text3;
+    ctx.font = '10px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(item.label, sx+sW/2, sumY+14);
+    ctx.fillStyle = item.highlight ? '#fff' : (item.label==="H'cap"?C.bogey:C.green);
+    ctx.font = 'bold 20px "IBM Plex Mono", monospace';
+    ctx.fillText(item.val, sx+sW/2, sumY+38);
+  });
+
+  // ── FOOTER ──
+  const footY = sumY + SUMMARY_H + 8;
+  ctx.fillStyle = C.green;
+  ctx.fillRect(OFFSET_X, footY, TABLE_W, 1);
+
+  // Eagle/Birdie/Bogey counts
+  let eagle=0,birdie=0,par_=0,bogey=0,dbl=0;
+  scores.forEach((s,i)=>{ if(s===null)return; const d=s-pars[i]; if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par_++;else if(d===1)bogey++;else dbl++; });
+  const stats = [
+    {label:'Eagle',val:eagle,color:C.blue},
+    {label:'Birdie',val:birdie,color:C.red},
+    {label:'Par',val:par_,color:C.green2},
+    {label:'Bogey',val:bogey,color:C.bogey},
+    {label:'Dbl+',val:dbl,color:C.dbl}
+  ];
+  const stW = TABLE_W / stats.length;
+  stats.forEach((st,i)=>{
+    const sx = OFFSET_X + i*stW + stW/2;
+    ctx.fillStyle = st.color;
+    ctx.font = 'bold 16px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(st.val), sx, footY+22);
+    ctx.fillStyle = C.text3;
+    ctx.font = '9px "IBM Plex Mono", monospace';
+    ctx.fillText(st.label, sx, footY+36);
+  });
+
+  // Branding
+  ctx.fillStyle = C.green;
+  ctx.fillRect(0, H-28, W, 28);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('⛳ Golf Scorecard System', W/2, H-10);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function scoreColor(df) {
+  if (df===null) return '#ccc';
+  if (df<=-2) return '#1a6b9a';
+  if (df===-1) return '#c94a2a';
+  if (df===0)  return '#2c6e3f';
+  if (df===1)  return '#b8922a';
+  return '#8a3a1a';
+}
+function holeHcp_c(s,par){ if(s===null)return null; const d=s-par; if(d<=0)return 0; if(d===1)return 1; return 2; }
+
+async function downloadCard() {
+  const canvas = document.getElementById('scCanvas');
+  const link = document.createElement('a');
+  link.download = 'scorecard-'+(currentPlayer?.name||'golf')+'.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  toast('✅ บันทึกรูปแล้ว — เปิด LINE แล้วแชร์รูปได้เลย','ok');
+}
+
+async function shareCard() {
+  const canvas = document.getElementById('scCanvas');
+  try {
+    canvas.toBlob(async blob => {
+      const file = new File([blob], 'scorecard.png', {type:'image/png'});
+      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+        await navigator.share({ files:[file], title:'สกอร์การ์ด '+currentPlayer?.name });
+      } else {
+        // Fallback: download
+        downloadCard();
+        toast('กรุณาบันทึกรูปแล้วแชร์ผ่าน LINE ครับ');
+      }
+    });
+  } catch(e) {
+    downloadCard();
+  }
+}
+</script>
 // ════════════════════════════════
 // CONFIG
 // ════════════════════════════════
@@ -901,7 +1235,7 @@ async function loadTourneyList() {
     renderTourneyList(tourneyList);
     // ถ้ายังไม่มี activeTourney และมีรายการ ให้เลือกอันล่าสุดอัตโนมัติ
     if (!activeTourney && tourneyList.length) {
-      await selectTourney(tourneyList[tourneyList.length-1].tourneyName);
+      await selectTourney(tourneyList[0].tourneyName);
     }
   } catch(e) { toast('❌ '+e.message,'err'); }
   loading(false);
@@ -913,12 +1247,10 @@ function renderTourneyList(list) {
   el.innerHTML = list.map(t => `
     <div class="ts-item ${activeTourney?.tourneyName===t.tourneyName?'active':''}" onclick="selectTourney('${t.tourneyName}')">
       <div style="flex:1;">
-        <div class="ts-item-name">${t.tourneyName}</div>
+        <div class="ts-item-name">${t.tourneyName} ${activeTourney?.tourneyName===t.tourneyName?'<span style="font-size:10px;color:var(--accent2);font-family:\'IBM Plex Mono\',monospace;">✓</span>':''}</div>
         <div class="ts-item-meta">${t.course||'—'} · ${fmtD(t.date)}</div>
       </div>
-      <span class="ts-item-badge ${activeTourney?.tourneyName===t.tourneyName?'ts-badge-live':'ts-badge-done'}">
-        ${activeTourney?.tourneyName===t.tourneyName?'✓ ใช้งาน':'เลือก'}
-      </span>
+      <span style="color:var(--text3);font-size:16px;">›</span>
     </div>`).join('');
 }
 
@@ -946,12 +1278,26 @@ async function selectTourney(name) {
     document.getElementById('tsActiveCourse').textContent = (t.course||'—') + ' · ' + fmtD(t.date);
     document.getElementById('tsActiveMeta').textContent  = 'กำลังดู: ' + t.tourneyName;
     document.getElementById('currentTourneyTag').textContent = '· ' + t.tourneyName;
+    closeTourneyDropdown(); // ปิด dropdown หลังเลือก
     renderTourneyList(tourneyList);
     // โหลดรายชื่อผู้เล่น
     await loadPlayersToAdmin();
     toast('✅ โหลด "'+name+'" แล้ว','ok');
   } catch(e) { toast('❌ '+e.message,'err'); }
   loading(false);
+}
+
+function toggleTourneyDropdown() {
+  const dd = document.getElementById('tsDropdown');
+  const btn = document.getElementById('tsDropdownBtn');
+  const isOpen = !dd.classList.contains('hidden');
+  dd.classList.toggle('hidden', isOpen);
+  btn.textContent = isOpen ? 'เปลี่ยน ▾' : 'ปิด ▴';
+}
+
+function closeTourneyDropdown() {
+  document.getElementById('tsDropdown').classList.add('hidden');
+  document.getElementById('tsDropdownBtn').textContent = 'เปลี่ยน ▾';
 }
 
 function clearTourneyForm() {
@@ -963,6 +1309,7 @@ function clearTourneyForm() {
   document.getElementById('tsActiveBar').classList.add('hidden');
   document.getElementById('tsActiveMeta').textContent = 'ยังไม่ได้เลือก';
   document.getElementById('currentTourneyTag').textContent = '';
+  closeTourneyDropdown();
   renderAdminList([],[]);
   renderParTable();
   toast('พร้อมสร้างการแข่งขันใหม่');
@@ -1476,7 +1823,7 @@ async function loadTourneyListForLb() {
     sel.innerHTML = '<option value="">— เลือกการแข่งขัน —</option>' +
       list.map(t=>`<option value="${t.tourneyName}" ${t.tourneyName===cur?'selected':''}>${t.tourneyName} · ${fmtD(t.date)}</option>`).join('');
     // ถ้ายังไม่ได้เลือก ให้เลือกอันล่าสุด
-    if (!sel.value && list.length) sel.value = list[list.length-1].tourneyName;
+    if (!sel.value && list.length) sel.value = list[0].tourneyName;
   } catch(e) {}
 }
 async function onLbTourneyChange() { await loadLeaderboard(); }
