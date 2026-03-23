@@ -522,35 +522,50 @@ const APPS_SCRIPT_CODE = `// ═════════════════
 
 function doGet(e) {
   const action = e.parameter.action;
+  let result;
   try {
-    if (action === 'getTourney')   return res(getTourney());
-    if (action === 'getPlayers')   return res(getPlayers());
-    if (action === 'getScores')    return res(getScores());
-    if (action === 'findPlayer')   return res(findPlayer(e.parameter.email));
-    return res({error:'unknown action'});
+    // Write operations ส่งมาเป็น GET + payload
+    if (e.parameter.payload) {
+      const data = JSON.parse(decodeURIComponent(e.parameter.payload));
+      if (action === 'saveTourney')  result = saveTourney(data);
+      else if (action === 'addPlayer')    result = addPlayer(data);
+      else if (action === 'bulkPlayers')  result = bulkPlayers(data);
+      else if (action === 'removePlayer') result = removePlayer(data.email);
+      else if (action === 'clearPlayers') result = clearPlayers();
+      else if (action === 'submitScore')  result = submitScore(data);
+      else result = {error:'unknown action'};
+    } else {
+      // Read operations
+      if (action === 'getTourney')       result = getTourney();
+      else if (action === 'getPlayers')  result = getPlayers();
+      else if (action === 'getScores')   result = getScores();
+      else if (action === 'findPlayer')  result = findPlayer(e.parameter.email);
+      else result = {error:'unknown action'};
+    }
   } catch(err) {
-    return res({error: err.toString()});
+    result = {error: err.toString()};
   }
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
+  let result;
   try {
     const data = JSON.parse(e.postData.contents);
-    if (data.action === 'saveTourney')  return res(saveTourney(data));
-    if (data.action === 'addPlayer')    return res(addPlayer(data));
-    if (data.action === 'bulkPlayers')  return res(bulkPlayers(data));
-    if (data.action === 'removePlayer') return res(removePlayer(data.email));
-    if (data.action === 'clearPlayers') return res(clearPlayers());
-    if (data.action === 'submitScore')  return res(submitScore(data));
-    return res({error:'unknown action'});
+    if (data.action === 'saveTourney')  result = saveTourney(data);
+    else if (data.action === 'addPlayer')    result = addPlayer(data);
+    else if (data.action === 'bulkPlayers')  result = bulkPlayers(data);
+    else if (data.action === 'removePlayer') result = removePlayer(data.email);
+    else if (data.action === 'clearPlayers') result = clearPlayers();
+    else if (data.action === 'submitScore')  result = submitScore(data);
+    else result = {error:'unknown action'};
   } catch(err) {
-    return res({error: err.toString()});
+    result = {error: err.toString()};
   }
-}
-
-function res(data) {
   return ContentService
-    .createTextOutput(JSON.stringify(data))
+    .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -602,7 +617,6 @@ function addPlayer(data) {
     sh.getRange(1,1,1,3).setValues([['Name','Email','Group']])
       .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
-  // Check duplicate
   const existing = getPlayers();
   if (existing.find(p => p.email.toLowerCase() === data.email.toLowerCase()))
     return {error: 'duplicate'};
@@ -666,12 +680,10 @@ function submitScore(data) {
     sh.getRange(1,1,1,h.length).setValues([h])
       .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
-  // Remove existing score for this player
   const rows = sh.getDataRange().getValues();
   for (var i = rows.length-1; i >= 1; i--) {
     if (rows[i][1].toLowerCase() === data.email.toLowerCase()) sh.deleteRow(i+1);
   }
-  // Append new score
   const row = [
     data.name, data.email, data.group, data.flight,
     data.gross, data.par, data.hcp, data.net, data.puttsTotal,
@@ -707,25 +719,29 @@ let tourneyCache = null;
 })();
 
 // ══════════════════════════════════════
-// API HELPER
+// API HELPER — รองรับ CORS จาก GitHub Pages
 // ══════════════════════════════════════
 async function api(action, params = {}) {
   if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
-  const url = scriptUrl + '?action=' + action + Object.keys(params).map(k => '&'+k+'='+encodeURIComponent(params[k])).join('');
-  const r = await fetch(url);
-  const json = await r.json();
+  const qs = Object.keys(params).map(k=>'&'+k+'='+encodeURIComponent(params[k])).join('');
+  const url = scriptUrl + '?action=' + action + qs;
+  const r = await fetch(url, { redirect: 'follow' });
+  const text = await r.text();
+  // Apps Script อาจ redirect หลายครั้ง ต้อง parse text
+  const json = JSON.parse(text);
   if (json.error) throw new Error(json.error);
   return json;
 }
 
 async function apiPost(body) {
   if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
-  const r = await fetch(scriptUrl, {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json' }
-  });
-  const json = await r.json();
+  // Apps Script Web App ต้องใช้ no-cors สำหรับ POST จาก browser
+  // แต่ no-cors ทำให้อ่าน response ไม่ได้ — ใช้วิธี GET แทนสำหรับ write operations
+  const payload = encodeURIComponent(JSON.stringify(body));
+  const url = scriptUrl + '?action=' + body.action + '&payload=' + payload;
+  const r = await fetch(url, { redirect: 'follow' });
+  const text = await r.text();
+  const json = JSON.parse(text);
   if (json.error) throw new Error(json.error);
   return json;
 }
