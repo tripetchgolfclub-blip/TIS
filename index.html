@@ -249,6 +249,10 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
     <div class="card">
       <div class="card-title">🏟️ ตั้งค่าการแข่งขัน</div>
       <div class="form-row">
+        <div class="form-group full"><label>ชื่อการแข่งขัน <span style="color:var(--red);">*</span> <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3);">(ใช้เป็น key หลัก ห้ามซ้ำ)</span></label>
+          <input type="text" id="adTourneyName" placeholder="เช่น Golf Day 2024, Annual Golf Tournament"></div>
+      </div>
+      <div class="form-row">
         <div class="form-group"><label>ชื่อสนาม</label><input type="text" id="adCourse" placeholder="ชื่อสนามกอล์ฟ"></div>
         <div class="form-group"><label>วันที่แข่ง</label><input type="date" id="adDate"></div>
       </div>
@@ -275,17 +279,20 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
       <div class="card-title">👤 เพิ่มผู้เล่น</div>
       <div class="form-row">
         <div class="form-group"><label>ชื่อผู้เล่น</label><input type="text" id="adName" placeholder="ชื่อ-นามสกุล"></div>
-        <div class="form-group"><label>Gmail</label><input type="email" id="adEmail" placeholder="player@gmail.com"></div>
+        <div class="form-group"><label>ฝ่าย</label><input type="text" id="adDept" placeholder="เช่น ฝ่ายการตลาด, IT"></div>
       </div>
       <div class="form-row">
+        <div class="form-group"><label>Gmail</label><input type="email" id="adEmail" placeholder="player@gmail.com"></div>
         <div class="form-group"><label>กลุ่มออกรอบ</label><input type="text" id="adGroup" placeholder="เช่น กลุ่ม 1, VIP"></div>
+      </div>
+      <div class="form-row">
         <div class="form-group" style="display:flex;align-items:flex-end;">
           <button class="btn-primary full" onclick="addPlayer()">+ เพิ่มผู้เล่น</button>
         </div>
       </div>
       <div class="divider"></div>
-      <div class="section-label">Bulk Import — ชื่อ, Gmail, กลุ่ม (ทีละบรรทัด)</div>
-      <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,somchai@gmail.com,กลุ่ม 1&#10;สมหญิง รักดี,somying@gmail.com,กลุ่ม 2"></textarea>
+      <div class="section-label">Bulk Import — ชื่อ, ฝ่าย, Gmail, กลุ่ม (ทีละบรรทัด)</div>
+      <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,ฝ่าย IT,somchai@gmail.com,กลุ่ม 1&#10;สมหญิง รักดี,ฝ่ายการตลาด,somying@gmail.com,กลุ่ม 2"></textarea>
       <button class="btn-sm" onclick="bulkImport()" style="margin-top:6px;">📋 Import ทั้งหมด</button>
     </div>
 
@@ -577,22 +584,22 @@ function getSheet(name) {
 // ── Tournament ──
 function getTourney() {
   const sh = getSheet('Tournament');
-  if (sh.getLastRow() < 2) return {course:'',date:'',holes:18,pars:[]};
+  if (sh.getLastRow() < 2) return {tourneyName:'',course:'',date:'',holes:18,pars:[]};
   const row = sh.getRange(2, 1, 1, sh.getLastColumn()).getValues()[0];
   return {
-    course: row[0], date: row[1], holes: row[2],
-    pars: row.slice(3).filter(v => v !== '')
+    tourneyName: row[0], course: row[1], date: row[2], holes: row[3],
+    pars: row.slice(4).filter(v => v !== '')
   };
 }
 
 function saveTourney(data) {
   const sh = getSheet('Tournament');
   sh.clearContents();
-  const headers = ['Course','Date','Holes'];
+  const headers = ['TourneyName','Course','Date','Holes'];
   for (var i=1;i<=18;i++) headers.push('Par_H'+i);
   sh.getRange(1,1,1,headers.length).setValues([headers])
     .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
-  const row = [data.course, data.date, data.holes, ...data.pars];
+  const row = [data.tourneyName, data.course, data.date, data.holes, ...data.pars];
   sh.getRange(2,1,1,row.length).setValues([row]);
   return {ok:true};
 }
@@ -601,8 +608,8 @@ function saveTourney(data) {
 function getPlayers() {
   const sh = getSheet('Players');
   if (sh.getLastRow() < 2) return [];
-  const rows = sh.getRange(2, 1, sh.getLastRow()-1, 3).getValues();
-  return rows.filter(r=>r[0]).map(r => ({name:r[0], email:r[1], group:r[2]}));
+  const rows = sh.getRange(2, 1, sh.getLastRow()-1, 4).getValues();
+  return rows.filter(r=>r[0]).map(r => ({name:r[0], email:r[1], group:r[2], dept:r[3]||''}));
 }
 
 function findPlayer(email) {
@@ -614,27 +621,27 @@ function findPlayer(email) {
 function addPlayer(data) {
   const sh = getSheet('Players');
   if (sh.getLastRow() === 0) {
-    sh.getRange(1,1,1,3).setValues([['Name','Email','Group']])
+    sh.getRange(1,1,1,4).setValues([['Name','Email','Group','Dept']])
       .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
   const existing = getPlayers();
   if (existing.find(p => p.email.toLowerCase() === data.email.toLowerCase()))
     return {error: 'duplicate'};
-  sh.appendRow([data.name, data.email, data.group]);
+  sh.appendRow([data.name, data.email, data.group, data.dept||'']);
   return {ok:true};
 }
 
 function bulkPlayers(data) {
   const sh = getSheet('Players');
   if (sh.getLastRow() === 0) {
-    sh.getRange(1,1,1,3).setValues([['Name','Email','Group']])
+    sh.getRange(1,1,1,4).setValues([['Name','Email','Group','Dept']])
       .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
   const existing = getPlayers().map(p => p.email.toLowerCase());
   let added = 0;
   data.players.forEach(p => {
     if (!existing.includes(p.email.toLowerCase())) {
-      sh.appendRow([p.name, p.email, p.group]);
+      sh.appendRow([p.name, p.email, p.group, p.dept||'']);
       added++;
     }
   });
@@ -662,30 +669,37 @@ function clearPlayers() {
 function getScores() {
   const sh = getSheet('Scores');
   if (sh.getLastRow() < 2) return [];
+  // ดึง tourneyName ปัจจุบันมาก่อนเพื่อกรองเฉพาะการแข่งขันนี้
+  const tourney = getTourney();
   const rows = sh.getRange(2, 1, sh.getLastRow()-1, sh.getLastColumn()).getValues();
-  return rows.filter(r=>r[0]).map(r => ({
-    name:r[0], email:r[1], group:r[2], flight:r[3],
-    gross:r[4], par:r[5], hcp:r[6], net:r[7], puttsTotal:r[8],
-    scores: r.slice(9,27), pars: r.slice(27,45), putts: r.slice(45,63)
+  return rows.filter(r=>r[0] && r[0]===tourney.tourneyName).map(r => ({
+    tourneyName:r[0], name:r[1], email:r[2], group:r[3], dept:r[4]||'', flight:r[5],
+    gross:r[6], par:r[7], hcp:r[8], net:r[9], puttsTotal:r[10],
+    scores: r.slice(11,29), pars: r.slice(29,47), putts: r.slice(47,65)
   }));
 }
 
 function submitScore(data) {
   const sh = getSheet('Scores');
   if (sh.getLastRow() === 0) {
-    var h = ['Name','Email','Group','Flight','Gross','Par','Hcp','Net','TotalPutts'];
+    var h = ['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts'];
     for (var n=1;n<=18;n++) h.push('H'+n+'_Score');
     for (var n=1;n<=18;n++) h.push('H'+n+'_Par');
     for (var n=1;n<=18;n++) h.push('H'+n+'_Putt');
     sh.getRange(1,1,1,h.length).setValues([h])
       .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
+  // ลบแถวเดิมที่มี tourneyName + email เดียวกัน (key คู่)
   const rows = sh.getDataRange().getValues();
   for (var i = rows.length-1; i >= 1; i--) {
-    if (rows[i][1].toLowerCase() === data.email.toLowerCase()) sh.deleteRow(i+1);
+    if (rows[i][0] === data.tourneyName &&
+        rows[i][2].toLowerCase() === data.email.toLowerCase()) {
+      sh.deleteRow(i+1);
+    }
   }
   const row = [
-    data.name, data.email, data.group, data.flight,
+    data.tourneyName,
+    data.name, data.email, data.group, data.dept||'', data.flight,
     data.gross, data.par, data.hcp, data.net, data.puttsTotal,
     ...data.scores, ...data.pars, ...data.putts
   ];
@@ -839,13 +853,15 @@ function setDefaultPar() {
 // TOURNAMENT SAVE
 // ══════════════════════════════════════
 async function saveTourney() {
+  const tourneyName = document.getElementById('adTourneyName').value.trim();
   const course = document.getElementById('adCourse').value.trim();
   const date   = document.getElementById('adDate').value;
   if (!scriptUrl) { toast('กรุณาบันทึก Apps Script URL ก่อน','err'); return; }
+  if (!tourneyName) { toast('กรุณากรอกชื่อการแข่งขัน','err'); return; }
   if (!course || !date) { toast('กรุณากรอกชื่อสนามและวันที่','err'); return; }
   loading(true, 'กำลังบันทึก...');
   try {
-    await apiPost({ action:'saveTourney', course, date, holes: parseInt(document.getElementById('adHoles').value), pars: getParsFromTable() });
+    await apiPost({ action:'saveTourney', tourneyName, course, date, holes: parseInt(document.getElementById('adHoles').value), pars: getParsFromTable() });
     tourneyCache = null;
     toast('✅ บันทึกการแข่งขันแล้ว','ok');
   } catch(e) { toast('❌ '+e.message,'err'); }
@@ -859,14 +875,16 @@ async function addPlayer() {
   const name  = document.getElementById('adName').value.trim();
   const email = document.getElementById('adEmail').value.trim().toLowerCase();
   const group = document.getElementById('adGroup').value.trim() || 'กลุ่ม 1';
+  const dept  = document.getElementById('adDept').value.trim() || '';
   if (!name || !email) { toast('กรุณากรอกชื่อและ Gmail','err'); return; }
   if (!email.includes('@')) { toast('Gmail ไม่ถูกต้อง','err'); return; }
   if (!scriptUrl) { toast('กรุณาบันทึก Apps Script URL ก่อน','err'); return; }
   loading(true, 'กำลังเพิ่มผู้เล่น...');
   try {
-    await apiPost({ action:'addPlayer', name, email, group });
+    await apiPost({ action:'addPlayer', name, email, group, dept });
     document.getElementById('adName').value = '';
     document.getElementById('adEmail').value = '';
+    document.getElementById('adDept').value = '';
     await loadPlayersToAdmin();
     toast('✅ เพิ่มผู้เล่นแล้ว','ok');
   } catch(e) {
@@ -881,8 +899,8 @@ async function bulkImport() {
   const players = [];
   raw.split('\n').filter(l=>l.trim()).forEach(line => {
     const parts = line.split(',').map(s=>s.trim());
-    if (parts.length < 2 || !parts[1].includes('@')) return;
-    players.push({ name:parts[0], email:parts[1].toLowerCase(), group:parts[2]||'กลุ่ม 1' });
+    if (parts.length < 3 || !parts[2].includes('@')) return;
+    players.push({ name:parts[0], dept:parts[1]||'', email:parts[2].toLowerCase(), group:parts[3]||'กลุ่ม 1' });
   });
   if (!players.length) { toast('ไม่พบข้อมูลที่ถูกต้อง','err'); return; }
   loading(true, `กำลัง Import ${players.length} คน...`);
@@ -942,19 +960,19 @@ function renderAdminList(players = [], scores = []) {
     return `<div style="margin-bottom:13px;">
       <div class="section-label">${g}</div>
       ${gp.map(p => {
-        const sc = scoreMap[p.email.toLowerCase()];
+        const sc = scores ? scoreMap[p.email.toLowerCase()] : null;
         const flight = sc ? calcFlight(sc.hcp) : null;
         return `<div class="player-item">
           <div class="pi-group">${g}</div>
           <div class="pi-info">
-            <div class="pi-name">${p.name}</div>
+            <div class="pi-name">${p.name} ${p.dept ? `<span style="font-size:11px;font-weight:400;color:var(--text3);">${p.dept}</span>` : ''}</div>
             <div class="pi-email">${p.email}</div>
           </div>
           ${sc
             ? `<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span></div>`
             : '<div class="pi-status pending">รอสกอร์</div>'}
           <div style="display:flex;gap:5px;flex-shrink:0;">
-            <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}')" title="แก้ไขสกอร์" style="color:var(--accent2);border-color:var(--accent2);">✏️</button>
+            <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}','${p.dept||''}')" title="แก้ไขสกอร์" style="color:var(--accent2);border-color:var(--accent2);">✏️</button>
             <button class="btn-danger" onclick="removePlayer('${p.email}')">×</button>
           </div>
         </div>`;
@@ -969,7 +987,7 @@ function renderAdminList(players = [], scores = []) {
 let adminEditPlayer = null;
 let adminEditState  = { scores:[], putts:[], pars:[], holes:18 };
 
-async function adminEditScore(email, name, group) {
+async function adminEditScore(email, name, group, dept='') {
   if (!adminIn) { toast('กรุณา Login Admin ก่อน','err'); return; }
   loading(true, `กำลังโหลดสกอร์ของ ${name}...`);
   try {
@@ -980,7 +998,7 @@ async function adminEditScore(email, name, group) {
     const allSc  = await api('getScores');
     const exist  = allSc.find(s => s.email.toLowerCase() === email.toLowerCase());
 
-    adminEditPlayer = { name, email, group };
+    adminEditPlayer = { name, email, group, dept };
     adminEditState  = {
       scores: exist ? exist.scores.map(v=>v===''?null:Number(v)) : Array(holes).fill(null),
       putts:  exist ? exist.putts.map(v=>v===''?null:Number(v))  : Array(holes).fill(null),
@@ -988,10 +1006,9 @@ async function adminEditScore(email, name, group) {
       holes
     };
 
-    // Populate modal
     document.getElementById('aeModalName').textContent  = name;
     document.getElementById('aeModalEmail').textContent = email;
-    document.getElementById('aeModalGroup').textContent = 'กลุ่ม: ' + group;
+    document.getElementById('aeModalGroup').textContent = 'กลุ่ม: ' + group + (dept ? ' · ฝ่าย: ' + dept : '');
     document.getElementById('aeModalCourse').textContent = (t.course||'—') + ' · ' + fmtD(t.date);
     renderAdminEditCard();
     document.getElementById('adminEditModal').classList.remove('hidden');
@@ -1107,8 +1124,9 @@ async function saveAdminEdit() {
   try {
     await apiPost({
       action: 'submitScore',
+      tourneyName: tourneyCache?.tourneyName || '',
       name: adminEditPlayer.name, email: adminEditPlayer.email,
-      group: adminEditPlayer.group, flight: calcFlight(hcp),
+      group: adminEditPlayer.group, dept: adminEditPlayer.dept||'', flight: calcFlight(hcp),
       gross, par: parSum, hcp, net, puttsTotal: puttsT,
       scores: [...adminEditState.scores], pars: [...adminEditState.pars], putts: [...adminEditState.putts]
     });
@@ -1173,10 +1191,10 @@ async function startScorecard() {
     holes
   };
 
-  document.getElementById('bnrCourse').textContent = t.course || '—';
-  document.getElementById('bnrMeta').textContent   = fmtD(t.date) + ' · ' + holes + ' หลุม';
+  document.getElementById('bnrCourse').textContent = t.tourneyName || t.course || '—';
+  document.getElementById('bnrMeta').textContent   = (t.course||'') + (t.course&&t.date?' · ':'') + fmtD(t.date) + ' · ' + holes + ' หลุม';
   document.getElementById('rbName').textContent    = currentPlayer.name;
-  document.getElementById('rbMeta').textContent    = 'กลุ่ม: ' + currentPlayer.group;
+  document.getElementById('rbMeta').textContent    = 'กลุ่ม: ' + currentPlayer.group + (currentPlayer.dept ? ' · ฝ่าย: ' + currentPlayer.dept : '');
 
   document.getElementById('gmailScreen').classList.add('hidden');
   document.getElementById('playerScorecard').classList.remove('hidden');
@@ -1299,8 +1317,9 @@ async function submitScore() {
   try {
     await apiPost({
       action: 'submitScore',
+      tourneyName: tourneyCache?.tourneyName || '',
       name: currentPlayer.name, email: currentPlayer.email,
-      group: currentPlayer.group, flight,
+      group: currentPlayer.group, dept: currentPlayer.dept||'', flight,
       gross, par: parSum, hcp, net, puttsTotal: puttsT,
       scores: [...scoreState.scores], pars: [...scoreState.pars], putts: [...scoreState.putts]
     });
@@ -1364,7 +1383,7 @@ function renderLb(data) {
         <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
         <td>
           <div style="font-weight:600;font-size:14px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
-          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;"><span class="group-chip">${r.group}</span></div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;"><span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}</div>
         </td>
         <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
