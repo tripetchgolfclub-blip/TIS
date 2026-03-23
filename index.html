@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a4a2a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Golf Score">
+<link rel="manifest" href="manifest.json">
 <title>Golf Scorecard System</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -625,6 +631,16 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 
 <div class="toast" id="toast"></div>
 
+<!-- LINE Browser Warning -->
+<div id="lineBrowserBanner" class="hidden" style="position:fixed;top:0;left:0;right:0;z-index:1000;background:#06c755;color:#fff;padding:12px 16px;font-size:13px;font-family:'Sarabun',sans-serif;display:flex;align-items:flex-start;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.2);">
+  <span style="font-size:20px;flex-shrink:0;">⚠️</span>
+  <div style="flex:1;">
+    <div style="font-weight:600;margin-bottom:3px;">กรุณาเปิดในเบราว์เซอร์ Chrome</div>
+    <div style="font-size:12px;opacity:.9;line-height:1.5;">กด <strong>⋮ → เปิดใน Chrome</strong> หรือ Copy ลิงก์ไปวางใน Chrome<br>จากนั้นกด ⋮ → <strong>"เพิ่มในหน้าจอหลัก"</strong> เพื่อใช้งานเหมือนแอป ⛳</div>
+  </div>
+  <button onclick="document.getElementById('lineBrowserBanner').classList.add('hidden')" style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;">ปิด</button>
+</div>
+
 <script>
 // ════════════════════════════════
 // APPS SCRIPT CODE (for display)
@@ -866,6 +882,15 @@ let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
   document.getElementById('adDate').value = new Date().toISOString().split('T')[0];
   if (scriptUrl) document.getElementById('adScriptUrl').value = scriptUrl;
   renderParTable();
+  // ตรวจจับ LINE browser แล้วแสดง banner แนะนำให้เปิดใน Chrome
+  if (/Line\//i.test(navigator.userAgent)) {
+    document.getElementById('lineBrowserBanner').classList.remove('hidden');
+  }
+  // PWA install prompt (Android Chrome)
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    window._pwaPrompt = e;
+  });
 })();
 
 // ════════════════════════════════
@@ -1437,12 +1462,17 @@ function reviewScore() {
   const { scores } = scoreState;
   const played = scores.filter(v=>v!==null).length;
   if (!played) { toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุมก่อนครับ','err'); return; }
-  // แสดง modal พร้อม canvas และปุ่มยืนยัน
   document.getElementById('scShareModal').classList.remove('hidden');
-  document.getElementById('scConfirmSection').classList.remove('hidden');
-  document.getElementById('scShareSection').classList.add('hidden');
-  document.getElementById('btnConfirmSubmit').disabled = false;
-  document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
+  // ถ้ายืนยันแล้ว → ข้ามปุ่มยืนยัน แสดงปุ่มบันทึก/แชร์ได้เลย
+  if (scoreState.locked) {
+    document.getElementById('scConfirmSection').classList.add('hidden');
+    document.getElementById('scShareSection').classList.remove('hidden');
+  } else {
+    document.getElementById('scConfirmSection').classList.remove('hidden');
+    document.getElementById('scShareSection').classList.add('hidden');
+    document.getElementById('btnConfirmSubmit').disabled = false;
+    document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
+  }
   // render canvas หลัง modal แสดง
   setTimeout(() => {
     const { gross, parSum, hcp, net } = calcTotals();
@@ -1650,22 +1680,37 @@ function scoreColor(df){
 
 async function downloadCard(){
   const canvas=document.getElementById('scCanvas');
-  const link=document.createElement('a');
-  link.download='scorecard-'+(currentPlayer?.name||'golf')+'.png';
-  link.href=canvas.toDataURL('image/png');
-  link.click();
-  toast('✅ บันทึกรูปแล้ว','ok');
+  // ใช้ toBlob + createObjectURL ดีกว่า toDataURL บน Android
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.download='scorecard-'+(currentPlayer?.name||'golf')+'.png';
+    link.href=url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('✅ บันทึกรูปแล้ว ตรวจสอบในแกลเลอรี่ได้เลยครับ','ok');
+  },'image/png');
 }
 async function shareCard(){
   const canvas=document.getElementById('scCanvas');
-  try{
-    canvas.toBlob(async blob=>{
-      const file=new File([blob],'scorecard.png',{type:'image/png'});
-      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+  canvas.toBlob(async blob=>{
+    const file=new File([blob],'scorecard.png',{type:'image/png'});
+    // Web Share API (Android Chrome รองรับ)
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{
         await navigator.share({files:[file],title:'สกอร์การ์ด '+(currentPlayer?.name||'')});
-      }else{downloadCard();toast('กรุณาบันทึกรูปแล้วแชร์ผ่าน LINE ครับ');}
-    });
-  }catch(e){downloadCard();}
+        return;
+      }catch(e){
+        // ผู้ใช้กด cancel หรือ error → fallback
+        if(e.name==='AbortError') return;
+      }
+    }
+    // Fallback: บันทึกรูปลงเครื่องแล้วให้ไปแชร์เอง
+    downloadCard();
+    toast('บันทึกรูปแล้ว เปิด LINE แล้วแชร์รูปจากแกลเลอรี่ได้เลยครับ');
+  },'image/png');
 }
 
 // ════════════════════════════════
