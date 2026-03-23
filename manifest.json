@@ -2,7 +2,7 @@
   "name": "Golf Scorecard",
   "short_name": "Golf Score",
   "description": "ระบบบันทึกสกอร์กอล์ฟ",
-  "start_url": "./golf-scorecard.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f8f7f4",
