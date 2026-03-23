@@ -445,17 +445,30 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div class="card-title">📊 สรุปรอบ</div>
         <div class="sum-grid" id="sumGrid"></div>
       </div>
-      <button class="btn-send" id="btnSend" onclick="submitScore()">📤 ส่งสกอร์ (บันทึกชั่วคราว)</button>
-      <button class="btn-send" id="btnReview" onclick="reviewScore()" style="background:#b8922a;">🔍 ตรวจสอบและยืนยันสกอร์</button>
-      <!-- Locked state -->
-      <div id="lockedBar" class="hidden" style="background:#fdf0ed;border:1px solid #f5c6bb;border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
-        <span style="font-size:24px;">🔒</span>
+
+      <!-- ปุ่มส่งชั่วคราว (แสดงเมื่อยังไม่ยืนยัน) -->
+      <div id="playerActions">
+        <button class="btn-send" id="btnSaveTemp" onclick="saveTempScore()" style="background:#5a7a9a;">
+          💾 ส่งสกอร์ชั่วคราว
+        </button>
+        <div id="tempSavedNote" class="hidden" style="background:#e8f5ed;border:1px solid #a3cfbb;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#1a4a2a;display:flex;align-items:center;gap:8px;">
+          <span>✓</span><span>บันทึกชั่วคราวแล้ว — ยังแก้ไขได้</span>
+        </div>
+        <button class="btn-send" id="btnReview" onclick="reviewScore()">🔍 ตรวจสอบและยืนยันสกอร์</button>
+      </div>
+
+      <!-- แสดงเมื่อยืนยันแล้ว (ล็อก) -->
+      <div id="confirmedBar" class="hidden" style="background:#1a4a2a;border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">🔒</span>
         <div>
-          <div style="font-size:14px;font-weight:600;color:var(--red);">สกอร์ถูกยืนยันแล้ว</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px;">หากต้องการแก้ไข กรุณาติดต่อ Admin</div>
+          <div style="font-size:15px;font-weight:600;color:#fff;">ยืนยันสกอร์แล้ว</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;">ไม่สามารถแก้ไขได้อีก · หากมีปัญหาติดต่อ Admin</div>
         </div>
       </div>
-      <button class="btn-outline full" onclick="showScoreCard()">🏆 ดูสกอร์การ์ด / แชร์ไลน์</button>
+      <button id="btnViewCard" class="hidden" class="btn-outline full" onclick="reviewScore()" style="width:100%;background:transparent;border:1px solid #d0cbc0;color:#6b6559;padding:11px;border-radius:8px;font-size:14px;cursor:pointer;margin-bottom:8px;font-family:'Sarabun',sans-serif;">
+        🏆 ดูสกอร์การ์ด / แชร์ LINE
+      </button>
+
       <button class="btn-outline full" onclick="logoutPlayer()">← ออกจากระบบ</button>
     </div>
   </div>
@@ -570,16 +583,39 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 </div>
 
 <!-- ══ SCORECARD SHARE MODAL ══ -->
-<div id="scShareModal" class="hidden" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
-  <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
+<div id="scShareModal" class="hidden" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;margin:auto;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
     <div style="background:#1a4a2a;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
-      <span id="scModalHeader" style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:#fff;">🏆 สกอร์การ์ด</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:#fff;">🏆 ตรวจสอบสกอร์การ์ด</span>
       <button onclick="closeScoreCard()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
     </div>
-    <div style="padding:16px;text-align:center;">
-      <canvas id="scCanvas" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.15);"></canvas>
-      <div id="scShareBtns" style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;"></div>
-      <div style="font-size:11px;color:#999;margin-top:8px;font-family:'IBM Plex Mono',monospace;" id="scModalHint">กด "บันทึกรูป" แล้วแชร์ผ่าน LINE ได้เลย</div>
+    <div style="padding:16px;">
+      <!-- Canvas -->
+      <canvas id="scCanvas" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:block;"></canvas>
+
+      <!-- ยืนยันส่งสกอร์ -->
+      <div id="scConfirmSection" style="margin-top:14px;background:#f0faf4;border:1px solid #a3cfbb;border-radius:10px;padding:14px 16px;">
+        <div style="font-size:13px;font-weight:600;color:#1a4a2a;margin-bottom:4px;">✅ สกอร์ถูกต้องแล้วใช่ไหม?</div>
+        <div style="font-size:12px;color:#5a5248;margin-bottom:12px;">กด "ยืนยันและส่งสกอร์" เพื่อบันทึกลง Google Sheets</div>
+        <button id="btnConfirmSubmit" onclick="confirmAndSubmit()" style="width:100%;background:#1a4a2a;color:#fff;border:none;padding:13px;border-radius:8px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;">✅ ยืนยันและส่งสกอร์</button>
+        <button onclick="closeScoreCard()" style="width:100%;background:transparent;border:1px solid #d0cbc0;color:#6b6559;padding:10px;border-radius:8px;font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;">← กลับแก้ไขสกอร์</button>
+      </div>
+
+      <!-- ส่งแล้ว — แชร์ -->
+      <div id="scShareSection" class="hidden" style="margin-top:14px;">
+        <div style="background:#d1e7dd;border:1px solid #a3cfbb;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">🎉</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#1a4a2a;">ส่งสกอร์เรียบร้อยแล้ว!</div>
+            <div style="font-size:12px;color:#2c6e3f;margin-top:1px;">บันทึกลง Google Sheets แล้ว</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="downloadCard()" style="flex:1;background:#1a4a2a;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;">⬇️ บันทึกรูป</button>
+          <button onclick="shareCard()" style="flex:1;background:#06c755;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;">📤 แชร์ LINE</button>
+        </div>
+        <div style="font-size:11px;color:#999;text-align:center;margin-top:8px;font-family:'IBM Plex Mono',monospace;">กด "บันทึกรูป" แล้วเปิด LINE → แชร์รูปภาพ</div>
+      </div>
     </div>
   </div>
 </div>
@@ -622,12 +658,21 @@ function getSheet(name) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   return ss.getSheetByName(name) || ss.insertSheet(name);
 }
+function fmtDate(d) {
+  if (!d) return '';
+  var dt = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dt.getTime())) return String(d);
+  var y = dt.getFullYear();
+  var m = String(dt.getMonth()+1).padStart(2,'0');
+  var day = String(dt.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
 function getTourneyList() {
   var sh = getSheet('Tournament');
   if (sh.getLastRow() < 2) return [];
   var rows = sh.getRange(2,1,sh.getLastRow()-1,4).getValues();
   var list = rows.filter(function(r){return r[0];}).map(function(r){
-    return {tourneyName:r[0],course:r[1],date:r[2],holes:r[3]};
+    return {tourneyName:r[0],course:r[1],date:fmtDate(r[2]),holes:r[3]};
   });
   list.sort(function(a,b){
     var da=a.date?new Date(a.date):new Date(0);
@@ -642,7 +687,7 @@ function getTourney(name) {
   var rows = sh.getDataRange().getValues();
   for (var i=1;i<rows.length;i++) {
     if (rows[i][0]===name) {
-      return {tourneyName:rows[i][0],course:rows[i][1],date:rows[i][2],holes:rows[i][3],
+      return {tourneyName:rows[i][0],course:rows[i][1],date:fmtDate(rows[i][2]),holes:rows[i][3],
               pars:rows[i].slice(4).filter(function(v){return v!=='';})};
     }
   }
@@ -685,7 +730,7 @@ function findPlayer(email) {
   var tMap = {};
   if (tSheet.getLastRow()>1) {
     var tRows = tSheet.getRange(2,1,tSheet.getLastRow()-1,4).getValues();
-    tRows.forEach(function(r){ if(r[0]) tMap[r[0]]={course:r[1],date:r[2]}; });
+    tRows.forEach(function(r){ if(r[0]) tMap[r[0]]={course:r[1],date:fmtDate(r[2])}; });
   }
   var scSheet = getSheet('Scores');
   var scMap = {};
@@ -693,7 +738,7 @@ function findPlayer(email) {
     var scRows = scSheet.getRange(2,1,scSheet.getLastRow()-1,11).getValues();
     scRows.forEach(function(r){
       var key = r[0]+'|||'+r[2].toString().toLowerCase();
-      scMap[key] = {hasScore:true,net:r[9],hcp:r[8],gross:r[6]};
+      scMap[key] = {hasScore:true,net:r[9],hcp:r[8],gross:r[6],confirmed:r[11]===true};
     });
   }
   var list = matches.map(function(p){
@@ -701,7 +746,7 @@ function findPlayer(email) {
     var sc = scMap[p.tourneyName+'|||'+email.toLowerCase()]||{hasScore:false};
     return {tourneyName:p.tourneyName,name:p.name,email:p.email,
             dept:p.dept,group:p.group,course:t.course||'',date:t.date||'',
-            hasScore:sc.hasScore,net:sc.net||'',hcp:sc.hcp||'',gross:sc.gross||''};
+            hasScore:sc.hasScore,net:sc.net||'',hcp:sc.hcp||'',gross:sc.gross||'',confirmed:sc.confirmed||false};
   });
   list.sort(function(a,b){
     var da=a.date?new Date(a.date):new Date(0);
@@ -762,26 +807,30 @@ function getScores(tourneyName) {
   var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
   return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
     return {tourneyName:r[0],name:r[1],email:r[2],group:r[3],dept:r[4]||'',flight:r[5],
-            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],
-            scores:r.slice(11,29),pars:r.slice(29,47),putts:r.slice(47,65)};
+            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,
+            scores:r.slice(12,30),pars:r.slice(30,48),putts:r.slice(48,66)};
   });
 }
 function submitScore(data) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()===0) {
-    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts'];
+    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed'];
     for(var n=1;n<=18;n++) h.push('H'+n+'_Score');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Par');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Putt');
     sh.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
+  // ถ้า confirmed แล้วห้าม overwrite (ยกเว้น Admin force)
   var rows = sh.getDataRange().getValues();
   for(var i=rows.length-1;i>=1;i--){
-    if(rows[i][0]===data.tourneyName && rows[i][2].toLowerCase()===data.email.toLowerCase())
+    if(rows[i][0]===data.tourneyName && rows[i][2].toLowerCase()===data.email.toLowerCase()){
+      if(rows[i][11]===true && !data.adminForce) return {error:'confirmed'};
       sh.deleteRow(i+1);
+    }
   }
+  var confirmed = data.confirmed===true;
   var row=[data.tourneyName,data.name,data.email,data.group,data.dept||'',data.flight,
-           data.gross,data.par,data.hcp,data.net,data.puttsTotal]
+           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed]
     .concat(data.scores).concat(data.pars).concat(data.putts);
   sh.appendRow(row);
   return {ok:true};
@@ -1229,7 +1278,7 @@ async function startScorecard() {
   scoreState={
     scores:exist?exist.scores.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
     putts: exist?exist.putts.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
-    pars:[...pars],holes
+    pars:[...pars],holes,locked:false
   };
   document.getElementById('bnrTitle').textContent=t?.tourneyName||'—';
   document.getElementById('bnrMeta').textContent=(t?.course||'—')+' · '+fmtD(t?.date)+' · '+holes+' หลุม';
@@ -1237,7 +1286,28 @@ async function startScorecard() {
   document.getElementById('rbMeta').textContent='กลุ่ม: '+currentPlayer.group+(currentPlayer.dept?' · ฝ่าย: '+currentPlayer.dept:'');
   document.getElementById('gmailScreen').classList.add('hidden');
   document.getElementById('playerScorecard').classList.remove('hidden');
-  renderCard();updateSummary();
+
+  if (exist?.confirmed===true) {
+    lockScorecard();
+  } else {
+    unlockScorecard();
+    if (exist) document.getElementById('tempSavedNote').classList.remove('hidden');
+  }
+  renderCard(); updateSummary();
+}
+
+function lockScorecard() {
+  scoreState.locked = true;
+  document.getElementById('playerActions').classList.add('hidden');
+  document.getElementById('confirmedBar').classList.remove('hidden');
+  document.getElementById('btnViewCard').classList.remove('hidden');
+}
+function unlockScorecard() {
+  scoreState.locked = false;
+  document.getElementById('playerActions').classList.remove('hidden');
+  document.getElementById('confirmedBar').classList.add('hidden');
+  document.getElementById('btnViewCard').classList.add('hidden');
+  document.getElementById('tempSavedNote').classList.add('hidden');
 }
 
 function holeHcp(s,par){if(s===null)return null;const d=s-par;if(d<=0)return 0;if(d===1)return 1;return 2;}
@@ -1282,9 +1352,29 @@ function mkSub(f,t,lbl,isTot=false){
   return el;
 }
 function adj(type,i,d){
+  if(scoreState.locked){toast('สกอร์ถูกยืนยันแล้ว ไม่สามารถแก้ไขได้','err');return;}
   if(type==='s')scoreState.scores[i]=Math.max(1,(scoreState.scores[i]??scoreState.pars[i])+d);
   else scoreState.putts[i]=Math.max(0,(scoreState.putts[i]??0)+d);
   renderCard();updateSummary();
+}
+
+async function saveTempScore() {
+  if(!scoreState.scores.some(v=>v!==null)){toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุม','err');return;}
+  const btn=document.getElementById('btnSaveTemp');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> กำลังส่ง...';
+  loading(true,'กำลังส่งสกอร์ชั่วคราว...');
+  const {gross,parSum,hcp,net,puttsT}=calcTotals();
+  try{
+    await apiPost({action:'submitScore',tourneyName:currentPlayer.tourneyName,
+      name:currentPlayer.name,email:currentPlayer.email,group:currentPlayer.group,
+      dept:currentPlayer.dept||'',flight:calcFlight(hcp),confirmed:false,
+      gross,par:parSum,hcp,net,puttsTotal:puttsT,
+      scores:[...scoreState.scores],pars:[...scoreState.pars],putts:[...scoreState.putts]});
+    document.getElementById('tempSavedNote').classList.remove('hidden');
+    toast('💾 บันทึกชั่วคราวแล้ว — ยังแก้ไขได้','ok');
+  }catch(e){toast('❌ '+e.message,'err');}
+  btn.disabled=false;btn.innerHTML='💾 ส่งสกอร์ชั่วคราว';
+  loading(false);
 }
 function updateBar(){
   const {played,gross,parSum,hcp,net}=calcTotals(),d=gross-parSum;
@@ -1317,42 +1407,81 @@ function updateSummary(){
   updateBar();
 }
 
-// ════════════════════════════════
-// SUBMIT
-// ════════════════════════════════
-async function submitScore(){
-  if(!scoreState.scores.some(v=>v!==null)){toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุม','err');return;}
-  const {gross,parSum,hcp,net,puttsT}=calcTotals();
-  const btn=document.getElementById('btnSend');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> กำลังส่ง...';
-  loading(true,'กำลังส่งสกอร์...');
-  try{
-    await apiPost({action:'submitScore',tourneyName:currentPlayer.tourneyName,
-      name:currentPlayer.name,email:currentPlayer.email,group:currentPlayer.group,
-      dept:currentPlayer.dept||'',flight:calcFlight(hcp),
-      gross,par:parSum,hcp,net,puttsTotal:puttsT,
-      scores:[...scoreState.scores],pars:[...scoreState.pars],putts:[...scoreState.putts]});
-    toast('✅ ส่งสกอร์เรียบร้อย!','ok');
-  }catch(e){toast('❌ '+e.message,'err');}
-  btn.disabled=false;btn.innerHTML='📤 ส่งสกอร์';
-  loading(false);
+function closeScoreCard() {
+  document.getElementById('scShareModal').classList.add('hidden');
 }
+
+// ════════════════════════════════
+// SUBMIT (ใช้โดย confirmAndSubmit เท่านั้น)
+// ════════════════════════════════
 
 // ════════════════════════════════
 // SCORECARD IMAGE
 // ════════════════════════════════
-function showScoreCard(){
-  const {scores,pars,putts,holes}=scoreState;
-  const played=scores.filter(v=>v!==null).length;
-  if(!played){toast('กรุณาบันทึกสกอร์ก่อนครับ','err');return;}
-  const {gross,parSum,hcp,net}=calcTotals();
-  const flight=calcFlight(hcp);
-  const t={title:document.getElementById('bnrTitle').textContent,
-           meta:document.getElementById('bnrMeta').textContent};
+// SCORECARD REVIEW + SUBMIT
+// ════════════════════════════════
+function reviewScore() {
+  const { scores } = scoreState;
+  const played = scores.filter(v=>v!==null).length;
+  if (!played) { toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุมก่อนครับ','err'); return; }
+  // แสดง modal พร้อม canvas และปุ่มยืนยัน
   document.getElementById('scShareModal').classList.remove('hidden');
-  requestAnimationFrame(()=>renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t));
+  document.getElementById('scConfirmSection').classList.remove('hidden');
+  document.getElementById('scShareSection').classList.add('hidden');
+  document.getElementById('btnConfirmSubmit').disabled = false;
+  document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
+  // render canvas หลัง modal แสดง
+  setTimeout(() => {
+    const { gross, parSum, hcp, net } = calcTotals();
+    const flight = calcFlight(hcp);
+    const t = {
+      title: document.getElementById('bnrTitle').textContent,
+      meta:  document.getElementById('bnrMeta').textContent
+    };
+    renderCanvas(scoreState.scores, scoreState.pars, scoreState.putts,
+                 scoreState.holes, gross, parSum, hcp, net, flight, t);
+  }, 80);
 }
-function closeScoreCard(){document.getElementById('scShareModal').classList.add('hidden');}
+
+function showScoreCard() {
+  // เรียกได้โดยตรงเพื่อดูสกอร์การ์ดอย่างเดียว (ไม่มีปุ่ม submit)
+  reviewScore();
+}
+
+async function confirmAndSubmit() {
+  const btn = document.getElementById('btnConfirmSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> กำลังยืนยัน...';
+  loading(true, 'กำลังยืนยันสกอร์...');
+  const { gross, parSum, hcp, net, puttsT } = calcTotals();
+  const flight = calcFlight(hcp);
+  try {
+    await apiPost({
+      action: 'submitScore', confirmed: true,
+      tourneyName: currentPlayer.tourneyName,
+      name: currentPlayer.name, email: currentPlayer.email,
+      group: currentPlayer.group, dept: currentPlayer.dept||'', flight,
+      gross, par: parSum, hcp, net, puttsTotal: puttsT,
+      scores: [...scoreState.scores], pars: [...scoreState.pars], putts: [...scoreState.putts]
+    });
+    // ซ่อนปุ่มยืนยัน แสดงปุ่มแชร์
+    document.getElementById('scConfirmSection').classList.add('hidden');
+    document.getElementById('scShareSection').classList.remove('hidden');
+    // ล็อกสกอร์การ์ดด้านหลัง
+    lockScorecard();
+    toast('✅ ยืนยันสกอร์เรียบร้อยแล้ว!','ok');
+  } catch(e) {
+    if (e.message.includes('confirmed')) {
+      toast('สกอร์นี้ถูกยืนยันไปแล้ว','err');
+      lockScorecard();
+    } else {
+      toast('❌ '+e.message,'err');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '✅ ยืนยันและส่งสกอร์';
+  }
+  loading(false);
+}
 
 function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   const canvas=document.getElementById('scCanvas');
@@ -1453,7 +1582,7 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   [[pr,1],[fl?sc:'—',2],[fl?dStr(sc-pr):'—',3],[fl?hcT:'—',4],[ptT||'—',5]].forEach(([v,ci])=>{
     ctx.textAlign='center';ctx.fillText(String(v),OX+colX[ci]+cols[ci]/2,subY+ROW_H-8);
   });
-  // Summary boxes
+  // Summary boxes — แก้ font size ให้พอดีกับกล่อง
   const smY=subY+ROW_H+7;
   const smItems=[{l:'Gross',v:String(gross)},{l:"H'cap",v:String(hcp)},{l:'Net',v:String(net),hi:true},{l:'Flight',v:'Flight '+flight}];
   const sW=TW/smItems.length;
@@ -1465,7 +1594,14 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
     ctx.font='10px "IBM Plex Mono",monospace';ctx.textAlign='center';
     ctx.fillText(item.l,sx+sW/2,smY+13);
     ctx.fillStyle=item.hi?'#fff':(item.l==="H'cap"?C.bogey:C.green);
-    ctx.font='bold 19px "IBM Plex Mono",monospace';
+    // ปรับขนาด font ให้พอดีกับ box width
+    const maxW = sW-10;
+    let fontSize=19;
+    ctx.font='bold '+fontSize+'px "IBM Plex Mono",monospace';
+    while(ctx.measureText(item.v).width>maxW && fontSize>10){
+      fontSize--;
+      ctx.font='bold '+fontSize+'px "IBM Plex Mono",monospace';
+    }
     ctx.fillText(item.v,sx+sW/2,smY+37);
   });
   // Stats footer
@@ -1629,7 +1765,7 @@ async function saveAdminEdit(){
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> กำลังบันทึก...';
   loading(true,'Admin บันทึกสกอร์...');
   try{
-    await apiPost({action:'submitScore',tourneyName:activeTourney.tourneyName,
+    await apiPost({action:'submitScore',tourneyName:activeTourney.tourneyName,adminForce:true,confirmed:false,
       name:adminEditPlayer.name,email:adminEditPlayer.email,group:adminEditPlayer.group,
       dept:adminEditPlayer.dept||'',flight:calcFlight(hcp),
       gross,par:parSum,hcp,net,puttsTotal:puttsT,
@@ -1710,7 +1846,21 @@ function calcFlight(hcp){return hcp<=12?'A':hcp<=24?'B':'C';}
 function dStr(d){return d===0?'E':d>0?`+${d}`:`${d}`;}
 function dColor(d){return d<=-2?'var(--eagle)':d===-1?'var(--birdie)':d===0?'var(--par-col)':d===1?'var(--bogey)':'var(--double)';}
 function clsCls(d){if(d===null)return 'c-empty';if(d<=-2)return 'c-eagle';if(d===-1)return 'c-birdie';if(d===0)return 'c-par';if(d===1)return 'c-bogey';return 'c-double';}
-function fmtD(d){if(!d)return '';try{return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});}catch{return String(d);}}
+function fmtD(d){
+  if(!d) return '';
+  try {
+    // Google Sheets อาจส่งมาเป็น string "2026-03-23" หรือ ISO string
+    let dateStr = String(d);
+    // ถ้าเป็น YYYY-MM-DD เติม T00:00:00 เพื่อป้องกัน timezone shift
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+    }
+    // ISO string หรือ format อื่น
+    const dt = new Date(dateStr);
+    if (isNaN(dt.getTime())) return dateStr;
+    return dt.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+  } catch(e) { return String(d); }
+}
 function selectCode(){
   const el=document.getElementById('appsScriptCode');
   const range=document.createRange();range.selectNodeContents(el);
