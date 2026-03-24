@@ -12,7 +12,2399 @@
 <meta name="apple-mobile-web-app-title" content="TIS Golf Club">
 <meta name="theme-color" content="#1a4a2a">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style><!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIS Golf Club</title>
+<link rel="manifest" href="/TIS/manifest.json">
+<link rel="icon" type="image/png" href="/TIS/icon-192.png">
+<link rel="apple-touch-icon" href="/TIS/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TIS Golf Club">
+<meta name="theme-color" content="#1a4a2a">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#f8f7f4;--surface:#fff;--surface2:#f2f0ec;--border:#e4e0d8;--border2:#d0cbc0;
+  --text:#1c1a17;--text2:#6b6559;--text3:#9e9488;
+  --accent:#2c6e3f;--accent2:#1a4a2a;
+  --red:#c94a2a;--red-bg:#fdf0ed;
+  --gold:#b8922a;--gold-bg:#fdf6e3;
+  --eagle:#1a6b9a;--birdie:#c94a2a;--par-col:#2c6e3f;--bogey:#b8922a;--double:#8a3a1a;--triple:#5a1a0a;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+  --shadow-lg:0 4px 20px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'Sarabun',sans-serif;color:var(--text);min-height:100vh;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;min-height:52px;gap:6px;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+.nav-tabs{display:flex;}
+.nav-tab{padding:0 8px;height:52px;display:flex;align-items:center;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.nav-tab:hover{color:var(--text2);}
+.nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+.main{max-width:720px;margin:0 auto;padding:20px 15px 48px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:13px;box-shadow:var(--shadow);}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--accent2);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.form-group{flex:1;min-width:120px;}
+label{display:block;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;}
+input[type=text],input[type=date],input[type=password],input[type=email],input[type=number],select,textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:7px;font-size:14px;font-family:'Sarabun',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44,110,63,.1);}
+input.shake,select.shake{animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239e9488' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer;}
+.btn-primary{background:var(--accent2);color:#fff;border:none;padding:11px 20px;border-radius:8px;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary:hover{background:var(--accent);transform:translateY(-1px);}
+.btn-primary.full{width:100%;justify-content:center;font-size:17px;padding:12px;}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:10px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .15s;font-family:'Sarabun',sans-serif;}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.btn-outline.full{width:100%;margin-bottom:8px;display:block;text-align:center;}
+.btn-send{width:100%;background:var(--accent2);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;cursor:pointer;transition:all .15s;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-send:hover{background:var(--accent);}
+.btn-send:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sm{padding:5px 11px;border:1px solid var(--border2);background:var(--bg);border-radius:6px;font-size:12px;cursor:pointer;color:var(--text2);font-family:'IBM Plex Mono',monospace;transition:all .12s;white-space:nowrap;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:transparent;border:1px solid #f5c6bb;color:var(--red);padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;}
+.btn-danger:hover{background:var(--red-bg);}
+.center-screen{min-height:calc(100vh - 52px);display:flex;align-items:center;justify-content:center;padding:24px 16px;}
+.center-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 26px;width:100%;max-width:400px;box-shadow:var(--shadow-lg);text-align:center;animation:fadeUp .3s ease;}
+.box-icon{font-size:38px;margin-bottom:10px;}
+.box-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:3px;}
+.box-sub{font-size:13px;color:var(--text3);margin-bottom:22px;line-height:1.6;}
+.err-box{background:var(--red-bg);border:1px solid #f5c6bb;border-radius:7px;padding:9px 12px;font-size:13px;color:var(--red);margin-bottom:12px;display:none;text-align:left;}
+.err-box.show{display:block;}
+
+/* TOURNAMENT SELECTOR */
+.tourney-selector{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:13px;box-shadow:var(--shadow);}
+.ts-header{padding:14px 18px;background:var(--accent2);display:flex;align-items:center;justify-content:space-between;}
+.ts-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:#fff;}
+.ts-meta{font-size:11px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;}
+.ts-active{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:#f0faf4;}
+.ts-active-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--accent2);flex:1;}
+.ts-active-meta{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.ts-list{max-height:240px;overflow-y:auto;}
+.ts-item{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.ts-item:last-child{border-bottom:none;}
+.ts-item:hover{background:#f5faf7;}
+.ts-item.active{background:#e8f5ed;}
+.ts-item-name{font-size:14px;font-weight:600;flex:1;}
+.ts-item-meta{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.ts-item-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;flex-shrink:0;}
+.ts-badge-live{background:#d1e7dd;color:var(--accent2);}
+.ts-badge-done{background:var(--surface2);color:var(--text3);}
+.ts-empty{padding:20px;text-align:center;color:var(--text3);font-size:13px;font-family:'IBM Plex Mono',monospace;}
+.ts-search{padding:10px 14px;border-bottom:1px solid var(--border);}
+.ts-search input{background:var(--bg);border:1px solid var(--border);padding:7px 11px;border-radius:7px;font-size:13px;width:100%;outline:none;font-family:'Sarabun',sans-serif;}
+.ts-search input:focus{border-color:var(--accent);}
+
+.par-table{width:100%;border-collapse:collapse;margin-top:4px;}
+.par-table th{padding:7px 4px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);text-align:center;background:var(--surface2);border:1px solid var(--border);}
+.par-table td{padding:4px;text-align:center;border:1px solid var(--border);}
+.par-table td input{background:transparent;border:none;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;width:38px;padding:4px 2px;color:var(--text);outline:none;}
+.par-table td input:focus{background:var(--bg);border-radius:4px;}
+.player-item{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:7px;}
+.pi-group{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;padding:3px 8px;background:var(--accent2);color:#fff;border-radius:4px;flex-shrink:0;}
+.pi-info{flex:1;min-width:0;}
+.pi-name{font-size:14px;font-weight:600;}
+.pi-email{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:1px;}
+.pi-status{flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 8px;border-radius:4px;}
+.pi-status.done{background:#d1e7dd;color:var(--accent2);}
+.pi-status.pending{background:#fff3cd;color:#856404;}
+.tourney-banner{background:var(--accent2);border-radius:10px;padding:13px 17px;margin-bottom:13px;}
+.tb-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:2px;}
+.tb-meta{font-size:12px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;}
+.round-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 17px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
+.rb-player{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--accent2);}
+.rb-meta{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+.rb-right{text-align:right;}
+.rb-gross{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:400;line-height:1;}
+.rb-subs{font-size:12px;font-family:'IBM Plex Mono',monospace;display:flex;flex-direction:column;gap:1px;margin-top:3px;}
+.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:13px;box-shadow:var(--shadow);width:100%;}
+.sc-head{display:grid;grid-template-columns:26px 26px 74px 36px 36px 44px;background:var(--surface2);border-bottom:2px solid var(--border);}
+.sc-head span{padding:7px 2px;font-size:9px;letter-spacing:0.8px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;border-right:1px solid var(--border);}
+.sc-head span:last-child{border-right:none;}
+.hole-row{display:grid;grid-template-columns:26px 26px 74px 36px 36px 44px;border-bottom:1px solid var(--border);align-items:center;}
+.hole-row:hover{background:#fcfbf8;}
+.h-num{padding:7px 1px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);border-right:1px solid var(--border);}
+.h-par-cell{padding:7px 1px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);border-right:1px solid var(--border);}
+.h-score{padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:2px;border-right:1px solid var(--border);}
+.sc-btn{width:20px;height:20px;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:4px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.sc-btn:hover{border-color:var(--accent);color:var(--accent);background:#e8f5ed;}
+.sc-val{font-family:'IBM Plex Mono',monospace;font-size:14px;width:18px;text-align:center;}
+.h-diff{padding:7px 1px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;border-right:1px solid var(--border);}
+.h-hcp{padding:7px 1px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;border-right:1px solid var(--border);}
+.h-putt{padding:3px 1px;display:flex;align-items:center;justify-content:center;gap:1px;}
+.putt-btn{width:15px;height:15px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:3px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.putt-btn:hover{border-color:var(--accent);color:var(--accent);}
+.putt-val{font-family:'IBM Plex Mono',monospace;font-size:11px;width:12px;text-align:center;color:var(--text2);}
+.sub-row{display:grid;grid-template-columns:26px 26px 74px 36px 36px 44px;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+.sub-row span{padding:7px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);font-weight:500;}
+.sub-row span:first-child{color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;}
+.sub-row span:last-child{border-right:none;}
+.sub-row.total-row{background:var(--accent2);}
+.sub-row.total-row span{color:rgba(255,255,255,.85);border-right-color:rgba(255,255,255,.1);}
+.sub-row.total-row span:first-child{color:rgba(255,255,255,.5);}
+.c-empty{color:var(--border2);}.c-eagle{color:var(--eagle);}.c-birdie{color:var(--birdie);}
+.c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}.c-triple{color:var(--triple);}
+.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--triple);font-weight:700;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg);}
+.leg{display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);}
+.leg-dot{width:6px;height:6px;border-radius:50%;}
+.net-box{background:var(--accent2);border-radius:10px;padding:13px 17px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center;}
+.nb-label{color:rgba(255,255,255,.6);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;}
+.nb-val{font-family:'IBM Plex Mono',monospace;font-size:32px;color:#fff;line-height:1;}
+.nb-note{color:rgba(255,255,255,.65);font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;}
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.sum-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 7px;text-align:center;}
+.sum-label{font-size:10px;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;margin-bottom:3px;}
+.sum-val{font-family:'IBM Plex Mono',monospace;font-size:20px;}
+.flight-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.flight-tab{padding:6px 14px;border:1px solid var(--border2);border-radius:20px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .15s;}
+.flight-tab:hover{border-color:var(--accent);color:var(--accent);}
+.flight-tab.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.flight-tab.booby-tab{border-color:#c94a2a;color:#c94a2a;}
+.flight-tab.booby-tab.active{background:#c94a2a;color:#fff;border-color:#c94a2a;}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin-bottom:18px;padding-top:8px;}
+.pod{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pod-name{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;text-align:center;max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pod-net{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;}
+.pod-sub{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.5;}
+.pod-block{border-radius:8px 8px 0 0;width:80px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.pod-1{background:linear-gradient(135deg,#c9a830,#e8c96a);height:78px;}
+.pod-2{background:linear-gradient(135deg,#8a9aaa,#b0c0d0);height:58px;}
+.pod-3{background:linear-gradient(135deg,#a0673a,#c8956a);height:42px;}
+.lb-table{width:100%;border-collapse:collapse;font-size:12px;}
+.lb-table th{padding:8px 6px;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);border-bottom:2px solid var(--border);background:var(--surface2);}
+.lb-table th:not(:first-child):not(:nth-child(2)){text-align:center;}
+.lb-table td{padding:8px 6px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.lb-table td:not(:first-child):not(:nth-child(2)){text-align:center;font-family:'IBM Plex Mono',monospace;}
+.lb-table tr:last-child td{border-bottom:none;}
+.lb-table tr:hover td{background:#faf9f6;}
+.rank-1 td{background:#fffbf0!important;}.rank-2 td{background:#f8fafc!important;}.rank-3 td{background:#fdf8f4!important;}
+.lb-net{font-size:17px;font-weight:500;color:var(--accent2);}
+.flight-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 6px;border-radius:3px;margin-left:4px;font-weight:600;}
+.fb-A{background:#d1e7dd;color:#0a3622;}.fb-B{background:#cfe2ff;color:#084298;}.fb-C{background:#fff3cd;color:#664d03;}
+.group-chip{display:inline-block;background:var(--surface2);border:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:1px 6px;border-radius:3px;color:var(--text3);}
+.pt-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
+.pt-item:hover{border-color:var(--accent);background:#f0faf4;}
+.pt-item.has-score{border-color:#a3cfbb;background:#f0faf4;}
+.pt-item.no-score{border-color:var(--border2);}
+.pt-tourney-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--accent2);}
+.pt-tourney-meta{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+.pt-score-badge{flex-shrink:0;text-align:right;}
+.pt-score-val{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:500;color:var(--accent2);}
+.pt-score-sub{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.code-wrap pre{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a8d5b5;line-height:1.7;white-space:pre;}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.loading-overlay.hidden{display:none;}
+.loading-spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;}
+.loading-text{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text2);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:10px 22px;border-radius:30px;font-size:12px;font-family:'IBM Plex Mono',monospace;transition:transform .25s ease;z-index:999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{background:var(--accent2);}.toast.err{background:var(--red);}
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.hidden{display:none!important;}
+.empty-msg{padding:24px;text-align:center;color:var(--text3);font-size:13px;font-family:'IBM Plex Mono',monospace;}
+.divider{height:1px;background:var(--border);margin:12px 0;}
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+
+/* ── Desktop: scorecard ใหญ่ขึ้น ── */
+@media (min-width:600px){
+  .sc-head{grid-template-columns:40px 40px 110px 56px 56px 68px;}
+  .sc-head span{padding:10px 6px;font-size:11px;letter-spacing:1px;}
+  .hole-row{grid-template-columns:40px 40px 110px 56px 56px 68px;}
+  .sub-row{grid-template-columns:40px 40px 110px 56px 56px 68px;}
+  .sub-row span{padding:9px 6px;font-size:14px;}
+  .sub-row span:first-child{font-size:11px;}
+  .h-num{padding:10px 4px;font-size:13px;}
+  .h-par-cell{padding:10px 4px;font-size:14px;}
+  .h-score{padding:6px 4px;gap:5px;}
+  .sc-btn{width:28px;height:28px;font-size:16px;border-radius:6px;}
+  .sc-val{font-size:18px;width:26px;}
+  .h-diff{padding:10px 4px;font-size:13px;}
+  .h-hcp{padding:10px 4px;font-size:14px;}
+  .h-putt{padding:5px 3px;gap:4px;}
+  .putt-btn{width:22px;height:22px;font-size:13px;border-radius:4px;}
+  .putt-val{font-size:14px;width:18px;}
+}
+
+.pi-status.wd{background:#f5e0e0;color:#c94a2a;border:1px solid #f5c6bb;}
+.pi-status.wd::before{content:'WD · ';}
+.lb-wd{opacity:.45;text-decoration:line-through;}
+.fn-A{background:#e8f5ed;border-left:3px solid #2c6e3f;}
+.fn-B{background:#e8f0ff;border-left:3px solid #4a6abf;}
+.fn-C{background:#fffbe8;border-left:3px solid #b8922a;}
+.fn-badge-A{background:#d1e7dd;color:#0a3622;}
+.fn-badge-B{background:#cfe2ff;color:#084298;}
+.fn-badge-C{background:#fff3cd;color:#664d03;}
+.award-section{margin-bottom:18px;}
+.award-section-title{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--accent2);padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--accent2);display:flex;align-items:center;gap:6px;}
+.award-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface);}
+.award-rank{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
+.award-info{flex:1;min-width:0;}
+.award-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.award-meta{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+.award-score{text-align:right;flex-shrink:0;}
+.award-score-val{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;color:var(--accent2);}
+.award-score-sub{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.award-booby-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.award-rank-1{background:#fffbf0;border-color:#e8d89a;}
+.award-rank-2{background:#f8fafc;border-color:#c8d8e8;}
+.award-rank-3{background:#fdf8f4;border-color:#e0c8b0;}
+.award-booby-1{background:#fde8e3;border-color:#f5c6bb;}
+.award-booby-2{background:#fff0e8;border-color:#f5d5bb;}
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="loading-spin"></div>
+  <div class="loading-text" id="loadingText">กำลังโหลด...</div>
+</div>
+
+<header>
+  <div class="logo"><img src="/TIS/icon-192.png" style="width:34px;height:34px;border-radius:50%;object-fit:cover;"> TIS Golf Club</div>
+  <div class="nav-tabs">
+    <div class="nav-tab" id="tab-admin" onclick="switchTab('admin')" style="display:none;">🔧 Admin</div>
+    <div class="nav-tab active" id="tab-player" onclick="switchTab('player')">บันทึกสกอร์</div>
+    <div class="nav-tab" id="tab-lb" onclick="switchTab('lb')">🏆 Leaderboard</div>
+    <div class="nav-tab" id="tab-login" onclick="switchTab('login')">⚙️</div>
+  </div>
+</header>
+
+<!-- ══ LOGIN ══ -->
+<div id="tabLogin" class="hidden">
+  <div class="center-screen">
+    <div class="center-box">
+      <div class="box-icon"><img src="/TIS/icon-192.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>
+      <div class="box-title">Admin Login</div>
+      <div class="box-sub">สำหรับผู้จัดการแข่งขัน</div>
+      <div class="err-box" id="loginErr">รหัสผ่านไม่ถูกต้อง</div>
+      <div class="form-group" style="text-align:left;margin-bottom:12px;">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="adminPw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-primary full" onclick="doLogin()">เข้าสู่ระบบ Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div id="tabAdmin" class="hidden">
+  <div class="main">
+
+    <!-- Script URL -->
+    <div class="card">
+      <div class="card-title">
+        🔗 เชื่อมต่อ Google Sheets
+        <button class="btn-sm" onclick="adminLogout()">ออก</button>
+      </div>
+      <div class="form-group">
+        <label>Apps Script URL</label>
+        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
+    </div>
+
+    <!-- Tournament Selector -->
+    <div class="tourney-selector" id="tourneySelectorCard">
+      <div class="ts-header">
+        <div>
+          <div class="ts-title">📋 การแข่งขัน</div>
+          <div class="ts-meta" id="tsActiveMeta">ยังไม่ได้เลือก</div>
+        </div>
+        <button class="btn-sm" onclick="loadTourneyList()" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;">🔄 โหลด</button>
+      </div>
+
+      <!-- Current tourney bar (default view) -->
+      <div id="tsActiveBar" class="hidden" style="padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--accent2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="tsActiveName">—</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="tsActiveCourse">—</div>
+        </div>
+        <button class="btn-sm" onclick="toggleTourneyDropdown()" id="tsDropdownBtn" style="flex-shrink:0;">
+          เปลี่ยน ▾
+        </button>
+      </div>
+
+      <!-- Dropdown list (hidden by default) -->
+      <div id="tsDropdown" class="hidden">
+        <div class="ts-search">
+          <input type="text" id="tsSearchInput" placeholder="🔍 ค้นหาชื่อการแข่งขัน..." oninput="filterTourneyList()">
+        </div>
+        <div class="ts-list" id="tsList"><div class="ts-empty">กด 🔄 โหลดรายการ</div></div>
+      </div>
+    </div>
+
+    <!-- Tournament Form -->
+    <div class="card">
+      <div class="card-title">🏟️ ตั้งค่าการแข่งขัน
+        <button class="btn-sm" onclick="clearTourneyForm()">+ สร้างใหม่</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2;min-width:200px;">
+          <label>ชื่อการแข่งขัน <span style="color:var(--red)">*</span></label>
+          <input type="text" id="adTourneyName" placeholder="เช่น Golf Day 2024">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>ชื่อสนาม</label><input type="text" id="adCourse" placeholder="ชื่อสนามกอล์ฟ"></div>
+        <div class="form-group"><label>วันที่แข่ง</label><input type="date" id="adDate"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="max-width:160px;"><label>จำนวนหลุม</label>
+          <select id="adHoles" onchange="renderParTable()">
+            <option value="18">18 หลุม</option>
+            <option value="9">9 หลุม</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Par แต่ละหลุม</div>
+      <div style="overflow-x:auto;"><table class="par-table" id="parTable"></table></div>
+      <div style="margin-top:7px;display:flex;align-items:center;gap:10px;">
+        <button class="btn-sm" onclick="setDefaultPar()">↺ รีเซ็ต</button>
+        <span style="font-size:12px;color:var(--text3);">Par รวม: <span id="parTotal" style="font-family:'IBM Plex Mono',monospace;color:var(--text);font-weight:500;">72</span></span>
+      </div>
+      <button class="btn-primary" onclick="saveTourney()" style="margin-top:14px;">💾 บันทึกการตั้งค่า</button>
+    </div>
+
+    <!-- Add Players -->
+    <div class="card">
+      <div class="card-title">👤 เพิ่มผู้เล่น
+        <span id="currentTourneyTag" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);"></span>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>ชื่อผู้เล่น</label><input type="text" id="adName" placeholder="ชื่อ-นามสกุล"></div>
+        <div class="form-group"><label>ฝ่าย</label><input type="text" id="adDept" placeholder="เช่น ฝ่าย IT"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gmail</label><input type="email" id="adEmail" placeholder="player@gmail.com"></div>
+        <div class="form-group"><label>กลุ่มออกรอบ</label><input type="text" id="adGroup" placeholder="เช่น กลุ่ม 1"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="display:flex;align-items:flex-end;">
+          <button class="btn-primary full" onclick="addPlayer()">+ เพิ่มผู้เล่น</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Bulk Import — ชื่อ, ฝ่าย, Gmail, กลุ่ม (ทีละบรรทัด)</div>
+      <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,ฝ่าย IT,somchai@gmail.com,กลุ่ม 1&#10;สมหญิง รักดี,ฝ่ายการตลาด,somying@gmail.com,กลุ่ม 2"></textarea>
+      <button class="btn-sm" onclick="bulkImport()" style="margin-top:6px;">📋 Import</button>
+    </div>
+
+    <!-- Player List -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:13px 17px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--accent2);">รายชื่อผู้เล่น</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="playerCountBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);"></span>
+          <button class="btn-sm" onclick="loadPlayersToAdmin()">🔄 โหลด</button>
+          <button class="btn-sm" onclick="clearAllPlayers()" style="color:var(--red);border-color:var(--red);">ล้างทั้งหมด</button>
+        </div>
+      </div>
+      <div id="adminPlayerList" style="padding:12px 12px 6px;"><div class="empty-msg">เลือกการแข่งขันและกด 🔄 โหลด</div></div>
+    </div>
+
+    <!-- Apps Script Code -->
+    <div class="card">
+      <div class="card-title">🔧 Apps Script Code</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.7;">
+        1. เปิด Google Sheets → <code>Extensions</code> → <code>Apps Script</code><br>
+        2. ลบ code เดิม → วาง code ด้านล่าง<br>
+        3. <code>Deploy</code> → New deployment → Web app → Anyone → Deploy<br>
+        4. คัดลอก URL มาวางด้านบน
+      </p>
+      <div class="code-wrap" onclick="selectCode()" title="คลิกเพื่อคัดลอก"><pre id="appsScriptCode"></pre></div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <button class="btn-sm" onclick="copyCode()">📋 คัดลอก Code</button>
+        <span style="font-size:11px;color:var(--text3);">หรือ คลิกที่กล่อง → Ctrl+A → Ctrl+C</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PLAYER ══ -->
+<div id="tabPlayer">
+  <div id="gmailScreen">
+    <div class="center-screen">
+      <div class="center-box" style="max-width:420px;">
+        <div class="box-icon"><img src="/TIS/icon-192.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>
+        <div class="box-title">ยืนยันตัวตน</div>
+        <div class="box-sub">กรอก Gmail ที่ลงทะเบียนไว้กับผู้จัดการแข่งขัน</div>
+        <div class="err-box" id="gmailErr">ไม่พบ Gmail นี้ในรายชื่อผู้เล่น<br>กรุณาติดต่อผู้จัดการแข่งขัน</div>
+        <div class="form-group" style="text-align:left;margin-bottom:12px;">
+          <label>Gmail ของคุณ</label>
+          <input type="email" id="playerEmail" placeholder="yourname@gmail.com" onkeydown="if(event.key==='Enter')verifyGmail()">
+        </div>
+        <button class="btn-primary full" onclick="verifyGmail()">ค้นหาชื่อของฉัน →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tournament picker for player -->
+  <div id="playerTourneyScreen" class="hidden">
+    <div class="center-screen">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;">
+        <div style="background:var(--accent2);padding:16px 20px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;" id="ptPlayerName">—</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="ptPlayerEmail">—</div>
+        </div>
+        <div style="padding:16px 18px 8px;">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">เลือกการแข่งขันที่ต้องการบันทึกสกอร์:</div>
+          <div id="ptTourneyList"></div>
+        </div>
+        <div style="padding:8px 18px 16px;">
+          <button class="btn-outline full" onclick="backToGmail()" style="margin-bottom:0;">← กลับ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="playerScorecard" class="hidden">
+    <div class="main" style="animation:fadeUp .25s ease;">
+      <div class="tourney-banner">
+        <div class="tb-title" id="bnrTitle" style="display:inline-block;background:rgba(220,60,60,0.18);border-radius:6px;padding:2px 12px 3px;margin-bottom:4px;">—</div>
+        <div class="tb-meta" id="bnrMeta">—</div>
+      </div>
+      <div class="round-bar">
+        <div>
+          <div class="rb-player" id="rbName">—</div>
+          <div class="rb-meta" id="rbMeta">—</div>
+        </div>
+        <div class="rb-right">
+          <div class="rb-gross" id="rbGross">0</div>
+          <div class="rb-subs">
+            <span id="rbVs" style="color:var(--text3)">E</span>
+            <span id="rbHcp" style="color:var(--bogey)">H'cap —</span>
+            <span id="rbNet" style="color:var(--accent2);font-weight:500">Net —</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc-card">
+        <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
+        <div id="holeRows"></div>
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" style="background:var(--eagle)"></div>Eagle</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--birdie)"></div>Birdie</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
+        </div>
+      </div>
+      </div>
+      <div class="net-box">
+        <div>
+          <div class="nb-label">Net Score</div>
+          <div class="nb-val" id="netVal">—</div>
+          <div class="nb-note" id="netNote">—</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="nb-label">H'cap วันนี้</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;color:#fff;" id="hcpVal">—</div>
+          <div class="nb-note" id="flightNote">Flight —</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 สรุปรอบ</div>
+        <div class="sum-grid" id="sumGrid"></div>
+      </div>
+
+      <!-- ปุ่มส่งชั่วคราว (แสดงเมื่อยังไม่ยืนยัน) -->
+      <div id="playerActions">
+        <button class="btn-send" id="btnSaveTemp" onclick="saveTempScore()" style="background:#5a7a9a;">
+          💾 ส่งสกอร์ชั่วคราว
+        </button>
+        <div id="tempSavedNote" class="hidden" style="background:#e8f5ed;border:1px solid #a3cfbb;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#1a4a2a;display:flex;align-items:center;gap:8px;">
+          <span>✓</span><span>บันทึกชั่วคราวแล้ว — ยังแก้ไขได้</span>
+        </div>
+        <button class="btn-send" id="btnReview" onclick="reviewScore()">🔍 ตรวจสอบและยืนยันสกอร์</button>
+      </div>
+
+      <!-- แสดงเมื่อยืนยันแล้ว (ล็อก) -->
+      <div id="confirmedBar" class="hidden" style="background:#1a4a2a;border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">🔒</span>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:#fff;">ยืนยันสกอร์แล้ว</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;">ไม่สามารถแก้ไขได้อีก · หากมีปัญหาติดต่อ Admin</div>
+        </div>
+      </div>
+      <button id="btnViewCard" class="hidden" class="btn-outline full" onclick="reviewScore()" style="width:100%;background:transparent;border:1px solid #d0cbc0;color:#6b6559;padding:11px;border-radius:8px;font-size:14px;cursor:pointer;margin-bottom:8px;font-family:'Sarabun',sans-serif;">
+        🏆 ดูสกอร์การ์ด / แชร์ LINE
+      </button>
+
+      <button class="btn-outline full" onclick="logoutPlayer()">← ออกจากระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEADERBOARD ══ -->
+<div id="tabLb" class="hidden">
+  <div class="main">
+    <div class="card">
+      <div class="card-title">🏆 Leaderboard
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="btn-sm" onclick="openAwardsModal()" style="background:var(--accent2);color:#fff;border-color:var(--accent2);">🏅 รางวัล</button>
+          <button class="btn-sm" onclick="loadLeaderboard()">🔄 รีเฟรช</button>
+        </div>
+      </div>
+      <!-- Tourney picker for LB -->
+      <div style="margin-bottom:12px;">
+        <label>การแข่งขัน</label>
+        <select id="lbTourneySelect" onchange="onLbTourneyChange()" style="margin-top:5px;">
+          <option value="">— เลือกการแข่งขัน —</option>
+        </select>
+      </div>
+      <div class="flight-tabs">
+        <div class="flight-tab active" onclick="setFlight(this,'lowgross')">🏌️ Low Gross</div>
+        <div class="flight-tab" onclick="setFlight(this,'lownet')" style="border-color:#6a5acd;color:#6a5acd;">🏆 Low Net</div>
+        <div class="flight-tab" onclick="setFlight(this,'A')">Flight A <span style="font-size:10px;opacity:.7">(0-12)</span></div>
+        <div class="flight-tab" onclick="setFlight(this,'B')">Flight B <span style="font-size:10px;opacity:.7">(13-24)</span></div>
+        <div class="flight-tab" onclick="setFlight(this,'C')">Flight C <span style="font-size:10px;opacity:.7">(25-36)</span></div>
+        <div class="flight-tab booby-tab" onclick="setFlight(this,'booby')">🐔 Booby</div>
+      </div>
+      <div id="lbPodium"></div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;">
+      <div id="lbTable"></div>
+      </div>
+    </div>
+    <div class="card" style="background:var(--gold-bg);border-color:#e8d8a0;">
+      <div class="card-title" style="color:var(--gold);">📐 สูตรคำนวณ</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
+        <thead><tr style="background:rgba(184,146,42,.1);">
+          <th style="padding:8px 10px;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);">ผลแต่ละหลุม</th>
+          <th style="padding:8px 10px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);">H'cap</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Eagle / Birdie / Par</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--par-col);">0</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Bogey (+1)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--bogey);">1</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Double Bogey (+2)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--triple);">3</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:13px;color:var(--text2);line-height:1.9;background:rgba(184,146,42,.08);border-radius:8px;padding:11px 13px;">
+        <strong>Net = Gross − H'cap รวม</strong> · ผู้ชนะ = Net ต่ำสุด<br>
+        ถ้า Net เท่ากัน → H'cap ต่ำสุดชนะ<br>
+        Flight: A (0–12) · B (13–24) · C (25–36)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN EDIT MODAL ══ -->
+<div id="adminEditModal" class="hidden" style="position:fixed;inset:0;z-index:300;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.5);overflow-y:auto;padding:16px;">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:auto;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;overflow:hidden;">
+    <div style="background:var(--accent2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;" id="aeModalName">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="aeModalEmail">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6);font-family:'IBM Plex Mono',monospace;margin-top:1px;" id="aeModalGroup">—</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Admin Edit</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;" id="aeModalCourse">—</div>
+        <button onclick="closeAdminEdit()" style="margin-top:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
+      </div>
+    </div>
+    <div style="padding:16px;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:13px;color:var(--text2);font-family:'IBM Plex Mono',monospace;">Gross</div>
+        <div style="text-align:right;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;line-height:1;" id="aeGross">0</div>
+          <div style="font-size:12px;font-family:'IBM Plex Mono',monospace;display:flex;flex-direction:column;gap:1px;margin-top:2px;align-items:flex-end;">
+            <span id="aeVs" style="color:var(--text3)">E</span>
+            <span id="aeHcp" style="color:var(--bogey)">H'cap —</span>
+            <span id="aeNet" style="color:var(--accent2);font-weight:500">Net —</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc-card">
+        <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
+        <div id="aeHoleRows"></div>
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" style="background:var(--eagle)"></div>Eagle</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
+        </div>
+      </div>
+      </div>
+      <div class="net-box" style="margin-bottom:13px;">
+        <div>
+          <div class="nb-label">Net Score</div>
+          <div class="nb-val" id="aeNetVal">—</div>
+          <div class="nb-note" id="aeNetNote">—</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="nb-label">H'cap</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;color:#fff;" id="aeHcpVal">—</div>
+          <div class="nb-note" id="aeFlightNote">Flight —</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:13px;">
+        <div class="card-title" style="font-size:15px;">📊 สรุปรอบ</div>
+        <div class="sum-grid" id="aeSumGrid"></div>
+      </div>
+      <div style="background:#fff8e6;border:1px solid #f0d080;border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#7a6020;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">⚠️</span>
+        <span>Admin Mode — การบันทึกจะเขียนทับสกอร์เดิมใน Google Sheets ทันที</span>
+      </div>
+      <button class="btn-send" id="btnAeSave" onclick="saveAdminEdit()">💾 บันทึกสกอร์</button>
+      <button class="btn-outline full" onclick="closeAdminEdit()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCORECARD SHARE MODAL ══ -->
+<div id="scShareModal" class="hidden" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;margin:auto;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
+    <div style="background:#1a4a2a;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:#fff;">🏆 ตรวจสอบสกอร์การ์ด</span>
+      <button onclick="closeScoreCard()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
+    </div>
+    <div style="padding:16px;">
+      <!-- Canvas -->
+      <canvas id="scCanvas" style="width:100%;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:block;"></canvas>
+
+      <!-- ยืนยันส่งสกอร์ -->
+      <div id="scConfirmSection" style="margin-top:14px;background:#f0faf4;border:1px solid #a3cfbb;border-radius:10px;padding:14px 16px;">
+        <div style="font-size:13px;font-weight:600;color:#1a4a2a;margin-bottom:4px;">✅ สกอร์ถูกต้องแล้วใช่ไหม?</div>
+        <div style="font-size:12px;color:#5a5248;margin-bottom:12px;">กด "ยืนยันและส่งสกอร์" เพื่อบันทึกลง Google Sheets</div>
+        <button id="btnConfirmSubmit" onclick="confirmAndSubmit()" style="width:100%;background:#1a4a2a;color:#fff;border:none;padding:13px;border-radius:8px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;">✅ ยืนยันและส่งสกอร์</button>
+        <button onclick="closeScoreCard()" style="width:100%;background:transparent;border:1px solid #d0cbc0;color:#6b6559;padding:10px;border-radius:8px;font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;">← กลับแก้ไขสกอร์</button>
+      </div>
+
+      <!-- ส่งแล้ว — แชร์ -->
+      <div id="scShareSection" class="hidden" style="margin-top:14px;">
+        <div style="background:#d1e7dd;border:1px solid #a3cfbb;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">🎉</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#1a4a2a;">ส่งสกอร์เรียบร้อยแล้ว!</div>
+            <div style="font-size:12px;color:#2c6e3f;margin-top:1px;">บันทึกลง Google Sheets แล้ว</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="downloadCard()" style="flex:1;background:#1a4a2a;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;">⬇️ บันทึกรูป</button>
+          <button onclick="shareCard()" style="flex:1;background:#06c755;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;">📤 แชร์ LINE</button>
+        </div>
+        <div style="font-size:11px;color:#999;text-align:center;margin-top:8px;font-family:'IBM Plex Mono',monospace;">กด "บันทึกรูป" แล้วเปิด LINE → แชร์รูปภาพ</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+// APPS SCRIPT CODE (for display)
+// ════════════════════════════════
+const APPS_SCRIPT_CODE = `function doGet(e) {
+  var action = e.parameter.action || '';
+  var result;
+  try {
+    if (e.parameter.payload) {
+      var data = JSON.parse(decodeURIComponent(e.parameter.payload));
+      if (action==='saveTourney')       result = saveTourney(data);
+      else if (action==='addPlayer')    result = addPlayer(data);
+      else if (action==='bulkPlayers')  result = bulkPlayers(data);
+      else if (action==='removePlayer') result = removePlayer(data);
+      else if (action==='clearPlayers') result = clearPlayers(data);
+      else if (action==='submitScore')  result = submitScore(data);
+      else result = {error:'unknown action: '+action};
+    } else {
+      if (action==='getTourneyList')    result = getTourneyList();
+      else if (action==='getTourney')   result = getTourney(e.parameter.name);
+      else if (action==='getPlayers')   result = getPlayers(e.parameter.name);
+      else if (action==='getScores')    result = getScores(e.parameter.name);
+      else if (action==='findPlayer')   result = findPlayer(e.parameter.email);
+      else result = {error:'unknown action: '+action};
+    }
+  } catch(err) {
+    result = {error: err.toString(), action: action};
+  }
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doPost(e) { return doGet(e); }
+function getSheet(name) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  return ss.getSheetByName(name) || ss.insertSheet(name);
+}
+function fmtDate(d) {
+  if (!d) return '';
+  var dt = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(dt.getTime())) return String(d);
+  var y = dt.getFullYear();
+  var m = String(dt.getMonth()+1).padStart(2,'0');
+  var day = String(dt.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function getTourneyList() {
+  var sh = getSheet('Tournament');
+  if (sh.getLastRow() < 2) return [];
+  var rows = sh.getRange(2,1,sh.getLastRow()-1,4).getValues();
+  var list = rows.filter(function(r){return r[0];}).map(function(r){
+    return {tourneyName:r[0],course:r[1],date:fmtDate(r[2]),holes:r[3]};
+  });
+  list.sort(function(a,b){
+    var da=a.date?new Date(a.date):new Date(0);
+    var db=b.date?new Date(b.date):new Date(0);
+    return db-da;
+  });
+  return list;
+}
+function getTourney(name) {
+  var sh = getSheet('Tournament');
+  if (sh.getLastRow() < 2) return null;
+  var rows = sh.getDataRange().getValues();
+  for (var i=1;i<rows.length;i++) {
+    if (rows[i][0]===name) {
+      return {tourneyName:rows[i][0],course:rows[i][1],date:fmtDate(rows[i][2]),holes:rows[i][3],
+              pars:rows[i].slice(4).filter(function(v){return v!=='';})};
+    }
+  }
+  return null;
+}
+function saveTourney(data) {
+  var sh = getSheet('Tournament');
+  if (sh.getLastRow()===0) {
+    var h=['TourneyName','Course','Date','Holes'];
+    for(var i=1;i<=18;i++) h.push('Par_H'+i);
+    sh.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
+  }
+  var rows = sh.getDataRange().getValues();
+  var found = -1;
+  for (var i=1;i<rows.length;i++) { if(rows[i][0]===data.tourneyName){found=i+1;break;} }
+  var row = [data.tourneyName,data.course,data.date,data.holes].concat(data.pars);
+  if (found>0) sh.getRange(found,1,1,row.length).setValues([row]);
+  else sh.appendRow(row);
+  return {ok:true};
+}
+function getPlayers(tourneyName) {
+  var sh = getSheet('Players');
+  if (sh.getLastRow()<2) return [];
+  var rows = sh.getRange(2,1,sh.getLastRow()-1,5).getValues();
+  return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
+    return {tourneyName:r[0],name:r[1],email:r[2],dept:r[3]||'',group:r[4]||''};
+  });
+}
+function findPlayer(email) {
+  var sh = getSheet('Players');
+  if (sh.getLastRow()<2) return {notFound:true};
+  var rows = sh.getRange(2,1,sh.getLastRow()-1,5).getValues();
+  var matches = rows.filter(function(r){
+    return r[1] && r[2].toString().toLowerCase()===email.toLowerCase();
+  }).map(function(r){
+    return {tourneyName:r[0],name:r[1],email:r[2],dept:r[3]||'',group:r[4]||''};
+  });
+  if (!matches.length) return {notFound:true};
+  var tSheet = getSheet('Tournament');
+  var tMap = {};
+  if (tSheet.getLastRow()>1) {
+    var tRows = tSheet.getRange(2,1,tSheet.getLastRow()-1,4).getValues();
+    tRows.forEach(function(r){ if(r[0]) tMap[r[0]]={course:r[1],date:fmtDate(r[2])}; });
+  }
+  var scSheet = getSheet('Scores');
+  var scMap = {};
+  if (scSheet.getLastRow()>1) {
+    var scRows = scSheet.getRange(2,1,scSheet.getLastRow()-1,11).getValues();
+    scRows.forEach(function(r){
+      var key = r[0]+'|||'+r[2].toString().toLowerCase();
+      scMap[key] = {hasScore:true,net:r[9],hcp:r[8],gross:r[6],confirmed:r[11]===true};
+    });
+  }
+  var list = matches.map(function(p){
+    var t = tMap[p.tourneyName]||{};
+    var sc = scMap[p.tourneyName+'|||'+email.toLowerCase()]||{hasScore:false};
+    return {tourneyName:p.tourneyName,name:p.name,email:p.email,
+            dept:p.dept,group:p.group,course:t.course||'',date:t.date||'',
+            hasScore:sc.hasScore,net:sc.net||'',hcp:sc.hcp||'',gross:sc.gross||'',confirmed:sc.confirmed||false};
+  });
+  list.sort(function(a,b){
+    var da=a.date?new Date(a.date):new Date(0);
+    var db=b.date?new Date(b.date):new Date(0);
+    return db-da;
+  });
+  return {found:true,name:matches[0].name,list:list};
+}
+function addPlayer(data) {
+  var sh = getSheet('Players');
+  if (sh.getLastRow()===0) {
+    sh.getRange(1,1,1,5).setValues([['TourneyName','Name','Email','Dept','Group']])
+      .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
+  }
+  var players = getPlayers(data.tourneyName);
+  if (players.find(function(p){return p.email.toLowerCase()===data.email.toLowerCase();}))
+    return {error:'duplicate'};
+  sh.appendRow([data.tourneyName,data.name,data.email,data.dept||'',data.group||'']);
+  return {ok:true};
+}
+function bulkPlayers(data) {
+  var sh = getSheet('Players');
+  if (sh.getLastRow()===0) {
+    sh.getRange(1,1,1,5).setValues([['TourneyName','Name','Email','Dept','Group']])
+      .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
+  }
+  var existing = getPlayers(data.tourneyName).map(function(p){return p.email.toLowerCase();});
+  var added=0;
+  data.players.forEach(function(p){
+    if(!existing.includes(p.email.toLowerCase())){
+      sh.appendRow([data.tourneyName,p.name,p.email,p.dept||'',p.group||'']);
+      added++;
+    }
+  });
+  return {ok:true,added:added};
+}
+function removePlayer(data) {
+  var sh = getSheet('Players');
+  var rows = sh.getDataRange().getValues();
+  for(var i=rows.length-1;i>=1;i--){
+    if(rows[i][0]===data.tourneyName && rows[i][2].toLowerCase()===data.email.toLowerCase())
+      sh.deleteRow(i+1);
+  }
+  return {ok:true};
+}
+function clearPlayers(data) {
+  var sh = getSheet('Players');
+  var rows = sh.getDataRange().getValues();
+  for(var i=rows.length-1;i>=1;i--){ if(rows[i][0]===data.tourneyName) sh.deleteRow(i+1); }
+  var sc = getSheet('Scores');
+  var scRows = sc.getDataRange().getValues();
+  for(var i=scRows.length-1;i>=1;i--){ if(scRows[i][0]===data.tourneyName) sc.deleteRow(i+1); }
+  return {ok:true};
+}
+function getScores(tourneyName) {
+  var sh = getSheet('Scores');
+  if (sh.getLastRow()<2) return [];
+  var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
+  return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
+    return {tourneyName:r[0],name:r[1],email:r[2],group:r[3],dept:r[4]||'',flight:r[5],
+            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,wd:r[12]===true,
+            scores:r.slice(13,31),pars:r.slice(31,49),putts:r.slice(49,67)};
+  });
+}
+function submitScore(data) {
+  var sh = getSheet('Scores');
+  if (sh.getLastRow()===0) {
+    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed','WD'];
+    for(var n=1;n<=18;n++) h.push('H'+n+'_Score');
+    for(var n=1;n<=18;n++) h.push('H'+n+'_Par');
+    for(var n=1;n<=18;n++) h.push('H'+n+'_Putt');
+    sh.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
+  }
+  // ถ้า confirmed แล้วห้าม overwrite (ยกเว้น Admin force)
+  var rows = sh.getDataRange().getValues();
+  for(var i=rows.length-1;i>=1;i--){
+    if(rows[i][0]===data.tourneyName && rows[i][2].toLowerCase()===data.email.toLowerCase()){
+      if(rows[i][11]===true && !data.adminForce) return {error:'confirmed'};
+      sh.deleteRow(i+1);
+    }
+  }
+  var confirmed = data.confirmed===true;
+  var wd = data.wd===true;
+  var row=[data.tourneyName,data.name,data.email,data.group,data.dept||'',data.flight,
+           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed,wd]
+    .concat(data.scores).concat(data.pars).concat(data.putts);
+  sh.appendRow(row);
+  return {ok:true};
+}`;
+
+document.getElementById('appsScriptCode').textContent = APPS_SCRIPT_CODE;
+
+// ════════════════════════════════
+// CONFIG & STATE
+// ════════════════════════════════
+const LOGO_SRC = '/TIS/icon-192.png';
+const ADMIN_PASSWORD = 'TIS2023';
+const DEF_PARS_18 = [4,4,3,5,4,3,4,5,4,4,3,5,4,4,3,5,4,4];
+const DEF_PARS_9  = [4,4,3,5,4,3,4,5,4];
+
+let adminIn = false;
+let scriptUrl = localStorage.getItem('golf_scriptUrl') || 'https://script.google.com/macros/s/AKfycbwGDVw99PpA1VcDxzOF2ydM2pV-89HsnfalNNuT3WbIjCdCO0uGvOpMPSreJ3pgzQlqkA/exec';
+let currentPlayer = null;
+let scoreState = { scores:[], putts:[], pars:[], holes:18 };
+let tourneyList = [];
+let activeTourney = null;
+let lbData = [];
+let activeFlightFilter = 'lowgross';
+let adminEditPlayer = null;
+let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+;(function(){
+  document.getElementById('adDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('adScriptUrl').value = scriptUrl;
+  renderParTable();
+})();
+
+// ════════════════════════════════
+// API
+// ════════════════════════════════
+async function api(action, params={}) {
+  if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
+  const qs = Object.keys(params).map(k=>'&'+k+'='+encodeURIComponent(params[k])).join('');
+  const r = await fetch(scriptUrl+'?action='+action+qs, {redirect:'follow'});
+  const text = await r.text();
+  let json;
+  try { json = JSON.parse(text); } catch(e) { throw new Error('Parse error: '+text.slice(0,100)); }
+  if (json && json.error) throw new Error(json.error);
+  return json;
+}
+async function apiPost(body) {
+  if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
+  const payload = encodeURIComponent(JSON.stringify(body));
+  const r = await fetch(scriptUrl+'?action='+body.action+'&payload='+payload, {redirect:'follow'});
+  const text = await r.text();
+  let json;
+  try { json = JSON.parse(text); } catch(e) { throw new Error('Parse error: '+text.slice(0,100)); }
+  if (json && json.error) throw new Error('['+body.action+'] '+json.error);
+  return json;
+}
+function loading(show, text='กำลังโหลด...') {
+  document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+  document.getElementById('loadingText').textContent = text;
+}
+
+// ════════════════════════════════
+// TABS
+// ════════════════════════════════
+function switchTab(t) {
+  ['admin','player','lb','login'].forEach(x => {
+    const tab  = document.getElementById('tab-'+x);
+    const view = document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1));
+    if (tab)  tab.classList.toggle('active', x===t);
+    if (view) view.classList.toggle('hidden', x!==t);
+  });
+  if (t==='login' && adminIn) switchTab('admin');
+  if (t==='lb') {
+    loadTourneyListForLb(true); // true = auto load leaderboard หลัง dropdown พร้อม
+    // reset ปุ่มให้ตรงกับ activeFlightFilter
+    document.querySelectorAll('.flight-tab').forEach(tab=>{
+      tab.classList.remove('active');
+    });
+    const tabs=document.querySelectorAll('.flight-tab');
+    // Low Gross เป็นปุ่มแรก
+    if(activeFlightFilter==='lowgross'&&tabs[0]) tabs[0].classList.add('active');
+  }
+}
+
+// ════════════════════════════════
+// ADMIN AUTH
+// ════════════════════════════════
+function doLogin() {
+  if (document.getElementById('adminPw').value === ADMIN_PASSWORD) {
+    adminIn = true;
+    document.getElementById('tab-admin').style.display = 'flex';
+    document.getElementById('loginErr').classList.remove('show');
+    document.getElementById('adminPw').value = '';
+    switchTab('admin');
+    if (scriptUrl) loadTourneyList();
+  } else {
+    document.getElementById('loginErr').classList.add('show');
+    const pw = document.getElementById('adminPw');
+    pw.classList.add('shake');
+    setTimeout(()=>pw.classList.remove('shake'), 400);
+  }
+}
+function adminLogout() {
+  adminIn = false;
+  document.getElementById('tab-admin').style.display = 'none';
+  switchTab('player');
+}
+function saveScriptUrl() {
+  const url = document.getElementById('adScriptUrl').value.trim();
+  if (!url) { toast('กรุณากรอก URL','err'); return; }
+  scriptUrl = url;
+  localStorage.setItem('golf_scriptUrl', url);
+  toast('✅ บันทึก URL แล้ว','ok');
+  if (adminIn) loadTourneyList();
+}
+
+// ════════════════════════════════
+// TOURNAMENT LIST
+// ════════════════════════════════
+async function loadTourneyList() {
+  if (!scriptUrl) return;
+  loading(true,'กำลังโหลดรายการ...');
+  try {
+    tourneyList = await api('getTourneyList');
+    renderTourneyList(tourneyList);
+    if (!activeTourney && tourneyList.length) {
+      await selectTourney(tourneyList[0].tourneyName);
+    }
+  } catch(e) { toast('❌ '+e.message,'err'); }
+  loading(false);
+}
+
+function renderTourneyList(list) {
+  const el = document.getElementById('tsList');
+  if (!list.length) { el.innerHTML = '<div class="ts-empty">ยังไม่มีการแข่งขัน</div>'; return; }
+  el.innerHTML = list.map(t => `
+    <div class="ts-item ${activeTourney?.tourneyName===t.tourneyName?'active':''}"
+         onclick="selectTourney('${t.tourneyName.replace(/'/g,"\\'")}')">
+      <div style="flex:1;">
+        <div class="ts-item-name">${t.tourneyName}${activeTourney?.tourneyName===t.tourneyName?' <span style="font-size:10px;color:var(--accent2);">✓</span>':''}</div>
+        <div class="ts-item-meta">${t.course||'—'} · ${fmtD(t.date)}</div>
+      </div>
+      <span style="color:var(--text3);font-size:16px;">›</span>
+    </div>`).join('');
+}
+
+function filterTourneyList() {
+  const q = document.getElementById('tsSearchInput').value.toLowerCase();
+  renderTourneyList(tourneyList.filter(t =>
+    t.tourneyName.toLowerCase().includes(q) || (t.course||'').toLowerCase().includes(q)));
+}
+
+async function selectTourney(name) {
+  loading(true,'กำลังโหลด '+name+'...');
+  try {
+    const t = await api('getTourney', {name});
+    if (!t) { toast('ไม่พบข้อมูล','err'); loading(false); return; }
+    activeTourney = t;
+    document.getElementById('adTourneyName').value = t.tourneyName||'';
+    document.getElementById('adCourse').value      = t.course||'';
+    document.getElementById('adDate').value        = t.date||'';
+    document.getElementById('adHoles').value       = t.holes||18;
+    renderParTable(t.pars&&t.pars.length ? t.pars.map(Number) : null);
+    document.getElementById('tsActiveBar').classList.remove('hidden');
+    document.getElementById('tsActiveName').textContent   = t.tourneyName;
+    document.getElementById('tsActiveCourse').textContent = (t.course||'—')+' · '+fmtD(t.date);
+    document.getElementById('tsActiveMeta').textContent   = 'กำลังดู: '+t.tourneyName;
+    document.getElementById('currentTourneyTag').textContent = '· '+t.tourneyName;
+    closeTourneyDropdown();
+    renderTourneyList(tourneyList);
+    await loadPlayersToAdmin();
+    toast('✅ โหลด "'+name+'" แล้ว','ok');
+  } catch(e) { toast('❌ '+e.message,'err'); }
+  loading(false);
+}
+
+function toggleTourneyDropdown() {
+  const dd  = document.getElementById('tsDropdown');
+  const btn = document.getElementById('tsDropdownBtn');
+  const isOpen = !dd.classList.contains('hidden');
+  dd.classList.toggle('hidden', isOpen);
+  btn.textContent = isOpen ? 'เปลี่ยน ▾' : 'ปิด ▴';
+}
+function closeTourneyDropdown() {
+  document.getElementById('tsDropdown').classList.add('hidden');
+  document.getElementById('tsDropdownBtn').textContent = 'เปลี่ยน ▾';
+}
+function clearTourneyForm() {
+  activeTourney = null;
+  document.getElementById('adTourneyName').value = '';
+  document.getElementById('adCourse').value = '';
+  document.getElementById('adDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('adHoles').value = 18;
+  document.getElementById('tsActiveBar').classList.add('hidden');
+  document.getElementById('tsActiveMeta').textContent = 'ยังไม่ได้เลือก';
+  document.getElementById('currentTourneyTag').textContent = '';
+  closeTourneyDropdown();
+  renderAdminList([],[]);
+  renderParTable();
+  toast('พร้อมสร้างการแข่งขันใหม่');
+}
+
+// ════════════════════════════════
+// PAR TABLE
+// ════════════════════════════════
+function renderParTable(savedPars) {
+  const holes = parseInt(document.getElementById('adHoles').value)||18;
+  const pars  = savedPars||(holes===9?[...DEF_PARS_9]:[...DEF_PARS_18]);
+  const tbl   = document.getElementById('parTable');
+  const rowDefs = holes===18?[[0,9],[9,18]]:[[0,9]];
+  let html='';
+  rowDefs.forEach(([f,t])=>{
+    html+='<tr>';
+    for(let i=f;i<t;i++) html+=`<th>${i+1}</th>`;
+    html+='</tr><tr>';
+    for(let i=f;i<t;i++) html+=`<td><input type="number" id="par_${i}" min="3" max="5" value="${pars[i]||4}" onchange="updateParTotal()"></td>`;
+    html+='</tr>';
+  });
+  tbl.innerHTML=html;
+  updateParTotal();
+}
+function getParsFromTable() {
+  const holes=parseInt(document.getElementById('adHoles').value)||18;
+  return Array.from({length:holes},(_,i)=>parseInt(document.getElementById('par_'+i)?.value)||4);
+}
+function updateParTotal() {
+  document.getElementById('parTotal').textContent=getParsFromTable().reduce((a,v)=>a+v,0);
+}
+function setDefaultPar() {
+  const holes=parseInt(document.getElementById('adHoles').value)||18;
+  const def=holes===9?DEF_PARS_9:DEF_PARS_18;
+  def.forEach((v,i)=>{const el=document.getElementById('par_'+i);if(el)el.value=v;});
+  updateParTotal();
+}
+
+// ════════════════════════════════
+// SAVE TOURNEY
+// ════════════════════════════════
+async function saveTourney() {
+  const tourneyName=document.getElementById('adTourneyName').value.trim();
+  const course=document.getElementById('adCourse').value.trim();
+  const date=document.getElementById('adDate').value;
+  if (!scriptUrl){toast('กรุณาบันทึก Apps Script URL ก่อน','err');return;}
+  if (!tourneyName){toast('กรุณากรอกชื่อการแข่งขัน','err');return;}
+  if (!course||!date){toast('กรุณากรอกชื่อสนามและวันที่','err');return;}
+  loading(true,'กำลังบันทึก...');
+  try {
+    await apiPost({action:'saveTourney',tourneyName,course,date,holes:parseInt(document.getElementById('adHoles').value),pars:getParsFromTable()});
+    activeTourney={tourneyName,course,date,holes:parseInt(document.getElementById('adHoles').value),pars:getParsFromTable()};
+    document.getElementById('tsActiveBar').classList.remove('hidden');
+    document.getElementById('tsActiveName').textContent   = tourneyName;
+    document.getElementById('tsActiveCourse').textContent = course+' · '+fmtD(date);
+    document.getElementById('tsActiveMeta').textContent   = 'กำลังดู: '+tourneyName;
+    document.getElementById('currentTourneyTag').textContent='· '+tourneyName;
+    await loadTourneyList();
+    toast('✅ บันทึกแล้ว','ok');
+  } catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+
+// ════════════════════════════════
+// PLAYERS
+// ════════════════════════════════
+async function addPlayer() {
+  if (!activeTourney){toast('กรุณาเลือกการแข่งขันก่อน','err');return;}
+  const name=document.getElementById('adName').value.trim();
+  const dept=document.getElementById('adDept').value.trim();
+  const email=document.getElementById('adEmail').value.trim().toLowerCase();
+  const group=document.getElementById('adGroup').value.trim()||'กลุ่ม 1';
+  if (!name||!email){toast('กรุณากรอกชื่อและ Gmail','err');return;}
+  if (!email.includes('@')){toast('Gmail ไม่ถูกต้อง','err');return;}
+  loading(true,'กำลังเพิ่ม...');
+  try {
+    await apiPost({action:'addPlayer',tourneyName:activeTourney.tourneyName,name,email,dept,group});
+    document.getElementById('adName').value='';
+    document.getElementById('adEmail').value='';
+    document.getElementById('adDept').value='';
+    await loadPlayersToAdmin();
+    toast('✅ เพิ่มผู้เล่นแล้ว','ok');
+  } catch(e){toast(e.message==='duplicate'?'Gmail นี้มีอยู่แล้ว':'❌ '+e.message,'err');}
+  loading(false);
+}
+
+async function bulkImport() {
+  if (!activeTourney){toast('กรุณาเลือกการแข่งขันก่อน','err');return;}
+  const raw=document.getElementById('bulkInput').value.trim();
+  if (!raw) return;
+  const players=[];
+  raw.split('\n').filter(l=>l.trim()).forEach(line=>{
+    const p=line.split(',').map(s=>s.trim());
+    if (p.length<3||!p[2].includes('@')) return;
+    players.push({name:p[0],dept:p[1]||'',email:p[2].toLowerCase(),group:p[3]||'กลุ่ม 1'});
+  });
+  if (!players.length){toast('ไม่พบข้อมูล','err');return;}
+  loading(true,`Import ${players.length} คน...`);
+  try {
+    const res=await apiPost({action:'bulkPlayers',tourneyName:activeTourney.tourneyName,players});
+    document.getElementById('bulkInput').value='';
+    await loadPlayersToAdmin();
+    toast(`✅ Import ${res.added} คน`,'ok');
+  } catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+
+async function removePlayer(email) {
+  if (!activeTourney||!confirm('ลบผู้เล่นนี้?')) return;
+  loading(true,'ลบ...');
+  try {
+    await apiPost({action:'removePlayer',tourneyName:activeTourney.tourneyName,email});
+    await loadPlayersToAdmin();
+    toast('ลบแล้ว');
+  } catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+
+async function clearAllPlayers() {
+  if (!activeTourney||!confirm('ลบผู้เล่นและสกอร์ทั้งหมดในการแข่งขันนี้?')) return;
+  loading(true,'ล้าง...');
+  try {
+    await apiPost({action:'clearPlayers',tourneyName:activeTourney.tourneyName});
+    renderAdminList([],[]);
+    toast('ล้างแล้ว');
+  } catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+
+async function loadPlayersToAdmin() {
+  if (!activeTourney||!scriptUrl) return;
+  loading(true,'โหลดรายชื่อ...');
+  try {
+    const [players,scores]=await Promise.all([
+      api('getPlayers',{name:activeTourney.tourneyName}),
+      api('getScores',{name:activeTourney.tourneyName})
+    ]);
+    renderAdminList(players,scores);
+  } catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+
+function renderAdminList(players=[],scores=[]) {
+  const el=document.getElementById('adminPlayerList');
+  document.getElementById('playerCountBadge').textContent=players.length?players.length+' คน':'';
+  if (!players.length){el.innerHTML='<div class="empty-msg">ยังไม่มีผู้เล่น</div>';return;}
+  const scoreMap={};
+  scores.forEach(s=>{scoreMap[s.email.toLowerCase()]=s;});
+  const groups=[...new Set(players.map(p=>p.group))];
+  el.innerHTML=groups.map(g=>{
+    const gp=players.filter(p=>p.group===g);
+    return `<div style="margin-bottom:13px;">
+      <div class="section-label">${g}</div>
+      ${gp.map(p=>{
+        const sc=scoreMap[p.email.toLowerCase()];
+        const flight=sc?calcFlight(sc.hcp):null;
+        const isWD=sc&&sc.wd===true;
+        return `<div class="player-item" style="${isWD?'opacity:.6;':''}">
+          <div class="pi-group">${g}</div>
+          <div class="pi-info">
+            <div class="pi-name">${p.name}${p.dept?` <span style="font-size:11px;font-weight:400;color:var(--text3);">${p.dept}</span>`:''}
+            </div>
+            <div class="pi-email">${p.email}</div>
+          </div>
+          ${sc
+            ? isWD
+              ? `<div class="pi-status wd">ถอนตัว</div>`
+              : `<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span></div>`
+            : '<div class="pi-status pending">รอสกอร์</div>'
+          }
+          <div style="display:flex;gap:5px;flex-shrink:0;">
+            ${sc?`<button class="btn-sm" onclick="toggleWD('${p.email}',${isWD})" style="color:${isWD?'var(--accent2)':'var(--red)'};border-color:${isWD?'var(--accent2)':'var(--red)'};" title="${isWD?'คืนสถานะ':'มาร์ค WD'}">${isWD?'↩ คืน':'WD'}</button>`:''}
+            <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}','${p.dept||''}')" style="color:var(--accent2);border-color:var(--accent2);">✏️</button>
+            <button class="btn-danger" onclick="removePlayer('${p.email}')">×</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// PLAYER VERIFY
+// ════════════════════════════════
+async function verifyGmail() {
+  const email=document.getElementById('playerEmail').value.trim().toLowerCase();
+  if (!email.includes('@')){showGmailErr();return;}
+  if (!scriptUrl){toast('ระบบยังไม่พร้อม','err');return;}
+  loading(true,'กำลังตรวจสอบ...');
+  try {
+    const res=await api('findPlayer',{email});
+    if (res.notFound){loading(false);showGmailErr();return;}
+    document.getElementById('gmailErr').classList.remove('show');
+    if (res.list.length===1) {
+      const p=res.list[0];
+      currentPlayer={name:p.name,email:p.email,dept:p.dept,group:p.group,tourneyName:p.tourneyName};
+      await startScorecard();
+    } else {
+      showTourneyPicker(res.name,email,res.list);
+    }
+  } catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+
+function showTourneyPicker(name,email,list) {
+  document.getElementById('ptPlayerName').textContent=name;
+  document.getElementById('ptPlayerEmail').textContent=email;
+  document.getElementById('ptTourneyList').innerHTML=list.map(t=>`
+    <div class="pt-item ${t.hasScore?'has-score':'no-score'}"
+         onclick="selectPlayerTourney('${t.tourneyName.replace(/'/g,"\\'")}','${name.replace(/'/g,"\\'")}','${email}','${(t.dept||'').replace(/'/g,"\\'")}','${(t.group||'').replace(/'/g,"\\'")}')">
+      <div style="flex:1;">
+        <div class="pt-tourney-name">${t.tourneyName}</div>
+        <div class="pt-tourney-meta">${t.course||'—'} · ${fmtD(t.date)}</div>
+      </div>
+      <div class="pt-score-badge">
+        ${t.hasScore
+          ?`<div class="pt-score-val">Net ${t.net}</div>
+            <div class="pt-score-sub">Gross ${t.gross} · H'cap ${t.hcp}</div>
+            <div class="pt-score-sub" style="color:var(--accent2);">✓ มีสกอร์แล้ว</div>`
+          :`<div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีสกอร์</div>`}
+      </div>
+      <div style="color:var(--accent2);font-size:18px;">›</div>
+    </div>`).join('');
+  document.getElementById('gmailScreen').classList.add('hidden');
+  document.getElementById('playerTourneyScreen').classList.remove('hidden');
+}
+
+async function selectPlayerTourney(tourneyName,name,email,dept,group) {
+  currentPlayer={name,email,dept,group,tourneyName};
+  document.getElementById('playerTourneyScreen').classList.add('hidden');
+  loading(true,'กำลังโหลดสกอร์...');
+  await startScorecard();
+  loading(false);
+}
+function backToGmail() {
+  document.getElementById('playerTourneyScreen').classList.add('hidden');
+  document.getElementById('gmailScreen').classList.remove('hidden');
+}
+function showGmailErr() {
+  document.getElementById('gmailErr').classList.add('show');
+  const inp=document.getElementById('playerEmail');
+  inp.classList.add('shake');
+  setTimeout(()=>inp.classList.remove('shake'),400);
+}
+function logoutPlayer() {
+  currentPlayer=null;
+  document.getElementById('playerEmail').value='';
+  document.getElementById('gmailScreen').classList.remove('hidden');
+  document.getElementById('playerTourneyScreen').classList.add('hidden');
+  document.getElementById('playerScorecard').classList.add('hidden');
+}
+
+// ════════════════════════════════
+// SCORECARD
+// ════════════════════════════════
+async function startScorecard() {
+  const t=await api('getTourney',{name:currentPlayer.tourneyName});
+  const holes=t?.holes||18;
+  const pars=(t?.pars&&t.pars.length)?t.pars.map(Number):(holes===9?DEF_PARS_9:DEF_PARS_18);
+  const allSc=await api('getScores',{name:currentPlayer.tourneyName});
+  const exist=allSc.find(s=>s.email.toLowerCase()===currentPlayer.email.toLowerCase());
+  scoreState={
+    scores:exist?exist.scores.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
+    putts: exist?exist.putts.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
+    pars:[...pars],holes,locked:false
+  };
+  document.getElementById('bnrTitle').textContent=t?.tourneyName||'—';
+  document.getElementById('bnrMeta').textContent=(t?.course||'—')+' · '+fmtD(t?.date)+' · '+holes+' หลุม';
+  document.getElementById('rbName').textContent=currentPlayer.name;
+  document.getElementById('rbMeta').textContent='กลุ่ม: '+currentPlayer.group+(currentPlayer.dept?' · ฝ่าย: '+currentPlayer.dept:'');
+  document.getElementById('gmailScreen').classList.add('hidden');
+  document.getElementById('playerScorecard').classList.remove('hidden');
+
+  if (exist?.confirmed===true) {
+    lockScorecard();
+  } else {
+    unlockScorecard();
+    if (exist) document.getElementById('tempSavedNote').classList.remove('hidden');
+  }
+  renderCard(); updateSummary();
+}
+
+function lockScorecard() {
+  scoreState.locked = true;
+  document.getElementById('playerActions').classList.add('hidden');
+  document.getElementById('confirmedBar').classList.remove('hidden');
+  document.getElementById('btnViewCard').classList.remove('hidden');
+}
+function unlockScorecard() {
+  scoreState.locked = false;
+  document.getElementById('playerActions').classList.remove('hidden');
+  document.getElementById('confirmedBar').classList.add('hidden');
+  document.getElementById('btnViewCard').classList.add('hidden');
+  document.getElementById('tempSavedNote').classList.add('hidden');
+}
+
+function holeHcp(s,par){if(s===null)return null;const d=s-par;if(d<=0)return 0;if(d===1)return 1;if(d===2)return 2;return 3;}
+function calcTotals(){
+  const {scores,pars,putts}=scoreState;
+  const played=scores.filter(v=>v!==null).length;
+  const gross=scores.reduce((a,v)=>a+(v||0),0);
+  const parSum=pars.filter((_,i)=>scores[i]!==null).reduce((a,v)=>a+v,0);
+  const hcp=scores.reduce((a,s,i)=>a+(holeHcp(s,pars[i])||0),0);
+  const puttsT=putts.reduce((a,v)=>a+(v||0),0);
+  return {played,gross,parSum,hcp,net:gross-hcp,puttsT};
+}
+function renderCard(){
+  const {holes}=scoreState,c=document.getElementById('holeRows');
+  c.innerHTML='';
+  for(let i=0;i<holes;i++){if(i===9)c.appendChild(mkSub(0,9,'OUT'));c.appendChild(mkRow(i));}
+  if(holes===18)c.appendChild(mkSub(9,18,'IN'));
+  c.appendChild(mkSub(0,holes,'TOTAL',true));
+  updateBar();
+}
+function mkRow(i){
+  const {scores,pars,putts}=scoreState,el=document.createElement('div');
+  el.className='hole-row';
+  const s=scores[i],par=pars[i],p=putts[i],df=s!==null?s-par:null,hcp=holeHcp(s,par);
+  const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':hcp===2?'hcp2':'hcp3';
+  el.innerHTML=`<div class="h-num">${i+1}</div><div class="h-par-cell">${par}</div>
+    <div class="h-score"><button class="sc-btn" onclick="adj('s',${i},-1)">−</button><span class="sc-val ${sCls}">${s!==null?s:'—'}</span><button class="sc-btn" onclick="adj('s',${i},1)">+</button></div>
+    <div class="h-diff ${sCls}">${df!==null?dStr(df):'—'}</div>
+    <div class="h-hcp ${hCls}">${hcp===null?'—':hcp===0?'·':hcp}</div>
+    <div class="h-putt"><button class="putt-btn" onclick="adj('p',${i},-1)">−</button><span class="putt-val">${p!==null?p:'—'}</span><button class="putt-btn" onclick="adj('p',${i},1)">+</button></div>`;
+  return el;
+}
+function mkSub(f,t,lbl,isTot=false){
+  const {scores,pars,putts}=scoreState,el=document.createElement('div');
+  el.className='sub-row'+(isTot?' total-row':'');
+  const sc=scores.slice(f,t).reduce((a,v)=>a+(v||0),0);
+  const pr=pars.slice(f,t).reduce((a,v)=>a+v,0);
+  const hc=scores.slice(f,t).reduce((a,s,idx)=>a+(holeHcp(s,pars[f+idx])||0),0);
+  const pt=putts.slice(f,t).reduce((a,v)=>a+(v||0),0);
+  const fl=scores.slice(f,t).filter(v=>v!==null).length;
+  el.innerHTML=`<span>${lbl}</span><span>${pr}</span><span>${fl?sc:'—'}</span><span>${fl?dStr(sc-pr):'—'}</span><span>${fl?hc:'—'}</span><span>${pt||'—'}</span>`;
+  return el;
+}
+function adj(type,i,d){
+  if(scoreState.locked){toast('สกอร์ถูกยืนยันแล้ว ไม่สามารถแก้ไขได้','err');return;}
+  if(type==='s')scoreState.scores[i]=Math.max(1,(scoreState.scores[i]??scoreState.pars[i])+d);
+  else scoreState.putts[i]=Math.max(0,(scoreState.putts[i]??0)+d);
+  renderCard();updateSummary();
+}
+
+async function saveTempScore() {
+  if(!scoreState.scores.some(v=>v!==null)){toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุม','err');return;}
+  const btn=document.getElementById('btnSaveTemp');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> กำลังส่ง...';
+  loading(true,'กำลังส่งสกอร์ชั่วคราว...');
+  const {gross,parSum,hcp,net,puttsT}=calcTotals();
+  try{
+    await apiPost({action:'submitScore',tourneyName:currentPlayer.tourneyName,
+      name:currentPlayer.name,email:currentPlayer.email,group:currentPlayer.group,
+      dept:currentPlayer.dept||'',flight:calcFlight(hcp),confirmed:false,
+      gross,par:parSum,hcp,net,puttsTotal:puttsT,
+      scores:[...scoreState.scores],pars:[...scoreState.pars],putts:[...scoreState.putts]});
+    document.getElementById('tempSavedNote').classList.remove('hidden');
+    toast('💾 บันทึกชั่วคราวแล้ว — ยังแก้ไขได้','ok');
+  }catch(e){toast('❌ '+e.message,'err');}
+  btn.disabled=false;btn.innerHTML='💾 ส่งสกอร์ชั่วคราว';
+  loading(false);
+}
+function updateBar(){
+  const {played,gross,parSum,hcp,net}=calcTotals(),d=gross-parSum;
+  document.getElementById('rbGross').textContent=gross||0;
+  const vsEl=document.getElementById('rbVs');
+  vsEl.textContent=played?dStr(d):'E';
+  vsEl.style.color=!played?'var(--text3)':d<0?'var(--birdie)':d===0?'var(--par-col)':d<=3?'var(--bogey)':'var(--double)';
+  document.getElementById('rbHcp').textContent=played?`H'cap ${hcp}`:"H'cap —";
+  document.getElementById('rbNet').textContent=played?`Net ${net}`:'Net —';
+  document.getElementById('hcpVal').textContent=played?hcp:'—';
+  document.getElementById('netVal').textContent=played?net:'—';
+  document.getElementById('netNote').textContent=played?`Gross ${gross} − H'cap ${hcp}`:'—';
+  document.getElementById('flightNote').textContent=played?`Flight ${calcFlight(hcp)}`:'Flight —';
+}
+function updateSummary(){
+  let e=0,b=0,p=0,bg=0,db=0,tr=0,pts=0,pc=0;
+  scoreState.scores.forEach((s,i)=>{
+    if(s===null)return;
+    const d=s-scoreState.pars[i];
+    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else if(d===2)db++;else tr++;
+    if(scoreState.putts[i]!==null){pts+=scoreState.putts[i];pc++;}
+  });
+  document.getElementById('sumGrid').innerHTML=
+    `<div class="sum-item"><div class="sum-label">Eagle</div><div class="sum-val c-eagle">${e}</div></div>
+     <div class="sum-item"><div class="sum-label">Birdie</div><div class="sum-val c-birdie">${b}</div></div>
+     <div class="sum-item"><div class="sum-label">Par</div><div class="sum-val c-par">${p}</div></div>
+     <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
+     <div class="sum-item"><div class="sum-label">Double</div><div class="sum-val c-double">${db}</div></div>
+     <div class="sum-item"><div class="sum-label">Triple+</div><div class="sum-val c-triple">${tr}</div></div>
+     <div class="sum-item"><div class="sum-label">Putt</div><div class="sum-val" style="color:var(--text2)">${pts||'—'}</div></div>
+     <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
+  updateBar();
+}
+
+function closeScoreCard() {
+  document.getElementById('scShareModal').classList.add('hidden');
+}
+
+// ════════════════════════════════
+// SUBMIT (ใช้โดย confirmAndSubmit เท่านั้น)
+// ════════════════════════════════
+
+// ════════════════════════════════
+// SCORECARD IMAGE
+// ════════════════════════════════
+// SCORECARD REVIEW + SUBMIT
+// ════════════════════════════════
+function reviewScore() {
+  const { scores, locked } = scoreState;
+  const played = scores.filter(v=>v!==null).length;
+  if (!played) { toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุมก่อนครับ','err'); return; }
+  document.getElementById('scShareModal').classList.remove('hidden');
+  if (locked) {
+    // ยืนยันแล้ว → แสดงแค่ปุ่มแชร์ ไม่มี confirm section
+    document.getElementById('scConfirmSection').classList.add('hidden');
+    document.getElementById('scShareSection').classList.remove('hidden');
+  } else {
+    document.getElementById('scConfirmSection').classList.remove('hidden');
+    document.getElementById('scShareSection').classList.add('hidden');
+    document.getElementById('btnConfirmSubmit').disabled = false;
+    document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
+  }
+  // render canvas หลัง modal แสดง
+  setTimeout(() => {
+    const { gross, parSum, hcp, net } = calcTotals();
+    const flight = calcFlight(hcp);
+    const t = {
+      title: document.getElementById('bnrTitle').textContent,
+      meta:  document.getElementById('bnrMeta').textContent
+    };
+    renderCanvas(scoreState.scores, scoreState.pars, scoreState.putts,
+                 scoreState.holes, gross, parSum, hcp, net, flight, t);
+  }, 80);
+}
+
+function showScoreCard() {
+  // เรียกได้โดยตรงเพื่อดูสกอร์การ์ดอย่างเดียว (ไม่มีปุ่ม submit)
+  reviewScore();
+}
+
+async function confirmAndSubmit() {
+  const btn = document.getElementById('btnConfirmSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> กำลังยืนยัน...';
+  loading(true, 'กำลังยืนยันสกอร์...');
+  const { gross, parSum, hcp, net, puttsT } = calcTotals();
+  const flight = calcFlight(hcp);
+  try {
+    await apiPost({
+      action: 'submitScore', confirmed: true,
+      tourneyName: currentPlayer.tourneyName,
+      name: currentPlayer.name, email: currentPlayer.email,
+      group: currentPlayer.group, dept: currentPlayer.dept||'', flight,
+      gross, par: parSum, hcp, net, puttsTotal: puttsT,
+      scores: [...scoreState.scores], pars: [...scoreState.pars], putts: [...scoreState.putts]
+    });
+    // ซ่อนปุ่มยืนยัน แสดงปุ่มแชร์
+    document.getElementById('scConfirmSection').classList.add('hidden');
+    document.getElementById('scShareSection').classList.remove('hidden');
+    // ล็อกสกอร์การ์ดด้านหลัง
+    lockScorecard();
+    toast('✅ ยืนยันสกอร์เรียบร้อยแล้ว!','ok');
+  } catch(e) {
+    if (e.message.includes('confirmed')) {
+      toast('สกอร์นี้ถูกยืนยันไปแล้ว','err');
+      lockScorecard();
+    } else {
+      toast('❌ '+e.message,'err');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '✅ ยืนยันและส่งสกอร์';
+  }
+  loading(false);
+}
+
+function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
+  const canvas=document.getElementById('scCanvas');
+  const dpr=window.devicePixelRatio||1;
+  // ใช้ความกว้างจริงของ container แทน 480px ตายตัว
+  const W=Math.min(480, canvas.parentElement.clientWidth - 32);
+  const ROW_H=28,HEADER_H=110,FOOTER_H=86;
+  const SUMMARY_H=54;
+  const H=HEADER_H+(holes+2)*ROW_H+SUMMARY_H+FOOTER_H+14;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const C={green:'#1a4a2a',green2:'#2c6e3f',green3:'#e8f5ed',
+           gold:'#c9a830',goldL:'#f5e6a0',cream:'#fffdf5',white:'#ffffff',
+           red:'#c94a2a',blue:'#1a6b9a',bogey:'#b8922a',dbl:'#8a3a1a',triple:'#5a1a0a',
+           text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0'};
+  // BG
+  ctx.fillStyle=C.cream;ctx.fillRect(0,0,W,H);
+  // Header
+  ctx.fillStyle=C.green;ctx.fillRect(0,0,W,HEADER_H);
+  ctx.fillStyle='rgba(255,255,255,0.03)';
+  for(let i=0;i<W;i+=8)ctx.fillRect(i,0,4,HEADER_H);
+  // Tourney name (red bg)
+  const tName=t.title||'—';
+  ctx.font='bold 12px "Sarabun",sans-serif';
+  const tnW=ctx.measureText(tName).width+24;
+  ctx.fillStyle='rgba(200,50,50,0.3)';
+  roundRect(ctx,(W-tnW)/2,11,tnW,22,5);ctx.fill();
+  ctx.fillStyle='#ffcccc';ctx.textAlign='center';
+  ctx.fillText(tName,W/2,26);
+  // Player name
+  ctx.fillStyle='#fff';ctx.font='bold 22px "Cormorant Garamond",serif';
+  ctx.textAlign='center';ctx.fillText(currentPlayer?.name||'—',W/2,56);
+  // Meta
+  ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='11px "IBM Plex Mono",monospace';
+  ctx.fillText(t.meta||'',W/2,73);
+  // Flight badge
+  const fbg={A:'#d1e7dd',B:'#cfe2ff',C:'#fff3cd'};
+  const ftc={A:'#0a5c2a',B:'#084298',C:'#664d03'};
+  ctx.fillStyle=fbg[flight]||'#eee';
+  roundRect(ctx,W/2-32,82,64,20,10);ctx.fill();
+  ctx.fillStyle=ftc[flight]||'#333';ctx.font='bold 11px "IBM Plex Mono",monospace';
+  ctx.textAlign='center';ctx.fillText('Flight '+flight,W/2,96);
+  // Table
+  const TT=HEADER_H+4;
+  // คำนวณ col ให้ตารางเต็ม W โดย Score col ยืดหยุ่น
+  const fixedW=36+36+64+64+50; // H+Par+±Par+H'cap+Putt
+  const scoreW=W-fixedW-2; // Score col กิน W ที่เหลือ
+  const cols=[36,36,scoreW,64,64,50];
+  const labels=['H','Par','Score','±Par',"H'cap",'Putt'];
+  const colX=[0];cols.forEach((w,i)=>colX.push(colX[i]+w));
+  const TW=colX[cols.length],OX=0;
+  // Table header
+  ctx.fillStyle=C.green;ctx.fillRect(OX,TT,TW,ROW_H);
+  ctx.fillStyle=C.goldL;ctx.font='bold 10px "IBM Plex Mono",monospace';
+  ctx.textAlign='center';
+  labels.forEach((lb,i)=>ctx.fillText(lb,OX+colX[i]+cols[i]/2,TT+ROW_H-8));
+  // Hole rows
+  for(let i=0;i<holes;i++){
+    const y=TT+ROW_H+i*ROW_H;
+    if(i===9){ctx.fillStyle=C.green2;ctx.fillRect(OX,y,TW,2);}
+    ctx.fillStyle=i%2===0?C.white:C.green3;ctx.fillRect(OX,y,TW,ROW_H);
+    const s=scores[i],par=pars[i],p=putts[i];
+    const df=s!==null?s-par:null;
+    const hcpH=holeHcp(s,par);
+    const cellData=[
+      {v:String(i+1),col:0},{v:String(par),col:1},
+      {v:s!==null?String(s):'—',col:2,isScore:true},{v:df!==null?dStr(df):'—',col:3,df},
+      {v:hcpH!==null?(hcpH===0?'·':String(hcpH)):'—',col:4,hcpH},
+      {v:p!==null?String(p):'—',col:5}
+    ];
+    cellData.forEach(c=>{
+      const cx=OX+colX[c.col]+cols[c.col]/2,cy=y+ROW_H-8;
+      if(c.isScore&&s!==null){
+        const col=scoreColor(df);
+        ctx.fillStyle=col+'22';
+        roundRect(ctx,OX+colX[c.col]+4,y+3,cols[c.col]-8,ROW_H-6,4);ctx.fill();
+        ctx.fillStyle=col;ctx.font='bold 13px "IBM Plex Mono",monospace';
+      }else if(c.df!==undefined&&df!==null){
+        ctx.fillStyle=scoreColor(df);ctx.font='11px "IBM Plex Mono",monospace';
+      }else if(c.hcpH!==undefined&&hcpH!==null&&hcpH>0){
+        ctx.fillStyle=hcpH===1?C.bogey:hcpH===2?C.dbl:C.triple;ctx.font='bold 11px "IBM Plex Mono",monospace';
+      }else{
+        ctx.fillStyle=c.col===0?C.text3:c.col===1?C.text2:C.text;
+        ctx.font=c.col===0?'11px "IBM Plex Mono",monospace':'12px "IBM Plex Mono",monospace';
+      }
+      ctx.textAlign='center';ctx.fillText(c.v,cx,cy);
+    });
+    ctx.strokeStyle=C.border;ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(OX,y+ROW_H);ctx.lineTo(OX+TW,y+ROW_H);ctx.stroke();
+  }
+  // Total row
+  const subY=TT+ROW_H+holes*ROW_H;
+  const sc=scores.reduce((a,v)=>a+(v||0),0);
+  const pr=pars.reduce((a,v)=>a+v,0);
+  const hcT=scores.reduce((a,s,i)=>a+(holeHcp(s,pars[i])||0),0);
+  const ptT=putts.reduce((a,v)=>a+(v||0),0);
+  const fl=scores.filter(v=>v!==null).length;
+  ctx.fillStyle=C.green;ctx.fillRect(OX,subY,TW,ROW_H);
+  ctx.fillStyle=C.goldL;ctx.font='bold 11px "IBM Plex Mono",monospace';
+  ctx.textAlign='left';ctx.fillText('TOTAL',OX+8,subY+ROW_H-8);
+  [[pr,1],[fl?sc:'—',2],[fl?dStr(sc-pr):'—',3],[fl?hcT:'—',4],[ptT||'—',5]].forEach(([v,ci])=>{
+    ctx.textAlign='center';ctx.fillText(String(v),OX+colX[ci]+cols[ci]/2,subY+ROW_H-8);
+  });
+  // Summary boxes — แก้ font size ให้พอดีกับกล่อง
+  const smY=subY+ROW_H+7;
+  const smItems=[{l:'Gross',v:String(gross)},{l:"H'cap",v:String(hcp)},{l:'Net',v:String(net),hi:true},{l:'Flight',v:'Flight '+flight}];
+  const sW=TW/smItems.length;
+  smItems.forEach((item,i)=>{
+    const sx=OX+i*sW;
+    ctx.fillStyle=item.hi?C.green:'#f5f2ea';
+    roundRect(ctx,sx+2,smY,sW-4,SUMMARY_H-4,7);ctx.fill();
+    ctx.fillStyle=item.hi?'rgba(255,255,255,0.6)':C.text3;
+    ctx.font='10px "IBM Plex Mono",monospace';ctx.textAlign='center';
+    ctx.fillText(item.l,sx+sW/2,smY+13);
+    ctx.fillStyle=item.hi?'#fff':(item.l==="H'cap"?C.bogey:C.green);
+    // ปรับขนาด font ให้พอดีกับ box width
+    const maxW = sW-10;
+    let fontSize=19;
+    ctx.font='bold '+fontSize+'px "IBM Plex Mono",monospace';
+    while(ctx.measureText(item.v).width>maxW && fontSize>10){
+      fontSize--;
+      ctx.font='bold '+fontSize+'px "IBM Plex Mono",monospace';
+    }
+    ctx.fillText(item.v,sx+sW/2,smY+37);
+  });
+  // Stats footer
+  const ftY=smY+SUMMARY_H+6;
+  ctx.fillStyle=C.green;ctx.fillRect(OX,ftY,TW,1);
+  let eagle=0,birdie=0,par_=0,bogey=0,dbl=0,triple=0;
+  scores.forEach((s,i)=>{if(s===null)return;const d=s-pars[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par_++;else if(d===1)bogey++;else if(d===2)dbl++;else triple++;});
+  [{l:'Eagle',v:eagle,c:C.blue},{l:'Birdie',v:birdie,c:C.red},{l:'Par',v:par_,c:C.green2},{l:'Bogey',v:bogey,c:C.bogey},{l:'Dbl',v:dbl,c:C.dbl},{l:'Trpl+',v:triple,c:C.triple}]
+    .forEach((st,i)=>{
+      const sx=OX+i*(TW/6)+TW/12;
+      ctx.fillStyle=st.c;ctx.font='bold 16px "IBM Plex Mono",monospace';
+      ctx.textAlign='center';ctx.fillText(String(st.v),sx,ftY+22);
+      ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",monospace';
+      ctx.fillText(st.l,sx,ftY+35);
+    });
+  // Branding
+  ctx.fillStyle=C.green;ctx.fillRect(0,H-26,W,26);
+  // Draw logo on canvas footer
+  const logoImg = new Image();
+  logoImg.onload = function(){
+    ctx.drawImage(logoImg, W/2 - 13, H-24, 22, 22);
+    ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='bold 10px "IBM Plex Mono",monospace';
+    ctx.textAlign='left';ctx.fillText('TIS Golf Club', W/2+13, H-9);
+  };
+  logoImg.src = LOGO_SRC;
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px "IBM Plex Mono",monospace';
+  ctx.textAlign='center';ctx.fillText('TIS Golf Club · Tri Petch Group',W/2,H-9);
+}
+
+
+function scoreColor(df){
+  if(df===null)return '#ccc';if(df<=-2)return '#1a6b9a';if(df===-1)return '#c94a2a';
+  if(df===0)return '#2c6e3f';if(df===1)return '#b8922a';return '#8a3a1a';
+}
+
+async function downloadCard(){
+  const canvas=document.getElementById('scCanvas');
+  const link=document.createElement('a');
+  link.download='scorecard-'+(currentPlayer?.name||'golf')+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  toast('✅ บันทึกรูปแล้ว','ok');
+}
+async function shareCard(){
+  const canvas=document.getElementById('scCanvas');
+  try{
+    canvas.toBlob(async blob=>{
+      const file=new File([blob],'scorecard.png',{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:'สกอร์การ์ด '+(currentPlayer?.name||'')});
+      }else{downloadCard();toast('กรุณาบันทึกรูปแล้วแชร์ผ่าน LINE ครับ');}
+    });
+  }catch(e){downloadCard();}
+}
+
+// ════════════════════════════════
+// ADMIN EDIT
+// ════════════════════════════════
+async function adminEditScore(email,name,group,dept=''){
+  if(!adminIn){toast('กรุณา Login Admin ก่อน','err');return;}
+  if(!activeTourney){toast('กรุณาเลือกการแข่งขันก่อน','err');return;}
+  loading(true,`โหลดสกอร์ของ ${name}...`);
+  try{
+    const allSc=await api('getScores',{name:activeTourney.tourneyName});
+    const exist=allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
+    const pars=(activeTourney.pars&&activeTourney.pars.length)?activeTourney.pars.map(Number):(activeTourney.holes===9?DEF_PARS_9:DEF_PARS_18);
+    adminEditPlayer={name,email,group,dept};
+    adminEditState={
+      scores:exist?exist.scores.map(v=>v===''?null:Number(v)):Array(activeTourney.holes||18).fill(null),
+      putts: exist?exist.putts.map(v=>v===''?null:Number(v)):Array(activeTourney.holes||18).fill(null),
+      pars:[...pars],holes:activeTourney.holes||18
+    };
+    document.getElementById('aeModalName').textContent=name;
+    document.getElementById('aeModalEmail').textContent=email;
+    document.getElementById('aeModalGroup').textContent='กลุ่ม: '+group+(dept?' · ฝ่าย: '+dept:'');
+    document.getElementById('aeModalCourse').textContent=activeTourney.tourneyName+' · '+(activeTourney.course||'—');
+    renderAeCard();updateAeSummary();
+    document.getElementById('adminEditModal').classList.remove('hidden');
+  }catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+function closeAdminEdit(){document.getElementById('adminEditModal').classList.add('hidden');adminEditPlayer=null;}
+
+function calcAeTotals(){
+  const {scores,pars,putts}=adminEditState;
+  const played=scores.filter(v=>v!==null).length;
+  const gross=scores.reduce((a,v)=>a+(v||0),0);
+  const parSum=pars.filter((_,i)=>scores[i]!==null).reduce((a,v)=>a+v,0);
+  const hcp=scores.reduce((a,s,i)=>a+(holeHcp(s,pars[i])||0),0);
+  const puttsT=putts.reduce((a,v)=>a+(v||0),0);
+  return {played,gross,parSum,hcp,net:gross-hcp,puttsT};
+}
+function renderAeCard(){
+  const {holes}=adminEditState,c=document.getElementById('aeHoleRows');
+  c.innerHTML='';
+  for(let i=0;i<holes;i++){if(i===9)c.appendChild(mkAeSub(0,9,'OUT'));c.appendChild(mkAeRow(i));}
+  if(holes===18)c.appendChild(mkAeSub(9,18,'IN'));
+  c.appendChild(mkAeSub(0,holes,'TOTAL',true));
+  updateAeBar();
+}
+function mkAeRow(i){
+  const {scores,pars,putts}=adminEditState,el=document.createElement('div');
+  el.className='hole-row';
+  const s=scores[i],par=pars[i],p=putts[i],df=s!==null?s-par:null,hcp=holeHcp(s,par);
+  const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':hcp===2?'hcp2':'hcp3';
+  el.innerHTML=`<div class="h-num">${i+1}</div><div class="h-par-cell">${par}</div>
+    <div class="h-score"><button class="sc-btn" onclick="adjAe('s',${i},-1)">−</button><span class="sc-val ${sCls}">${s!==null?s:'—'}</span><button class="sc-btn" onclick="adjAe('s',${i},1)">+</button></div>
+    <div class="h-diff ${sCls}">${df!==null?dStr(df):'—'}</div>
+    <div class="h-hcp ${hCls}">${hcp===null?'—':hcp===0?'·':hcp}</div>
+    <div class="h-putt"><button class="putt-btn" onclick="adjAe('p',${i},-1)">−</button><span class="putt-val">${p!==null?p:'—'}</span><button class="putt-btn" onclick="adjAe('p',${i},1)">+</button></div>`;
+  return el;
+}
+function mkAeSub(f,t,lbl,isTot=false){
+  const {scores,pars,putts}=adminEditState,el=document.createElement('div');
+  el.className='sub-row'+(isTot?' total-row':'');
+  const sc=scores.slice(f,t).reduce((a,v)=>a+(v||0),0);
+  const pr=pars.slice(f,t).reduce((a,v)=>a+v,0);
+  const hc=scores.slice(f,t).reduce((a,s,idx)=>a+(holeHcp(s,pars[f+idx])||0),0);
+  const pt=putts.slice(f,t).reduce((a,v)=>a+(v||0),0);
+  const fl=scores.slice(f,t).filter(v=>v!==null).length;
+  el.innerHTML=`<span>${lbl}</span><span>${pr}</span><span>${fl?sc:'—'}</span><span>${fl?dStr(sc-pr):'—'}</span><span>${fl?hc:'—'}</span><span>${pt||'—'}</span>`;
+  return el;
+}
+function adjAe(type,i,d){
+  if(type==='s')adminEditState.scores[i]=Math.max(1,(adminEditState.scores[i]??adminEditState.pars[i])+d);
+  else adminEditState.putts[i]=Math.max(0,(adminEditState.putts[i]??0)+d);
+  renderAeCard();updateAeSummary();
+}
+function updateAeBar(){
+  const {played,gross,parSum,hcp,net}=calcAeTotals(),d=gross-parSum;
+  document.getElementById('aeGross').textContent=gross||0;
+  const vsEl=document.getElementById('aeVs');
+  vsEl.textContent=played?dStr(d):'E';
+  vsEl.style.color=!played?'var(--text3)':d<0?'var(--birdie)':d===0?'var(--par-col)':d<=3?'var(--bogey)':'var(--double)';
+  document.getElementById('aeHcp').textContent=played?`H'cap ${hcp}`:"H'cap —";
+  document.getElementById('aeNet').textContent=played?`Net ${net}`:'Net —';
+  document.getElementById('aeHcpVal').textContent=played?hcp:'—';
+  document.getElementById('aeNetVal').textContent=played?net:'—';
+  document.getElementById('aeNetNote').textContent=played?`Gross ${gross} − H'cap ${hcp}`:'—';
+  document.getElementById('aeFlightNote').textContent=played?`Flight ${calcFlight(hcp)}`:'Flight —';
+}
+function updateAeSummary(){
+  let e=0,b=0,p=0,bg=0,db=0,tr=0,pts=0,pc=0;
+  adminEditState.scores.forEach((s,i)=>{
+    if(s===null)return;const d=s-adminEditState.pars[i];
+    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else if(d===2)db++;else tr++;
+    if(adminEditState.putts[i]!==null){pts+=adminEditState.putts[i];pc++;}
+  });
+  document.getElementById('aeSumGrid').innerHTML=
+    `<div class="sum-item"><div class="sum-label">Eagle</div><div class="sum-val c-eagle">${e}</div></div>
+     <div class="sum-item"><div class="sum-label">Birdie</div><div class="sum-val c-birdie">${b}</div></div>
+     <div class="sum-item"><div class="sum-label">Par</div><div class="sum-val c-par">${p}</div></div>
+     <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
+     <div class="sum-item"><div class="sum-label">Double</div><div class="sum-val c-double">${db}</div></div>
+     <div class="sum-item"><div class="sum-label">Triple+</div><div class="sum-val c-triple">${tr}</div></div>
+     <div class="sum-item"><div class="sum-label">Putt</div><div class="sum-val" style="color:var(--text2)">${pts||'—'}</div></div>
+     <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
+  updateAeBar();
+}
+async function saveAdminEdit(){
+  if(!adminIn){toast('Session หมดอายุ','err');closeAdminEdit();return;}
+  if(!adminEditState.scores.some(v=>v!==null)){toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุม','err');return;}
+  const {gross,parSum,hcp,net,puttsT}=calcAeTotals();
+  const btn=document.getElementById('btnAeSave');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> กำลังบันทึก...';
+  loading(true,'Admin บันทึกสกอร์...');
+  try{
+    await apiPost({action:'submitScore',tourneyName:activeTourney.tourneyName,adminForce:true,confirmed:false,
+      name:adminEditPlayer.name,email:adminEditPlayer.email,group:adminEditPlayer.group,
+      dept:adminEditPlayer.dept||'',flight:calcFlight(hcp),
+      gross,par:parSum,hcp,net,puttsTotal:puttsT,
+      scores:[...adminEditState.scores],pars:[...adminEditState.pars],putts:[...adminEditState.putts]});
+    toast(`✅ บันทึกสกอร์ของ ${adminEditPlayer.name} แล้ว`,'ok');
+    closeAdminEdit();
+    await loadPlayersToAdmin();
+  }catch(e){toast('❌ '+e.message,'err');}
+  btn.disabled=false;btn.innerHTML='💾 บันทึกสกอร์';
+  loading(false);
+}
+
+// ════════════════════════════════
+// LEADERBOARD
+// ════════════════════════════════
+async function loadTourneyListForLb(autoLoad=false){
+  if(!scriptUrl) return;
+  try{
+    const list=await api('getTourneyList');
+    const sel=document.getElementById('lbTourneySelect');
+    const cur=sel.value;
+    sel.innerHTML='<option value="">— เลือกการแข่งขัน —</option>'+
+      list.map(t=>`<option value="${t.tourneyName}" ${t.tourneyName===cur?'selected':''}>${t.tourneyName} · ${fmtD(t.date)}</option>`).join('');
+    if(!sel.value&&list.length) sel.value=list[0].tourneyName;
+    // โหลด leaderboard ทันทีหลัง dropdown พร้อม
+    if(autoLoad) await loadLeaderboard();
+  }catch(e){}
+}
+async function onLbTourneyChange(){await loadLeaderboard();}
+async function loadLeaderboard(){
+  const name=document.getElementById('lbTourneySelect')?.value;
+  if(!scriptUrl||!name){renderLb([]);return;}
+  loading(true,'โหลด Leaderboard...');
+  try{lbData=await api('getScores',{name});renderLb(lbData);}
+  catch(e){toast('❌ '+e.message,'err');}
+  loading(false);
+}
+function setFlight(el,flight){
+  activeFlightFilter=flight;
+  document.querySelectorAll('.flight-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderLb(lbData);
+}
+function renderLb(data){
+  let d=[...(data||[])];
+  const isBooby=activeFlightFilter==='booby';
+  const isLowGross=activeFlightFilter==='lowgross';
+  const isLowNet=activeFlightFilter==='lownet';
+
+  // กรอง WD ออกเสมอ (ยกเว้นหน้า Booby ไม่ต้องกรอง)
+  if(!isBooby) d=d.filter(r=>!r.wd);
+
+  // กรองตาม Flight (A/B/C เท่านั้น)
+  if(!isBooby&&!isLowGross&&!isLowNet&&activeFlightFilter){
+    d=d.filter(r=>r.flight===activeFlightFilter);
+  }
+
+  // จัดเรียง
+  if(isBooby){
+    d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
+  }else if(isLowGross){
+    d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
+  }else{
+    // Net (Flight A/B/C + Low Net Overall): Net น้อย→มาก, tie H'cap ต่ำ
+    d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
+  }
+
+  const podEl=document.getElementById('lbPodium'),tblEl=document.getElementById('lbTable');
+  if(!d.length){podEl.innerHTML='';tblEl.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>';return;}
+
+  const medals=['🥇','🥈','🥉'];
+
+  // ─── PODIUM (ใช้ร่วมกันทุก mode) ───
+  const top=d.slice(0,3);
+  const podOrder=top.length>=2?[top[1],top[0],top[2]].filter(Boolean):[top[0]];
+  const podCls=['pod-2','pod-1','pod-3'];
+  // Low Gross → แสดง Gross ในกราฟ | ทุกอื่น (Flight / Booby) → แสดง Net
+  const mainVal=r=>isLowGross?r.gross:r.net;
+  const mainLabel=isLowGross?'Gross':'Net';
+  const podMedals=isBooby?['🐔','🐓','🎗️']:medals;
+  const medalColors=['var(--gold)','#7a8a9a','#a0673a'];
+  podEl.innerHTML=`<div class="podium">${podOrder.map((p,podIdx)=>{
+    const rank=top.indexOf(p); // rank=ตำแหน่งจริง(0=ชนะ), podIdx=ตำแหน่งบนแท่น(1=กลาง)
+    return `<div class="pod">
+      <div class="pod-name">${p.name}</div>
+      <div class="pod-net" style="color:${medalColors[rank]}">${mainVal(p)}</div>
+      <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+      <div class="pod-block ${podCls[podIdx]}">${podMedals[rank]}</div>
+    </div>`;}).join('')}</div>`;
+
+  // ─── TABLE ───
+  if(isBooby){
+    const boobyTag=i=>{
+      if(i===0) return `<span style="background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;">🐔 Booby Maker</span>`;
+      if(i===1) return `<span style="background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;">🐓 Booby</span>`;
+      return '';
+    };
+    tblEl.innerHTML=`<table class="lb-table">
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <tbody>${d.map((r,i)=>{
+        const diff=r.gross-(r.par||72);
+        return `<tr class="${i<2?'rank-'+(i+1):''}">
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:15px;">'+(i===0?'🐔':'🐓')+'</span>':i+1}</td>
+          <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
+              <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
+            </div></td>
+          <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
+          <td>${r.hcp}</td>
+          <td class="lb-net">${r.net}</td>
+          <td style="text-align:center;">${boobyTag(i)}</td>
+        </tr>`;}).join('')}</tbody></table>`;
+    return;
+  }
+
+  if(isLowNet){
+    // Low Net Overall — แสดงสีพื้นแยก Flight
+    const flightBg={'A':'#f0faf4','B':'#f0f4ff','C':'#fffdf0'};
+    const flightBorder={'A':'#a3cfbb','B':'#a3b8f0','C':'#e8d080'};
+    tblEl.innerHTML=`<table class="lb-table">
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th></tr></thead>
+      <tbody>${d.map((r,i)=>{
+        const diff=r.gross-(r.par||72);
+        const bg=flightBg[r.flight]||'';
+        const bd=flightBorder[r.flight]||'var(--border)';
+        return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+          <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
+              <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
+            </div></td>
+          <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
+          <td>${r.hcp}</td>
+          <td class="lb-net">${r.net}</td>
+        </tr>`;}).join('')}</tbody></table>`;
+    return;
+  }
+  // Low Gross / Flight A/B/C
+  tblEl.innerHTML=`<table class="lb-table">
+    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th></tr></thead>
+    <tbody>${d.map((r,i)=>{
+      const diff=r.gross-(r.par||72);
+      return `<tr class="${i<3?'rank-'+(i+1):''}">
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+        <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
+            <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
+          </div></td>
+        <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
+        <td>${r.hcp}</td>
+        <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
+      </tr>`;}).join('')}</tbody></table>`;
+}
+
+// ════════════════════════════════
+// HELPERS
+// ════════════════════════════════
+function calcFlight(hcp){return hcp<=12?'A':hcp<=24?'B':'C';}
+function dStr(d){return d===0?'E':d>0?`+${d}`:`${d}`;}
+function dColor(d){return d<=-2?'var(--eagle)':d===-1?'var(--birdie)':d===0?'var(--par-col)':d===1?'var(--bogey)':d===2?'var(--double)':'var(--triple)';}
+function clsCls(d){if(d===null)return 'c-empty';if(d<=-2)return 'c-eagle';if(d===-1)return 'c-birdie';if(d===0)return 'c-par';if(d===1)return 'c-bogey';if(d===2)return 'c-double';return 'c-triple';}
+function fmtD(d){
+  if(!d) return '';
+  try {
+    // Google Sheets อาจส่งมาเป็น string "2026-03-23" หรือ ISO string
+    let dateStr = String(d);
+    // ถ้าเป็น YYYY-MM-DD เติม T00:00:00 เพื่อป้องกัน timezone shift
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+    }
+    // ISO string หรือ format อื่น
+    const dt = new Date(dateStr);
+    if (isNaN(dt.getTime())) return dateStr;
+    return dt.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+  } catch(e) { return String(d); }
+}
+function selectCode(){
+  const el=document.getElementById('appsScriptCode');
+  const range=document.createRange();range.selectNodeContents(el);
+  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+  copyCode();
+}
+function copyCode(){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>toast('📋 คัดลอกแล้ว','ok')).catch(copyFallback);
+  }else{copyFallback();}
+}
+function copyFallback(){
+  const ta=document.createElement('textarea');ta.value=APPS_SCRIPT_CODE;
+  ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');toast('📋 คัดลอกแล้ว','ok');}
+  catch{toast('กรุณาคัดลอกจากกล่อง Code ด้วยตนเอง');}
+  document.body.removeChild(ta);
+}
+let tTimer;
+function toast(msg,type=''){
+  clearTimeout(tTimer);
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;
+  requestAnimationFrame(()=>t.classList.add('show'));
+  tTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/TIS/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+
+// ════════════════════════════════
+// WD TOGGLE (Admin)
+// ════════════════════════════════
+async function toggleWD(email, currentWD) {
+  if(!adminIn){toast('กรุณา Login Admin ก่อน','err');return;}
+  if(!activeTourney){toast('กรุณาเลือกการแข่งขันก่อน','err');return;}
+  const action = currentWD ? 'คืนสถานะผู้เล่น' : 'มาร์ค WD (ถอนตัว)';
+  if(!confirm(`${action} สำหรับ ${email}?`)) return;
+  loading(true, currentWD ? 'คืนสถานะ...' : 'มาร์ค WD...');
+  try {
+    // โหลดสกอร์เดิมแล้ว submit ใหม่พร้อม wd flag
+    const allSc = await api('getScores',{name:activeTourney.tourneyName});
+    const sc = allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
+    if(!sc){toast('ไม่พบสกอร์ของผู้เล่นนี้','err');loading(false);return;}
+    await apiPost({
+      action:'submitScore', adminForce:true, confirmed:sc.confirmed,
+      wd: !currentWD,  // toggle
+      tourneyName:activeTourney.tourneyName,
+      name:sc.name, email:sc.email, group:sc.group, dept:sc.dept||'', flight:sc.flight,
+      gross:sc.gross, par:sc.par, hcp:sc.hcp, net:sc.net, puttsTotal:sc.puttsTotal,
+      scores:[...sc.scores], pars:[...sc.pars], putts:[...sc.putts]
+    });
+    toast(currentWD ? '↩ คืนสถานะแล้ว' : '🚩 มาร์ค WD แล้ว', 'ok');
+    await loadPlayersToAdmin();
+  } catch(e){ toast('❌ '+e.message,'err'); }
+  loading(false);
+}
+
+// ════════════════════════════════
+// AWARDS MODAL + PDF
+// ════════════════════════════════
+function openAwardsModal() {
+  const name = document.getElementById('lbTourneySelect')?.value;
+  if(!lbData||!lbData.length){toast('โหลด Leaderboard ก่อนครับ','err');return;}
+  document.getElementById('awardsModal').classList.remove('hidden');
+  document.getElementById('awardsModalTourney').textContent = name || '—';
+  renderAwards(lbData);
+}
+function closeAwardsModal() {
+  document.getElementById('awardsModal').classList.add('hidden');
+}
+
+function getAwardsData(data) {
+  const d = (data||[]).filter(r=>!r.wd);
+  return {
+    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,3),
+    lowNet:   [...d].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightA:  [...d].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightB:  [...d].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightC:  [...d].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    booby:    [...d].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
+  };
+}
+
+function awardsRowHtml(p, rank, val, sub, extraTag='') {
+  const cls = rank<=3?`award-rank-${rank}`:'';
+  const medals=['🥇','🥈','🥉'];
+  const icon = rank<=3?medals[rank-1]:rank;
+  return `<div class="award-row ${cls}">
+    <div class="award-rank">${icon}</div>
+    <div class="award-info">
+      <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+      <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
+    </div>
+    <div class="award-score">
+      <div class="award-score-val">${val}</div>
+      <div class="award-score-sub">${sub}</div>
+      ${extraTag}
+    </div>
+  </div>`;
+}
+
+function awardsSectionHtml(title, players, getVal, getSub) {
+  const rows = players.length
+    ? players.map((p,i)=>awardsRowHtml(p,i+1,getVal(p),getSub(p))).join('')
+    : '<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
+  return `<div class="award-section">
+    <div class="award-section-title">${title}
+      <button onclick="exportSectionPDF('${title.replace(/['"<>]/g,'')}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
+    </div>
+    ${rows}
+  </div>`;
+}
+
+function renderAwards(data) {
+  const body = document.getElementById('awardsModalBody');
+  if (!data||!data.length) { body.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>'; return; }
+  const {lowGross,flightA,flightB,flightC,booby} = getAwardsData(data);
+  const boobyIcons=['🐔','🐓'];
+  const boobyStyles=[
+    'background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;',
+    'background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'
+  ];
+  const boobyLabels=['🐔 Booby Maker','🐓 Booby'];
+  const boobyRows = booby.slice(0,2).map((p,i)=>`<div class="award-row award-booby-${i+1}">
+    <div class="award-rank">${boobyIcons[i]}</div>
+    <div class="award-info">
+      <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+      <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
+    </div>
+    <div class="award-score">
+      <div class="award-score-val" style="color:#c94a2a;">${p.net}</div>
+      <div class="award-score-sub">Net · H'cap ${p.hcp}</div>
+      <div style="margin-top:3px;"><span class="award-booby-tag" style="${boobyStyles[i]}">${boobyLabels[i]}</span></div>
+    </div>
+  </div>`).join('');
+
+  body.innerHTML =
+    awardsSectionHtml('🏌️ Low Gross', lowGross, p=>p.gross, p=>`Gross · H'cap ${p.hcp}`) +
+    awardsSectionHtml('🟢 Flight A (H'cap 0–12)', flightA, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
+    awardsSectionHtml('🔵 Flight B (H'cap 13–24)', flightB, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
+    awardsSectionHtml('🟡 Flight C (H'cap 25–36)', flightC, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
+    `<div class="award-section">
+      <div class="award-section-title">🐔 Booby
+        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
+      </div>
+      ${booby.length>=2 ? boobyRows : '<div style="padding:10px 12px;font-size:13px;color:var(--text3);">ต้องมีผู้เล่นอย่างน้อย 2 คน</div>'}
+    </div>`;
+}
+
+// ════════════════════════════════
+// PDF EXPORT (Canvas-based)
+// ════════════════════════════════
+function exportSectionPDF(sectionTitle, btn) {
+  const tourneyName = document.getElementById('awardsModalTourney').textContent || '';
+  const {lowGross,flightA,flightB,flightC,booby} = getAwardsData(lbData);
+  const sectionMap = {
+    '🏌️ Low Gross': {players:lowGross, getVal:p=>p.gross, getSub:p=>`Gross · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
+    'Flight A (H'cap 0–12)': {players:flightA, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
+    'Flight B (H'cap 13–24)': {players:flightB, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#084298', isBooby:false},
+    'Flight C (H'cap 25–36)': {players:flightC, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#664d03', isBooby:false},
+    'Booby': {players:booby, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#c94a2a', isBooby:true},
+  };
+  // clean key match
+  const key = Object.keys(sectionMap).find(k=>sectionTitle.includes(k.replace(/[🏌️🟢🔵🟡]/g,'').trim())||sectionTitle.includes(k));
+  const sec = sectionMap[key]||sectionMap[Object.keys(sectionMap)[0]];
+
+  const canvas = document.createElement('canvas');
+  const DPR=2, W=600, ROW_H=80, HEADER_H=130, CHART_H=220, FOOTER_H=50;
+  const H = HEADER_H + CHART_H + (sec.players.length*ROW_H) + FOOTER_H + 20;
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(DPR,DPR);
+
+  const C={bg:'#fffdf5',green:'#1a4a2a',green2:'#2c6e3f',gold:'#c9a830',
+           text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',
+           white:'#ffffff',accent:sec.color};
+  const medals=['🥇','🥈','🥉'];
+  const podColors=[C.gold,'#8a9aaa','#a0673a'];
+  const boobyIcons=['🐔','🐓'];
+
+  // BG
+  ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
+
+  // Header bar
+  ctx.fillStyle=C.green; roundRect(ctx,0,0,W,HEADER_H,0); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.04)';
+  for(let i=0;i<W;i+=10) ctx.fillRect(i,0,5,HEADER_H);
+
+  // Logo
+  const logoImg=new Image();
+  logoImg.src=LOGO_SRC;
+
+  // Title text (draw immediately, logo async)
+  ctx.fillStyle='rgba(255,255,255,.55)'; ctx.font='11px "IBM Plex Mono",sans-serif';
+  ctx.textAlign='center'; ctx.fillText(tourneyName, W/2, 28);
+  ctx.fillStyle='#fff'; ctx.font='bold 26px "Cormorant Garamond",serif';
+  ctx.fillText(sectionTitle.replace(/[🏌️🟢🔵🟡🐔]/gu,'').trim(), W/2, 64);
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='12px "IBM Plex Mono",sans-serif';
+  ctx.fillText('ผลการแข่งขัน · '+new Date().toLocaleDateString('th-TH'), W/2, 88);
+
+  // BAR CHART
+  const chartY=HEADER_H+16;
+  const players=sec.players.slice(0,3);
+  if(players.length>0){
+    const maxVal=Math.max(...players.map(p=>sec.getVal(p)))||1;
+    const minVal=Math.min(...players.map(p=>sec.getVal(p)));
+    // golf = น้อยดี → ปรับสเกลกลับด้าน
+    const isBoobyChart=sec.isBooby;
+    const BAR_AREA_H=CHART_H-40;
+    const BAR_W=100, GAP=40;
+    const totalW=players.length*(BAR_W+GAP)-GAP;
+    const startX=(W-totalW)/2;
+
+    players.forEach((p,i)=>{
+      const val=sec.getVal(p);
+      // สูงสุดของคนที่ชนะ = แท่งสูงสุด
+      let ratio;
+      if(players.length===1) ratio=0.7;
+      else {
+        const sorted=isBoobyChart?[...players].sort((a,b)=>b.net-a.net):
+                                  isNaN(val)?0:[...players].sort((a,b)=>a.net-b.net||a.gross-b.gross);
+        // แท่งที่ 1 สูงสุด ลดลงตาม rank
+        ratio = [0.85,0.65,0.5][i];
+      }
+      const barH=Math.max(30, BAR_AREA_H*ratio);
+      const bx=startX+i*(BAR_W+GAP);
+      const by=chartY+BAR_AREA_H-barH+10;
+
+      // Bar shadow
+      ctx.fillStyle='rgba(0,0,0,.08)';
+      roundRect(ctx,bx+3,by+3,BAR_W,barH,8); ctx.fill();
+
+      // Bar gradient
+      const grad=ctx.createLinearGradient(bx,by,bx,by+barH);
+      grad.addColorStop(0, i===0?C.gold:i===1?'#8a9aaa':'#b08060');
+      grad.addColorStop(1, i===0?'#a07820':i===1?'#607080':'#806040');
+      ctx.fillStyle=grad;
+      roundRect(ctx,bx,by,BAR_W,barH,8); ctx.fill();
+
+      // Medal icon on bar
+      ctx.font='24px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(sec.isBooby?boobyIcons[i]||'':medals[i]||'', bx+BAR_W/2, by+30);
+
+      // Score value
+      ctx.fillStyle='#fff'; ctx.font='bold 22px "IBM Plex Mono",sans-serif';
+      ctx.fillText(String(val), bx+BAR_W/2, by+barH-12);
+
+      // Name below bar
+      ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif';
+      const shortName=p.name.length>12?p.name.substring(0,11)+'…':p.name;
+      ctx.fillText(shortName, bx+BAR_W/2, chartY+BAR_AREA_H+26);
+      ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
+      ctx.fillText(sec.getSub(p), bx+BAR_W/2, chartY+BAR_AREA_H+42);
+    });
+  }
+
+  // Divider
+  const listY=HEADER_H+CHART_H+10;
+  ctx.strokeStyle=C.border; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(24,listY); ctx.lineTo(W-24,listY); ctx.stroke();
+
+  // Player rows
+  sec.players.forEach((p,i)=>{
+    const ry=listY+8+i*ROW_H;
+    // row bg
+    ctx.fillStyle=i%2===0?C.white:'#f8f6f2';
+    roundRect(ctx,20,ry,W-40,ROW_H-6,8); ctx.fill();
+    ctx.strokeStyle=C.border; ctx.lineWidth=.5;
+    roundRect(ctx,20,ry,W-40,ROW_H-6,8); ctx.stroke();
+
+    // Rank
+    ctx.font='22px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(sec.isBooby?(boobyIcons[i]||String(i+1)):(medals[i]||String(i+1)), 30, ry+42);
+
+    // Name
+    ctx.fillStyle=C.text; ctx.font='bold 15px "Sarabun",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(p.name, 66, ry+28);
+    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
+    ctx.fillText((p.group||'')+(p.dept?' · '+p.dept:''), 66, ry+46);
+
+    // Score
+    ctx.fillStyle=sec.isBooby?'#c94a2a':C.accent;
+    ctx.font='bold 24px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(sec.getVal(p)), W-30, ry+34);
+    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
+    ctx.fillText(sec.getSub(p), W-30, ry+52);
+
+    // Flight badge
+    const fbColors={'A':['#d1e7dd','#0a3622'],'B':['#cfe2ff','#084298'],'C':['#fff3cd','#664d03']};
+    const [fbg,ftc]=fbColors[p.flight]||['#eee','#333'];
+    ctx.fillStyle=fbg; roundRect(ctx,W-90,ry+10,36,16,8); ctx.fill();
+    ctx.fillStyle=ftc; ctx.font='bold 9px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(p.flight, W-72, ry+22);
+
+    // Booby tag
+    if(sec.isBooby&&i<2){
+      const btag=i===0?'Booby Maker':'Booby';
+      ctx.fillStyle=i===0?'#fde8e3':'#fff0e8';
+      roundRect(ctx,66,ry+52,btag.length*7+12,16,4); ctx.fill();
+      ctx.fillStyle=i===0?'#c94a2a':'#e07a40'; ctx.font='bold 9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
+      ctx.fillText(btag, 72, ry+64);
+    }
+  });
+
+  // Footer
+  ctx.fillStyle=C.green; ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
+  const logoSmall=new Image(); logoSmall.src=LOGO_SRC;
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'), W/2, H-FOOTER_H+20);
+  ctx.fillText(tourneyName, W/2, H-FOOTER_H+36);
+
+  // Draw logo async then download
+  const doDownload = () => {
+    try{ctx.drawImage(logoImg, W/2-130, H-FOOTER_H+4, 28, 28);}catch(e){}
+    const link=document.createElement('a');
+    const safeTitle=sectionTitle.replace(/[^\w\sก-๙]/g,'').trim().replace(/\s+/g,'-');
+    link.download=`award-${safeTitle}-${tourneyName}.png`;
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+    toast('✅ บันทึกรูปแล้ว','ok');
+    if(btn){btn.textContent='⬇ PDF';btn.disabled=false;}
+  };
+  if(btn){btn.textContent='⏳...';btn.disabled=true;}
+  if(logoImg.complete) doDownload();
+  else logoImg.onload=doDownload;
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+</script>
+
+</body>
+</html>
+
 :root{
   --bg:#f8f7f4;--surface:#fff;--surface2:#f2f0ec;--border:#e4e0d8;--border2:#d0cbc0;
   --text:#1c1a17;--text2:#6b6559;--text3:#9e9488;
