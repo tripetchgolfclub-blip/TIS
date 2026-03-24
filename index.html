@@ -921,8 +921,7 @@ function switchTab(t) {
   });
   if (t==='login' && adminIn) switchTab('admin');
   if (t==='lb') {
-    loadTourneyListForLb();
-    loadLeaderboard();
+    loadTourneyListForLb(true); // true = auto load leaderboard หลัง dropdown พร้อม
     // reset ปุ่มให้ตรงกับ activeFlightFilter
     document.querySelectorAll('.flight-tab').forEach(tab=>{
       tab.classList.remove('active');
@@ -1824,7 +1823,7 @@ async function saveAdminEdit(){
 // ════════════════════════════════
 // LEADERBOARD
 // ════════════════════════════════
-async function loadTourneyListForLb(){
+async function loadTourneyListForLb(autoLoad=false){
   if(!scriptUrl) return;
   try{
     const list=await api('getTourneyList');
@@ -1833,6 +1832,8 @@ async function loadTourneyListForLb(){
     sel.innerHTML='<option value="">— เลือกการแข่งขัน —</option>'+
       list.map(t=>`<option value="${t.tourneyName}" ${t.tourneyName===cur?'selected':''}>${t.tourneyName} · ${fmtD(t.date)}</option>`).join('');
     if(!sel.value&&list.length) sel.value=list[0].tourneyName;
+    // โหลด leaderboard ทันทีหลัง dropdown พร้อม
+    if(autoLoad) await loadLeaderboard();
   }catch(e){}
 }
 async function onLbTourneyChange(){await loadLeaderboard();}
