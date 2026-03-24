@@ -19,16 +19,16 @@
   --accent:#2c6e3f;--accent2:#1a4a2a;
   --red:#c94a2a;--red-bg:#fdf0ed;
   --gold:#b8922a;--gold-bg:#fdf6e3;
-  --eagle:#1a6b9a;--birdie:#c94a2a;--par-col:#2c6e3f;--bogey:#b8922a;--double:#8a3a1a;
+  --eagle:#1a6b9a;--birdie:#c94a2a;--par-col:#2c6e3f;--bogey:#b8922a;--double:#8a3a1a;--triple:#5a1a0a;
   --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
   --shadow-lg:0 4px 20px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.07);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);font-family:'Sarabun',sans-serif;color:var(--text);min-height:100vh;}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;height:52px;}
-.logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;min-height:52px;gap:6px;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
 .nav-tabs{display:flex;}
-.nav-tab{padding:0 13px;height:52px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.nav-tab{padding:0 8px;height:52px;display:flex;align-items:center;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
 .nav-tab:hover{color:var(--text2);}
 .nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
 .main{max-width:720px;margin:0 auto;padding:20px 15px 48px;}
@@ -109,24 +109,24 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rb-gross{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:400;line-height:1;}
 .rb-subs{font-size:12px;font-family:'IBM Plex Mono',monospace;display:flex;flex-direction:column;gap:1px;margin-top:3px;}
 .sc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:13px;box-shadow:var(--shadow);}
-.sc-head{display:grid;grid-template-columns:36px 38px 1fr 52px 52px 42px;background:var(--surface2);border-bottom:2px solid var(--border);}
+.sc-head{display:grid;grid-template-columns:28px 30px 1fr 40px 40px 36px;background:var(--surface2);border-bottom:2px solid var(--border);}
 .sc-head span{padding:8px 4px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;border-right:1px solid var(--border);}
 .sc-head span:last-child{border-right:none;}
-.hole-row{display:grid;grid-template-columns:36px 38px 1fr 52px 52px 42px;border-bottom:1px solid var(--border);align-items:center;}
+.hole-row{display:grid;grid-template-columns:28px 30px 1fr 40px 40px 36px;border-bottom:1px solid var(--border);align-items:center;}
 .hole-row:hover{background:#fcfbf8;}
-.h-num{padding:9px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);border-right:1px solid var(--border);}
-.h-par-cell{padding:9px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text2);border-right:1px solid var(--border);}
-.h-score{padding:5px 6px;display:flex;align-items:center;justify-content:center;gap:5px;border-right:1px solid var(--border);}
-.sc-btn{width:25px;height:25px;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:5px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.h-num{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);border-right:1px solid var(--border);}
+.h-par-cell{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);}
+.h-score{padding:4px 3px;display:flex;align-items:center;justify-content:center;gap:3px;border-right:1px solid var(--border);}
+.sc-btn{width:22px;height:22px;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
 .sc-btn:hover{border-color:var(--accent);color:var(--accent);background:#e8f5ed;}
-.sc-val{font-family:'IBM Plex Mono',monospace;font-size:18px;width:26px;text-align:center;}
-.h-diff{padding:9px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;border-right:1px solid var(--border);}
-.h-hcp{padding:9px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;border-right:1px solid var(--border);}
-.h-putt{padding:5px 4px;display:flex;align-items:center;justify-content:center;gap:3px;}
-.putt-btn{width:20px;height:20px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:4px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.sc-val{font-family:'IBM Plex Mono',monospace;font-size:15px;width:20px;text-align:center;}
+.h-diff{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;border-right:1px solid var(--border);}
+.h-hcp{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;border-right:1px solid var(--border);}
+.h-putt{padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:2px;}
+.putt-btn{width:17px;height:17px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:4px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
 .putt-btn:hover{border-color:var(--accent);color:var(--accent);}
-.putt-val{font-family:'IBM Plex Mono',monospace;font-size:13px;width:16px;text-align:center;color:var(--text2);}
-.sub-row{display:grid;grid-template-columns:36px 38px 1fr 52px 52px 42px;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+.putt-val{font-family:'IBM Plex Mono',monospace;font-size:12px;width:14px;text-align:center;color:var(--text2);}
+.sub-row{display:grid;grid-template-columns:28px 30px 1fr 40px 40px 36px;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
 .sub-row span{padding:7px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);font-weight:500;}
 .sub-row span:first-child{color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;}
 .sub-row span:last-child{border-right:none;}
@@ -134,8 +134,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sub-row.total-row span{color:rgba(255,255,255,.85);border-right-color:rgba(255,255,255,.1);}
 .sub-row.total-row span:first-child{color:rgba(255,255,255,.5);}
 .c-empty{color:var(--border2);}.c-eagle{color:var(--eagle);}.c-birdie{color:var(--birdie);}
-.c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}
-.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}
+.c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}.c-triple{color:var(--triple);}
+.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--triple);font-weight:700;}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg);}
 .leg{display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);}
 .leg-dot{width:6px;height:6px;border-radius:50%;}
@@ -143,7 +143,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .nb-label{color:rgba(255,255,255,.6);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;}
 .nb-val{font-family:'IBM Plex Mono',monospace;font-size:32px;color:#fff;line-height:1;}
 .nb-note{color:rgba(255,255,255,.65);font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;}
-.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 .sum-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 7px;text-align:center;}
 .sum-label{font-size:10px;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;margin-bottom:3px;}
 .sum-val{font-family:'IBM Plex Mono',monospace;font-size:20px;}
@@ -435,7 +435,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--birdie)"></div>Birdie</div>
           <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
           <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double+→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
         </div>
       </div>
       <div class="net-box">
@@ -517,7 +518,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <tbody>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Eagle / Birdie / Par</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--par-col);">0</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Bogey (+1)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--bogey);">1</td></tr>
-          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Double Bogey+ (≥+2)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Double Bogey (+2)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--triple);">3</td></tr>
         </tbody>
       </table>
       <div style="font-size:13px;color:var(--text2);line-height:1.9;background:rgba(184,146,42,.08);border-radius:8px;padding:11px 13px;">
@@ -563,7 +565,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--eagle)"></div>Eagle</div>
           <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
           <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double+→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
         </div>
       </div>
       <div class="net-box" style="margin-bottom:13px;">
@@ -1331,7 +1334,7 @@ function unlockScorecard() {
   document.getElementById('tempSavedNote').classList.add('hidden');
 }
 
-function holeHcp(s,par){if(s===null)return null;const d=s-par;if(d<=0)return 0;if(d===1)return 1;return 2;}
+function holeHcp(s,par){if(s===null)return null;const d=s-par;if(d<=0)return 0;if(d===1)return 1;if(d===2)return 2;return 3;}
 function calcTotals(){
   const {scores,pars,putts}=scoreState;
   const played=scores.filter(v=>v!==null).length;
@@ -1353,7 +1356,7 @@ function mkRow(i){
   const {scores,pars,putts}=scoreState,el=document.createElement('div');
   el.className='hole-row';
   const s=scores[i],par=pars[i],p=putts[i],df=s!==null?s-par:null,hcp=holeHcp(s,par);
-  const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':'hcp2';
+  const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':hcp===2?'hcp2':'hcp3';
   el.innerHTML=`<div class="h-num">${i+1}</div><div class="h-par-cell">${par}</div>
     <div class="h-score"><button class="sc-btn" onclick="adj('s',${i},-1)">−</button><span class="sc-val ${sCls}">${s!==null?s:'—'}</span><button class="sc-btn" onclick="adj('s',${i},1)">+</button></div>
     <div class="h-diff ${sCls}">${df!==null?dStr(df):'—'}</div>
@@ -1411,11 +1414,11 @@ function updateBar(){
   document.getElementById('flightNote').textContent=played?`Flight ${calcFlight(hcp)}`:'Flight —';
 }
 function updateSummary(){
-  let e=0,b=0,p=0,bg=0,db=0,pts=0,pc=0;
+  let e=0,b=0,p=0,bg=0,db=0,tr=0,pts=0,pc=0;
   scoreState.scores.forEach((s,i)=>{
     if(s===null)return;
     const d=s-scoreState.pars[i];
-    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else db++;
+    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else if(d===2)db++;else tr++;
     if(scoreState.putts[i]!==null){pts+=scoreState.putts[i];pc++;}
   });
   document.getElementById('sumGrid').innerHTML=
@@ -1423,7 +1426,8 @@ function updateSummary(){
      <div class="sum-item"><div class="sum-label">Birdie</div><div class="sum-val c-birdie">${b}</div></div>
      <div class="sum-item"><div class="sum-label">Par</div><div class="sum-val c-par">${p}</div></div>
      <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
-     <div class="sum-item"><div class="sum-label">Double+</div><div class="sum-val c-double">${db}</div></div>
+     <div class="sum-item"><div class="sum-label">Double</div><div class="sum-val c-double">${db}</div></div>
+     <div class="sum-item"><div class="sum-label">Triple+</div><div class="sum-val c-triple">${tr}</div></div>
      <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
   updateBar();
 }
@@ -1442,15 +1446,20 @@ function closeScoreCard() {
 // SCORECARD REVIEW + SUBMIT
 // ════════════════════════════════
 function reviewScore() {
-  const { scores } = scoreState;
+  const { scores, locked } = scoreState;
   const played = scores.filter(v=>v!==null).length;
   if (!played) { toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุมก่อนครับ','err'); return; }
-  // แสดง modal พร้อม canvas และปุ่มยืนยัน
   document.getElementById('scShareModal').classList.remove('hidden');
-  document.getElementById('scConfirmSection').classList.remove('hidden');
-  document.getElementById('scShareSection').classList.add('hidden');
-  document.getElementById('btnConfirmSubmit').disabled = false;
-  document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
+  if (locked) {
+    // ยืนยันแล้ว → แสดงแค่ปุ่มแชร์ ไม่มี confirm section
+    document.getElementById('scConfirmSection').classList.add('hidden');
+    document.getElementById('scShareSection').classList.remove('hidden');
+  } else {
+    document.getElementById('scConfirmSection').classList.remove('hidden');
+    document.getElementById('scShareSection').classList.add('hidden');
+    document.getElementById('btnConfirmSubmit').disabled = false;
+    document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
+  }
   // render canvas หลัง modal แสดง
   setTimeout(() => {
     const { gross, parSum, hcp, net } = calcTotals();
@@ -1516,7 +1525,7 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   ctx.scale(dpr,dpr);
   const C={green:'#1a4a2a',green2:'#2c6e3f',green3:'#e8f5ed',
            gold:'#c9a830',goldL:'#f5e6a0',cream:'#fffdf5',white:'#ffffff',
-           red:'#c94a2a',blue:'#1a6b9a',bogey:'#b8922a',dbl:'#8a3a1a',
+           red:'#c94a2a',blue:'#1a6b9a',bogey:'#b8922a',dbl:'#8a3a1a',triple:'#5a1a0a',
            text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0'};
   // BG
   ctx.fillStyle=C.cream;ctx.fillRect(0,0,W,H);
@@ -1580,7 +1589,7 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
       }else if(c.df!==undefined&&df!==null){
         ctx.fillStyle=scoreColor(df);ctx.font='11px "IBM Plex Mono",monospace';
       }else if(c.hcpH!==undefined&&hcpH!==null&&hcpH>0){
-        ctx.fillStyle=hcpH===1?C.bogey:C.dbl;ctx.font='bold 11px "IBM Plex Mono",monospace';
+        ctx.fillStyle=hcpH===1?C.bogey:hcpH===2?C.dbl:C.triple;ctx.font='bold 11px "IBM Plex Mono",monospace';
       }else{
         ctx.fillStyle=c.col===0?C.text3:c.col===1?C.text2:C.text;
         ctx.font=c.col===0?'11px "IBM Plex Mono",monospace':'12px "IBM Plex Mono",monospace';
@@ -1628,11 +1637,11 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   // Stats footer
   const ftY=smY+SUMMARY_H+6;
   ctx.fillStyle=C.green;ctx.fillRect(OX,ftY,TW,1);
-  let eagle=0,birdie=0,par_=0,bogey=0,dbl=0;
-  scores.forEach((s,i)=>{if(s===null)return;const d=s-pars[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par_++;else if(d===1)bogey++;else dbl++;});
-  [{l:'Eagle',v:eagle,c:C.blue},{l:'Birdie',v:birdie,c:C.red},{l:'Par',v:par_,c:C.green2},{l:'Bogey',v:bogey,c:C.bogey},{l:'Dbl+',v:dbl,c:C.dbl}]
+  let eagle=0,birdie=0,par_=0,bogey=0,dbl=0,triple=0;
+  scores.forEach((s,i)=>{if(s===null)return;const d=s-pars[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par_++;else if(d===1)bogey++;else if(d===2)dbl++;else triple++;});
+  [{l:'Eagle',v:eagle,c:C.blue},{l:'Birdie',v:birdie,c:C.red},{l:'Par',v:par_,c:C.green2},{l:'Bogey',v:bogey,c:C.bogey},{l:'Dbl',v:dbl,c:C.dbl},{l:'Trpl+',v:triple,c:C.triple}]
     .forEach((st,i)=>{
-      const sx=OX+i*(TW/5)+TW/10;
+      const sx=OX+i*(TW/6)+TW/12;
       ctx.fillStyle=st.c;ctx.font='bold 16px "IBM Plex Mono",monospace';
       ctx.textAlign='center';ctx.fillText(String(st.v),sx,ftY+22);
       ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",monospace';
@@ -1733,7 +1742,7 @@ function mkAeRow(i){
   const {scores,pars,putts}=adminEditState,el=document.createElement('div');
   el.className='hole-row';
   const s=scores[i],par=pars[i],p=putts[i],df=s!==null?s-par:null,hcp=holeHcp(s,par);
-  const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':'hcp2';
+  const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':hcp===2?'hcp2':'hcp3';
   el.innerHTML=`<div class="h-num">${i+1}</div><div class="h-par-cell">${par}</div>
     <div class="h-score"><button class="sc-btn" onclick="adjAe('s',${i},-1)">−</button><span class="sc-val ${sCls}">${s!==null?s:'—'}</span><button class="sc-btn" onclick="adjAe('s',${i},1)">+</button></div>
     <div class="h-diff ${sCls}">${df!==null?dStr(df):'—'}</div>
@@ -1771,10 +1780,10 @@ function updateAeBar(){
   document.getElementById('aeFlightNote').textContent=played?`Flight ${calcFlight(hcp)}`:'Flight —';
 }
 function updateAeSummary(){
-  let e=0,b=0,p=0,bg=0,db=0,pts=0,pc=0;
+  let e=0,b=0,p=0,bg=0,db=0,tr=0,pts=0,pc=0;
   adminEditState.scores.forEach((s,i)=>{
     if(s===null)return;const d=s-adminEditState.pars[i];
-    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else db++;
+    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else if(d===2)db++;else tr++;
     if(adminEditState.putts[i]!==null){pts+=adminEditState.putts[i];pc++;}
   });
   document.getElementById('aeSumGrid').innerHTML=
@@ -1782,7 +1791,8 @@ function updateAeSummary(){
      <div class="sum-item"><div class="sum-label">Birdie</div><div class="sum-val c-birdie">${b}</div></div>
      <div class="sum-item"><div class="sum-label">Par</div><div class="sum-val c-par">${p}</div></div>
      <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
-     <div class="sum-item"><div class="sum-label">Double+</div><div class="sum-val c-double">${db}</div></div>
+     <div class="sum-item"><div class="sum-label">Double</div><div class="sum-val c-double">${db}</div></div>
+     <div class="sum-item"><div class="sum-label">Triple+</div><div class="sum-val c-triple">${tr}</div></div>
      <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
   updateAeBar();
 }
@@ -1926,8 +1936,8 @@ function renderLb(data){
 // ════════════════════════════════
 function calcFlight(hcp){return hcp<=12?'A':hcp<=24?'B':'C';}
 function dStr(d){return d===0?'E':d>0?`+${d}`:`${d}`;}
-function dColor(d){return d<=-2?'var(--eagle)':d===-1?'var(--birdie)':d===0?'var(--par-col)':d===1?'var(--bogey)':'var(--double)';}
-function clsCls(d){if(d===null)return 'c-empty';if(d<=-2)return 'c-eagle';if(d===-1)return 'c-birdie';if(d===0)return 'c-par';if(d===1)return 'c-bogey';return 'c-double';}
+function dColor(d){return d<=-2?'var(--eagle)':d===-1?'var(--birdie)':d===0?'var(--par-col)':d===1?'var(--bogey)':d===2?'var(--double)':'var(--triple)';}
+function clsCls(d){if(d===null)return 'c-empty';if(d<=-2)return 'c-eagle';if(d===-1)return 'c-birdie';if(d===0)return 'c-par';if(d===1)return 'c-bogey';if(d===2)return 'c-double';return 'c-triple';}
 function fmtD(d){
   if(!d) return '';
   try {
