@@ -24,7 +24,7 @@
   --shadow-lg:0 4px 20px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.07);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);font-family:'Sarabun',sans-serif;color:var(--text);min-height:100vh;}
+html,body{overflow-x:hidden;}body{background:var(--bg);font-family:'Sarabun',sans-serif;color:var(--text);min-height:100vh;}
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;min-height:52px;gap:6px;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
 .nav-tabs{display:flex;}
@@ -108,11 +108,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rb-right{text-align:right;}
 .rb-gross{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:400;line-height:1;}
 .rb-subs{font-size:12px;font-family:'IBM Plex Mono',monospace;display:flex;flex-direction:column;gap:1px;margin-top:3px;}
-.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:13px;box-shadow:var(--shadow);}
-.sc-head{display:grid;grid-template-columns:28px 30px 1fr 40px 40px 36px;background:var(--surface2);border-bottom:2px solid var(--border);}
+.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:visible;margin-bottom:13px;box-shadow:var(--shadow);}
+.sc-head{display:grid;grid-template-columns:28px 30px 80px 44px 44px 44px;background:var(--surface2);border-bottom:2px solid var(--border);}
 .sc-head span{padding:8px 4px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;border-right:1px solid var(--border);}
 .sc-head span:last-child{border-right:none;}
-.hole-row{display:grid;grid-template-columns:28px 30px 1fr 40px 40px 36px;border-bottom:1px solid var(--border);align-items:center;}
+.hole-row{display:grid;grid-template-columns:28px 30px 80px 44px 44px 44px;border-bottom:1px solid var(--border);align-items:center;}
 .hole-row:hover{background:#fcfbf8;}
 .h-num{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);border-right:1px solid var(--border);}
 .h-par-cell{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);}
@@ -126,7 +126,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .putt-btn{width:17px;height:17px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:4px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
 .putt-btn:hover{border-color:var(--accent);color:var(--accent);}
 .putt-val{font-family:'IBM Plex Mono',monospace;font-size:12px;width:14px;text-align:center;color:var(--text2);}
-.sub-row{display:grid;grid-template-columns:28px 30px 1fr 40px 40px 36px;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+.sub-row{display:grid;grid-template-columns:28px 30px 80px 44px 44px 44px;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
 .sub-row span{padding:7px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);font-weight:500;}
 .sub-row span:first-child{color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;}
 .sub-row span:last-child{border-right:none;}
@@ -427,8 +427,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           </div>
         </div>
       </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-      <div class="sc-card" style="min-width:320px;">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -15px;padding:0 0 4px;">
+      <div class="sc-card" style="min-width:340px;margin:0 15px;">
         <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
         <div id="holeRows"></div>
         <div class="legend">
@@ -535,7 +535,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 
 <!-- ══ ADMIN EDIT MODAL ══ -->
 <div id="adminEditModal" class="hidden" style="position:fixed;inset:0;z-index:300;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.5);overflow-y:auto;padding:16px;">
-  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:auto;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;overflow:hidden;">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:auto;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;overflow:visible;">
     <div style="background:var(--accent2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;" id="aeModalName">—</div>
@@ -560,8 +560,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           </div>
         </div>
       </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-      <div class="sc-card" style="min-width:320px;">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 0 4px;">
+      <div class="sc-card" style="min-width:340px;">
         <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
         <div id="aeHoleRows"></div>
         <div class="legend">
