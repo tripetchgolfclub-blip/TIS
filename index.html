@@ -1520,7 +1520,9 @@ async function confirmAndSubmit() {
 function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   const canvas=document.getElementById('scCanvas');
   const dpr=window.devicePixelRatio||1;
-  const W=480,ROW_H=28,HEADER_H=110,FOOTER_H=86;
+  // ใช้ความกว้างจริงของ container แทน 480px ตายตัว
+  const W=Math.min(480, canvas.parentElement.clientWidth - 32);
+  const ROW_H=28,HEADER_H=110,FOOTER_H=86;
   const SUMMARY_H=54;
   const H=HEADER_H+(holes+2)*ROW_H+SUMMARY_H+FOOTER_H+14;
   canvas.width=W*dpr;canvas.height=H*dpr;
@@ -1560,10 +1562,13 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   ctx.textAlign='center';ctx.fillText('Flight '+flight,W/2,96);
   // Table
   const TT=HEADER_H+4;
-  const cols=[36,36,70,64,64,50];
+  // คำนวณ col ให้ตารางเต็ม W โดย Score col ยืดหยุ่น
+  const fixedW=36+36+64+64+50; // H+Par+±Par+H'cap+Putt
+  const scoreW=W-fixedW-2; // Score col กิน W ที่เหลือ
+  const cols=[36,36,scoreW,64,64,50];
   const labels=['H','Par','Score','±Par',"H'cap",'Putt'];
   const colX=[0];cols.forEach((w,i)=>colX.push(colX[i]+w));
-  const TW=colX[cols.length],OX=(W-TW)/2;
+  const TW=colX[cols.length],OX=0;
   // Table header
   ctx.fillStyle=C.green;ctx.fillRect(OX,TT,TW,ROW_H);
   ctx.fillStyle=C.goldL;ctx.font='bold 10px "IBM Plex Mono",monospace';
