@@ -286,19 +286,6 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 <div id="tabAdmin" class="hidden">
   <div class="main">
 
-    <!-- Script URL -->
-    <div class="card">
-      <div class="card-title">
-        🔗 เชื่อมต่อ Google Sheets
-        <button class="btn-sm" onclick="adminLogout()">ออก</button>
-      </div>
-      <div class="form-group">
-        <label>Apps Script URL</label>
-        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
-    </div>
-
     <!-- Tournament Selector -->
     <div class="tourney-selector" id="tourneySelectorCard">
       <div class="ts-header">
@@ -396,7 +383,20 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <button class="btn-sm" onclick="clearAllPlayers()" style="color:var(--red);border-color:var(--red);">ล้างทั้งหมด</button>
         </div>
       </div>
-      <div id="adminPlayerList" style="padding:12px 12px 6px;"><div class="empty-msg">เลือกการแข่งขันและกด 🔄 โหลด</div></div>
+      <div id="adminPlayerList" style="padding:12px 12px 6px;"><div class="empty-msg" style="line-height:1.8;">กรุณา:<br>1. เลือกการแข่งขันจากรายการด้านบน<br>2. กดปุ่ม 🔄 โหลด เพื่อดึงรายชื่อผู้เล่น</div></div>
+    </div>
+
+    <!-- Script URL -->
+    <div class="card">
+      <div class="card-title">
+        🔗 เชื่อมต่อ Google Sheets
+        <button class="btn-sm" onclick="adminLogout()">ออก</button>
+      </div>
+      <div class="form-group">
+        <label>Apps Script URL</label>
+        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
     </div>
 
     <!-- Apps Script Code -->
@@ -2169,21 +2169,30 @@ async function toggleWD(email, currentWD) {
 // ════════════════════════════════
 // AWARDS MODAL + PDF
 // ════════════════════════════════
-function openAwardsModal() {
-  const tourneyName = document.getElementById('lbTourneySelect')?.value || '';
+async function openAwardsModal() {
+  if(!scriptUrl){ toast('กรุณาตั้งค่า Apps Script URL ก่อนครับ','err'); return; }
+  let tourneyName = document.getElementById('lbTourneySelect')?.value || '';
+  // ถ้า dropdown ยังว่าง ให้โหลด list ก่อนแล้วเลือกอันแรก
   if(!tourneyName){
-    toast('กรุณาเลือกการแข่งขันก่อนครับ','err');
-    return;
+    loading(true,'โหลดรายการการแข่งขัน...');
+    try{
+      const list = await api('getTourneyList');
+      const sel = document.getElementById('lbTourneySelect');
+      sel.innerHTML='<option value="">— เลือกการแข่งขัน —</option>'+
+        list.map(t=>`<option value="${t.tourneyName}">${t.tourneyName} · ${fmtD(t.date)}</option>`).join('');
+      if(list.length){ sel.value=list[0].tourneyName; tourneyName=list[0].tourneyName; }
+    }catch(e){ loading(false); toast('❌ '+e.message,'err'); return; }
+    loading(false);
   }
-  // โหลดข้อมูลใหม่ทุกครั้งเพื่อให้แน่ใจว่าข้อมูลล่าสุด
+  if(!tourneyName){ toast('ไม่พบรายการการแข่งขัน','err'); return; }
   loading(true,'โหลดข้อมูลรางวัล...');
-  api('getScores',{name:tourneyName}).then(scores=>{
-    lbData = scores;
+  try{
+    lbData = await api('getScores',{name:tourneyName});
     loading(false);
     document.getElementById('awardsModal').classList.remove('hidden');
     document.getElementById('awardsModalTourney').textContent = tourneyName;
     renderAwards(lbData);
-  }).catch(e=>{ loading(false); toast('❌ '+e.message,'err'); });
+  }catch(e){ loading(false); toast('❌ '+e.message,'err'); }
 }
 function closeAwardsModal() {
   document.getElementById('awardsModal').classList.add('hidden');
