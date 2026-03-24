@@ -2237,7 +2237,7 @@ function awardsRowHtml(p, rank, val, sub, extraTag='') {
 function awardsSectionHtml(title, players, getVal, getSub) {
   const rows = players.length
     ? players.map((p,i)=>awardsRowHtml(p,i+1,getVal(p),getSub(p))).join('')
-    : '<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
+    : `<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>`;
   return `<div class="award-section">
     <div class="award-section-title">${title}
       <button onclick="exportSectionPDF('${title.replace(/['"<>]/g,'')}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
@@ -2294,9 +2294,9 @@ function renderAwards(data) {
       ${lgNote}${lgRows}
     </div>` +
     awardsSectionHtml('🏆 Low Net Overall', lowNet, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    awardsSectionHtml('🟢 Flight A (H'cap 0–12)', flightA, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    awardsSectionHtml('🔵 Flight B (H'cap 13–24)', flightB, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    awardsSectionHtml('🟡 Flight C (H'cap 25–36)', flightC, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
+    awardsSectionHtml('🟢 Flight A (Hcap 0-12)', flightA, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
+    awardsSectionHtml('🔵 Flight B (Hcap 13-24)', flightB, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
+    awardsSectionHtml('🟡 Flight C (Hcap 25-36)', flightC, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
     `<div class="award-section">
       <div class="award-section-title">🐔 Booby
         <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
@@ -2313,9 +2313,9 @@ function exportSectionPDF(sectionTitle, btn) {
   const {lowGross,flightA,flightB,flightC,booby} = getAwardsData(lbData);
   const sectionMap = {
     '🏌️ Low Gross': {players:lowGross, getVal:p=>p.gross, getSub:p=>`Gross · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
-    'Flight A (H'cap 0–12)': {players:flightA, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
-    'Flight B (H'cap 13–24)': {players:flightB, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#084298', isBooby:false},
-    'Flight C (H'cap 25–36)': {players:flightC, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#664d03', isBooby:false},
+    'Flight A (Hcap 0-12)': {players:flightA, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
+    'Flight B (Hcap 13-24)': {players:flightB, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#084298', isBooby:false},
+    'Flight C (Hcap 25-36)': {players:flightC, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#664d03', isBooby:false},
     'Booby': {players:booby, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#c94a2a', isBooby:true},
   };
   // clean key match
