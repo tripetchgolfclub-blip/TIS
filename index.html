@@ -536,7 +536,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
   <div class="main">
     <div class="card">
       <div class="card-title">🏆 Leaderboard
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
+          <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="lbRefreshIndicator">🔄 auto 60s</span>
           <button class="btn-sm" onclick="openAwardsModal()" style="background:var(--accent2);color:#fff;border-color:var(--accent2);">🏅 รางวัล</button>
           <button class="btn-sm" onclick="loadLeaderboard()">🔄 รีเฟรช</button>
         </div>
@@ -683,6 +684,23 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         </div>
         <div style="font-size:11px;color:#999;text-align:center;margin-top:8px;font-family:'IBM Plex Mono',monospace;">กด "บันทึกรูป" แล้วเปิด LINE → แชร์รูปภาพ</div>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ AWARDS MODAL ══ -->
+<div id="awardsModal" class="hidden" style="position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.65);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px;">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:680px;margin:auto;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
+    <div style="background:var(--accent2);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;">🏅 สรุปรางวัล</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="awardsModalTourney">—</div>
+      </div>
+      <button onclick="closeAwardsModal()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
+    </div>
+    <div style="padding:16px;max-height:80vh;overflow-y:auto;" id="awardsModalBody">
+      <div class="empty-msg">กำลังโหลด...</div>
     </div>
   </div>
 </div>
@@ -1895,13 +1913,33 @@ async function loadTourneyListForLb(autoLoad=false){
   }catch(e){}
 }
 async function onLbTourneyChange(){await loadLeaderboard();}
-async function loadLeaderboard(){
+let _lbRefreshTimer = null;
+
+async function loadLeaderboard(silent=false){
   const name=document.getElementById('lbTourneySelect')?.value;
   if(!scriptUrl||!name){renderLb([]);return;}
-  loading(true,'โหลด Leaderboard...');
-  try{lbData=await api('getScores',{name});renderLb(lbData);}
-  catch(e){toast('❌ '+e.message,'err');}
-  loading(false);
+  if(!silent) loading(true,'โหลด Leaderboard...');
+  try{
+    lbData=await api('getScores',{name});
+    renderLb(lbData);
+    // อัพเดต awards modal ถ้าเปิดอยู่
+    if(!document.getElementById('awardsModal').classList.contains('hidden')) renderAwards(lbData);
+  }catch(e){if(!silent)toast('❌ '+e.message,'err');}
+  if(!silent) loading(false);
+}
+
+function startLbAutoRefresh(){
+  stopLbAutoRefresh();
+  _lbRefreshTimer = setInterval(()=>{
+    // refresh เฉพาะตอนอยู่หน้า LB และไม่มี modal อื่นเปิดอยู่
+    const lbVisible = !document.getElementById('tabLb').classList.contains('hidden');
+    const noModal = document.getElementById('scShareModal').classList.contains('hidden')
+                 && document.getElementById('adminEditModal').classList.contains('hidden');
+    if(lbVisible && noModal) loadLeaderboard(true); // silent=true ไม่แสดง loading overlay
+  }, 60000); // 60 วินาที
+}
+function stopLbAutoRefresh(){
+  if(_lbRefreshTimer){ clearInterval(_lbRefreshTimer); _lbRefreshTimer=null; }
 }
 function setFlight(el,flight){
   activeFlightFilter=flight;
@@ -2111,10 +2149,25 @@ async function toggleWD(email, currentWD) {
 // AWARDS MODAL + PDF
 // ════════════════════════════════
 function openAwardsModal() {
-  const name = document.getElementById('lbTourneySelect')?.value;
-  if(!lbData||!lbData.length){toast('โหลด Leaderboard ก่อนครับ','err');return;}
+  const tourneyName = document.getElementById('lbTourneySelect')?.value || '—';
+  if(!lbData||!lbData.length){
+    // ถ้ายังไม่มีข้อมูล ให้ลองโหลดก่อนแล้วค่อยเปิด
+    if(scriptUrl && tourneyName !== '—'){
+      loading(true,'โหลดข้อมูลรางวัล...');
+      api('getScores',{name:tourneyName}).then(scores=>{
+        lbData=scores;
+        loading(false);
+        document.getElementById('awardsModal').classList.remove('hidden');
+        document.getElementById('awardsModalTourney').textContent = tourneyName;
+        renderAwards(lbData);
+      }).catch(e=>{loading(false);toast('❌ '+e.message,'err');});
+      return;
+    }
+    toast('กรุณาเปิดหน้า Leaderboard และเลือกการแข่งขันก่อนครับ','err');
+    return;
+  }
   document.getElementById('awardsModal').classList.remove('hidden');
-  document.getElementById('awardsModalTourney').textContent = name || '—';
+  document.getElementById('awardsModalTourney').textContent = tourneyName;
   renderAwards(lbData);
 }
 function closeAwardsModal() {
