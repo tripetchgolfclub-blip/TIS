@@ -427,7 +427,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           </div>
         </div>
       </div>
-      <div class="sc-card">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <div class="sc-card" style="min-width:320px;">
         <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
         <div id="holeRows"></div>
         <div class="legend">
@@ -439,6 +440,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
         </div>
       </div>
+      </div><!-- /overflow wrapper -->
       <div class="net-box">
         <div>
           <div class="nb-label">Net Score</div>
@@ -558,7 +560,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           </div>
         </div>
       </div>
-      <div class="sc-card">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <div class="sc-card" style="min-width:320px;">
         <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
         <div id="aeHoleRows"></div>
         <div class="legend">
@@ -569,6 +572,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
         </div>
       </div>
+      </div><!-- /overflow wrapper -->
       <div class="net-box" style="margin-bottom:13px;">
         <div>
           <div class="nb-label">Net Score</div>
@@ -1428,6 +1432,7 @@ function updateSummary(){
      <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
      <div class="sum-item"><div class="sum-label">Double</div><div class="sum-val c-double">${db}</div></div>
      <div class="sum-item"><div class="sum-label">Triple+</div><div class="sum-val c-triple">${tr}</div></div>
+     <div class="sum-item"><div class="sum-label">Putt</div><div class="sum-val" style="color:var(--text2)">${pts||'—'}</div></div>
      <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
   updateBar();
 }
@@ -1793,6 +1798,7 @@ function updateAeSummary(){
      <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
      <div class="sum-item"><div class="sum-label">Double</div><div class="sum-val c-double">${db}</div></div>
      <div class="sum-item"><div class="sum-label">Triple+</div><div class="sum-val c-triple">${tr}</div></div>
+     <div class="sum-item"><div class="sum-label">Putt</div><div class="sum-val" style="color:var(--text2)">${pts||'—'}</div></div>
      <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
   updateAeBar();
 }
