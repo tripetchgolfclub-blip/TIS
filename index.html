@@ -370,7 +370,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
       <div class="divider"></div>
       <div class="section-label">Bulk Import — ชื่อ, ฝ่าย, Gmail, กลุ่ม (ทีละบรรทัด)</div>
       <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,ฝ่าย IT,somchai@gmail.com,กลุ่ม 1&#10;สมหญิง รักดี,ฝ่ายการตลาด,somying@gmail.com,กลุ่ม 2"></textarea>
-      <button class="btn-sm" onclick="bulkImport()" style="margin-top:6px;">📋 Import</button>
+      <button class="btn-primary" onclick="bulkImport()" style="margin-top:8px;padding:9px 18px;font-size:14px;">📋 Import ผู้เล่นทั้งหมด</button>
     </div>
 
     <!-- Player List -->
@@ -1211,6 +1211,7 @@ async function addPlayer() {
     document.getElementById('adName').value='';
     document.getElementById('adEmail').value='';
     document.getElementById('adDept').value='';
+    document.getElementById('adGroup').value='';
     await loadPlayersToAdmin();
     toast('✅ เพิ่มผู้เล่นแล้ว','ok');
   } catch(e){toast(e.message==='duplicate'?'Gmail นี้มีอยู่แล้ว':'❌ '+e.message,'err');}
