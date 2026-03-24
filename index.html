@@ -108,25 +108,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rb-right{text-align:right;}
 .rb-gross{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:400;line-height:1;}
 .rb-subs{font-size:12px;font-family:'IBM Plex Mono',monospace;display:flex;flex-direction:column;gap:1px;margin-top:3px;}
-.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:visible;margin-bottom:13px;box-shadow:var(--shadow);}
-.sc-head{display:grid;grid-template-columns:28px 30px 80px 44px 44px 44px;background:var(--surface2);border-bottom:2px solid var(--border);}
+.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:13px;box-shadow:var(--shadow);}
+.sc-head{display:grid;grid-template-columns:8% 9% 1fr 13% 13% 16%;background:var(--surface2);border-bottom:2px solid var(--border);}
 .sc-head span{padding:8px 4px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;border-right:1px solid var(--border);}
 .sc-head span:last-child{border-right:none;}
-.hole-row{display:grid;grid-template-columns:28px 30px 80px 44px 44px 44px;border-bottom:1px solid var(--border);align-items:center;}
+.hole-row{display:grid;grid-template-columns:8% 9% 1fr 13% 13% 16%;border-bottom:1px solid var(--border);align-items:center;}
 .hole-row:hover{background:#fcfbf8;}
 .h-num{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);border-right:1px solid var(--border);}
 .h-par-cell{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);}
-.h-score{padding:4px 3px;display:flex;align-items:center;justify-content:center;gap:3px;border-right:1px solid var(--border);}
-.sc-btn{width:22px;height:22px;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.h-score{padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:2px;border-right:1px solid var(--border);}
+.sc-btn{width:20px;height:20px;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:4px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
 .sc-btn:hover{border-color:var(--accent);color:var(--accent);background:#e8f5ed;}
-.sc-val{font-family:'IBM Plex Mono',monospace;font-size:15px;width:20px;text-align:center;}
+.sc-val{font-family:'IBM Plex Mono',monospace;font-size:14px;width:18px;text-align:center;}
 .h-diff{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;border-right:1px solid var(--border);}
 .h-hcp{padding:8px 2px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;border-right:1px solid var(--border);}
-.h-putt{padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:2px;}
-.putt-btn{width:17px;height:17px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:4px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.h-putt{padding:3px 1px;display:flex;align-items:center;justify-content:center;gap:1px;}
+.putt-btn{width:15px;height:15px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:3px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
 .putt-btn:hover{border-color:var(--accent);color:var(--accent);}
-.putt-val{font-family:'IBM Plex Mono',monospace;font-size:12px;width:14px;text-align:center;color:var(--text2);}
-.sub-row{display:grid;grid-template-columns:28px 30px 80px 44px 44px 44px;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+.putt-val{font-family:'IBM Plex Mono',monospace;font-size:11px;width:12px;text-align:center;color:var(--text2);}
+.sub-row{display:grid;grid-template-columns:8% 9% 1fr 13% 13% 16%;background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
 .sub-row span{padding:7px 4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);border-right:1px solid var(--border);font-weight:500;}
 .sub-row span:first-child{color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;}
 .sub-row span:last-child{border-right:none;}
@@ -427,8 +427,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           </div>
         </div>
       </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -15px;padding:0 0 4px;">
-      <div class="sc-card" style="min-width:340px;margin:0 15px;">
+      <div class="sc-card">
         <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
         <div id="holeRows"></div>
         <div class="legend">
@@ -440,7 +439,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
         </div>
       </div>
-      </div><!-- /overflow wrapper -->
+      </div>
       <div class="net-box">
         <div>
           <div class="nb-label">Net Score</div>
@@ -535,7 +534,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 
 <!-- ══ ADMIN EDIT MODAL ══ -->
 <div id="adminEditModal" class="hidden" style="position:fixed;inset:0;z-index:300;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.5);overflow-y:auto;padding:16px;">
-  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:auto;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;overflow:visible;">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:auto;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;overflow:hidden;">
     <div style="background:var(--accent2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;" id="aeModalName">—</div>
@@ -560,8 +559,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           </div>
         </div>
       </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 0 4px;">
-      <div class="sc-card" style="min-width:340px;">
+      <div class="sc-card">
         <div class="sc-head"><span>H</span><span>Par</span><span>Score</span><span>±Par</span><span>H'cap</span><span>Putt</span></div>
         <div id="aeHoleRows"></div>
         <div class="legend">
@@ -572,7 +570,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
         </div>
       </div>
-      </div><!-- /overflow wrapper -->
+      </div>
       <div class="net-box" style="margin-bottom:13px;">
         <div>
           <div class="nb-label">Net Score</div>
@@ -1886,13 +1884,14 @@ function renderLb(data){
   const mainVal=r=>isLowGross?r.gross:r.net;
   const mainLabel=isLowGross?'Gross':'Net';
   const podMedals=isBooby?['🐔','🐓','🎗️']:medals;
-  podEl.innerHTML=`<div class="podium">${podOrder.map(p=>{
-    const rank=top.indexOf(p);
+  const medalColors=['var(--gold)','#7a8a9a','#a0673a'];
+  podEl.innerHTML=`<div class="podium">${podOrder.map((p,podIdx)=>{
+    const rank=top.indexOf(p); // rank=ตำแหน่งจริง(0=ชนะ), podIdx=ตำแหน่งบนแท่น(1=กลาง)
     return `<div class="pod">
       <div class="pod-name">${p.name}</div>
-      <div class="pod-net" style="color:${rank===0?'var(--gold)':rank===1?'#7a8a9a':'#a0673a'}">${mainVal(p)}</div>
+      <div class="pod-net" style="color:${medalColors[rank]}">${mainVal(p)}</div>
       <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
-      <div class="pod-block ${podCls[rank]}">${podMedals[rank]}</div>
+      <div class="pod-block ${podCls[podIdx]}">${podMedals[rank]}</div>
     </div>`;}).join('')}</div>`;
 
   // ─── TABLE ───
