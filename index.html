@@ -728,6 +728,7 @@ const APPS_SCRIPT_CODE = `function doGet(e) {
       else if (action==='removePlayer') result = removePlayer(data);
       else if (action==='clearPlayers') result = clearPlayers(data);
       else if (action==='submitScore')  result = submitScore(data);
+      else if (action==='setPlayerFlag') result = setPlayerFlag(data);
       else result = {error:'unknown action: '+action};
     } else {
       if (action==='getTourneyList')    result = getTourneyList();
@@ -756,6 +757,41 @@ function fmtDate(d) {
   var m = String(dt.getMonth()+1).padStart(2,'0');
   var day = String(dt.getDate()).padStart(2,'0');
   return y+'-'+m+'-'+day;
+}
+// ─── PlayerFlags sheet: TourneyName | Email | WD | LGG | LNO ───
+function getFlagsMap(tourneyName) {
+  var sh = getSheet('PlayerFlags');
+  if (sh.getLastRow() < 2) return {};
+  var rows = sh.getRange(2,1,sh.getLastRow()-1,5).getValues();
+  var map = {};
+  rows.filter(function(r){return r[0]===tourneyName;}).forEach(function(r){
+    map[r[1].toString().toLowerCase()] = {wd:r[2]===true,lgg:r[3]===true,lno:r[4]===true};
+  });
+  return map;
+}
+function setPlayerFlag(data) {
+  var sh = getSheet('PlayerFlags');
+  if (sh.getLastRow()===0) {
+    sh.getRange(1,1,1,5).setValues([['TourneyName','Email','WD','LGG','LNO']])
+      .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
+  }
+  var email = data.email.toString().toLowerCase();
+  var rows = sh.getLastRow()>1 ? sh.getRange(2,1,sh.getLastRow()-1,5).getValues() : [];
+  var found = -1;
+  for (var i=0;i<rows.length;i++) {
+    if (rows[i][0]===data.tourneyName && rows[i][1].toString().toLowerCase()===email) {
+      found = i+2; break;
+    }
+  }
+  var wd  = data.wd  === true;
+  var lgg = data.lgg === true;
+  var lno = data.lno === true;
+  if (found>0) {
+    sh.getRange(found,3,1,3).setValues([[wd,lgg,lno]]);
+  } else {
+    sh.appendRow([data.tourneyName,data.email,wd,lgg,lno]);
+  }
+  return {ok:true};
 }
 function getTourneyList() {
   var sh = getSheet('Tournament');
@@ -889,28 +925,35 @@ function clearPlayers(data) {
   var sc = getSheet('Scores');
   var scRows = sc.getDataRange().getValues();
   for(var i=scRows.length-1;i>=1;i--){ if(scRows[i][0]===data.tourneyName) sc.deleteRow(i+1); }
+  // ลบ flags ด้วย
+  var fl = getSheet('PlayerFlags');
+  var flRows = fl.getLastRow()>1?fl.getRange(2,1,fl.getLastRow()-1,5).getValues():[];
+  for(var i=flRows.length-1;i>=0;i--){ if(flRows[i][0]===data.tourneyName) fl.deleteRow(i+2); }
   return {ok:true};
 }
 function getScores(tourneyName) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()<2) return [];
+  var flagsMap = getFlagsMap(tourneyName);
   var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
   return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
+    var email = r[2].toString().toLowerCase();
+    var flags = flagsMap[email]||{wd:false,lgg:false,lno:false};
     return {tourneyName:r[0],name:r[1],email:r[2],group:r[3],dept:r[4]||'',flight:r[5],
-            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,lgg:r[12]===true,lno:r[13]===true,wd:r[14]===true,
-            scores:r.slice(15,33),pars:r.slice(33,51),putts:r.slice(51,69)};
+            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,
+            wd:flags.wd,lgg:flags.lgg,lno:flags.lno,
+            scores:r.slice(12,30),pars:r.slice(30,48),putts:r.slice(48,66)};
   });
 }
 function submitScore(data) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()===0) {
-    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed','LGG','LNO','WD'];
+    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed'];
     for(var n=1;n<=18;n++) h.push('H'+n+'_Score');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Par');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Putt');
     sh.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
-  // ถ้า confirmed แล้วห้าม overwrite (ยกเว้น Admin force)
   var rows = sh.getDataRange().getValues();
   for(var i=rows.length-1;i>=1;i--){
     if(rows[i][0]===data.tourneyName && rows[i][2].toLowerCase()===data.email.toLowerCase()){
@@ -919,15 +962,12 @@ function submitScore(data) {
     }
   }
   var confirmed = data.confirmed===true;
-  var lgg = data.lgg===true;
-  var lno = data.lno===true;
-  var wd = data.wd===true;
   var row=[data.tourneyName,data.name,data.email,data.group,data.dept||'',data.flight,
-           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed,lgg,lno,wd]
+           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed]
     .concat(data.scores).concat(data.pars).concat(data.putts);
   sh.appendRow(row);
   return {ok:true};
-}`;
+}`;;
 
 document.getElementById('appsScriptCode').textContent = APPS_SCRIPT_CODE;
 
@@ -1270,7 +1310,13 @@ function renderAdminList(players=[],scores=[]) {
   document.getElementById('playerCountBadge').textContent=players.length?players.length+' คน':'';
   if (!players.length){el.innerHTML='<div class="empty-msg">ยังไม่มีผู้เล่น</div>';return;}
   const scoreMap={};
-  scores.forEach(s=>{scoreMap[s.email.toLowerCase()]=s;});
+  scores.forEach(s=>{
+    // normalize flags (PlayerFlags sheet จะ populate ค่า)
+    s.wd  = s.wd  === true;
+    s.lgg = s.lgg === true;
+    s.lno = s.lno === true;
+    scoreMap[s.email.toLowerCase()]=s;
+  });
   const groups=[...new Set(players.map(p=>p.group))];
   el.innerHTML=groups.map(g=>{
     const gp=players.filter(p=>p.group===g);
@@ -1359,7 +1405,7 @@ function showTourneyPicker(name,email,list) {
           ?`<div class="pt-score-val">Net ${t.net}</div>
             <div class="pt-score-sub">Gross ${t.gross} · H'cap ${t.hcp}</div>
             <div class="pt-score-sub" style="color:var(--accent2);">✓ มีสกอร์แล้ว</div>`
-          :`<div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">ยังไม่มีสกอร์</div>`}
+          :`<div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีสกอร์</div>`}
       </div>
       <div style="color:var(--accent2);font-size:18px;">›</div>
     </div>`).join('');
@@ -1968,19 +2014,20 @@ function renderLb(data){
   const isLowGross= activeFlightFilter==='lowgross';
   const isLowNet  = activeFlightFilter==='lownet';
 
-  // กรอง WD ออก (ยกเว้น Booby)
-  if(!isBooby) d=d.filter(r=>!r.wd);
-
-  // Prize exclusion: lgg=ชนะ Low Gross → ตัดออกจาก net/flight/booby
-  //                  lno=ชนะ Low Net Overall → ตัดออกจาก flight/booby
-  if(!isLowGross && !isLowNet) d=d.filter(r=>!r.lgg);
-  if(!isLowGross && !isLowNet && !isBooby) {} // lno ตัดใน flight/booby ด้านล่าง
-
-  // กรองตาม Flight A/B/C
-  if(!isBooby&&!isLowGross&&!isLowNet&&activeFlightFilter){
-    d=d.filter(r=>r.flight===activeFlightFilter).filter(r=>!r.lno);
+  // Prize exclusion ตามเงื่อนไข:
+  // Low Gross: ยกเว้น WD เท่านั้น
+  // Low Net Overall: ยกเว้น WD + LGG
+  // Flight A/B/C + Booby: ยกเว้น WD + LGG + LNO
+  if(isLowGross){
+    d = d.filter(r=>!r.wd);
+  } else if(isLowNet){
+    d = d.filter(r=>!r.wd && !r.lgg);
+  } else {
+    // Flight A/B/C, Booby
+    d = d.filter(r=>!r.wd && !r.lgg && !r.lno);
+    if(!isBooby && activeFlightFilter)
+      d = d.filter(r=>r.flight===activeFlightFilter);
   }
-  if(isBooby) d=d.filter(r=>!r.lgg&&!r.lno);
 
   // จัดเรียง
   if(isBooby)      d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
@@ -2039,9 +2086,9 @@ function renderLb(data){
         const diff=r.gross-(r.par||72);
         const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
         return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
-          <td style="font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
-            <div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
@@ -2058,9 +2105,9 @@ function renderLb(data){
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         return `<tr class="${i<2?'rank-'+(i+1):''}">
-          <td style="font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
-            <div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
@@ -2077,9 +2124,9 @@ function renderLb(data){
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
       return `<tr class="${i<3?'rank-'+(i+1):''}">
-        <td style="font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
         <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
-          <div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
             <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
           </div></td>
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
@@ -2152,7 +2199,7 @@ if ('serviceWorker' in navigator) {
 // ════════════════════════════════
 // BOOBY IMAGE SRC
 // ════════════════════════════════
-const BOOBY_IMG_SRC =  + BOOBY_SRC + r;
+const BOOBY_IMG_SRC = '/TIS/booby.png';
 
 // ════════════════════════════════
 // FLAG TOGGLE (WD / LGG / LNO)
@@ -2165,23 +2212,27 @@ async function toggleFlag(email, flag, current) {
   if(!confirm(`${action} สำหรับ ${email}?`)) return;
   loading(true, action+'...');
   try {
+    // โหลด flag เดิมก่อนเพื่อ preserve ค่าอื่น
     const allSc = await api('getScores',{name:activeTourney.tourneyName});
     const sc = allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
-    if(!sc){toast('ไม่พบสกอร์ของผู้เล่นนี้','err');loading(false);return;}
-    const payload = {
-      action:'submitScore', adminForce:true,
-      confirmed:sc.confirmed,
-      wd:  flag==='wd'  ? !current : (sc.wd===true),
-      lgg: flag==='lgg' ? !current : (sc.lgg===true),
-      lno: flag==='lno' ? !current : (sc.lno===true),
-      tourneyName:activeTourney.tourneyName,
-      name:sc.name, email:sc.email, group:sc.group, dept:sc.dept||'', flight:sc.flight,
-      gross:sc.gross, par:sc.par, hcp:sc.hcp, net:sc.net, puttsTotal:sc.puttsTotal,
-      scores:[...sc.scores], pars:[...sc.pars], putts:[...sc.putts]
-    };
-    await apiPost(payload);
+    const curWd  = sc ? (sc.wd===true)  : false;
+    const curLgg = sc ? (sc.lgg===true) : false;
+    const curLno = sc ? (sc.lno===true) : false;
+    await apiPost({
+      action: 'setPlayerFlag',
+      tourneyName: activeTourney.tourneyName,
+      email: email,
+      wd:  flag==='wd'  ? !current : curWd,
+      lgg: flag==='lgg' ? !current : curLgg,
+      lno: flag==='lno' ? !current : curLno,
+    });
     toast(`✅ ${action} แล้ว`,'ok');
+    // Refresh admin list + lbData
     await loadPlayersToAdmin();
+    if(document.getElementById('lbTourneySelect')?.value===activeTourney.tourneyName){
+      lbData = await api('getScores',{name:activeTourney.tourneyName});
+      renderLb(lbData);
+    }
   } catch(e){ toast('❌ '+e.message,'err'); }
   loading(false);
 }
@@ -2215,36 +2266,41 @@ function stopLbAutoRefresh(){
 // AWARDS MODAL
 // ════════════════════════════════
 function getAwardsData(data){
-  const d=(data||[]).filter(r=>!r.wd);
-  const noLgg=d.filter(r=>!r.lgg);
-  const noLggLno=noLgg.filter(r=>!r.lno);
+  // Low Gross: ยกเว้น WD
+  const forLg  = (data||[]).filter(r=>!r.wd);
+  // Low Net Overall: ยกเว้น WD + LGG
+  const forLn  = forLg.filter(r=>!r.lgg);
+  // Flight + Booby: ยกเว้น WD + LGG + LNO
+  const forFlt = forLn.filter(r=>!r.lno);
   return {
-    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
-    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
-    flightA:  [...noLggLno].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightB:  [...noLggLno].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightC:  [...noLggLno].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    booby:    [...noLggLno].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
+    lowGross: [...forLg].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
+    lowNet:   [...forLn].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
+    flightA:  [...forFlt].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightB:  [...forFlt].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightC:  [...forFlt].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    booby:    [...forFlt].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
   };
 }
 
-function openAwardsModal(){
-  const name=document.getElementById('lbTourneySelect')?.value||'—';
-  if(!lbData||!lbData.length){
-    if(scriptUrl&&name!=='—'){
-      loading(true,'โหลดข้อมูลรางวัล...');
-      api('getScores',{name}).then(s=>{lbData=s;loading(false);
-        document.getElementById('awardsModal').classList.remove('hidden');
-        document.getElementById('awardsModalTourney').textContent=name;
-        renderAwards(lbData);
-      }).catch(e=>{loading(false);toast('❌ '+e.message,'err');});
-      return;
-    }
-    toast('กรุณาเปิดหน้า Leaderboard และเลือกการแข่งขันก่อนครับ','err');return;
+async function openAwardsModal(){
+  const name=document.getElementById('lbTourneySelect')?.value||'';
+  const modal=document.getElementById('awardsModal');
+  const body=document.getElementById('awardsModalBody');
+  const tEl=document.getElementById('awardsModalTourney');
+  // เปิด modal ก่อนเลย แสดง loading ใน body
+  modal.classList.remove('hidden');
+  tEl.textContent=name||'—';
+  body.innerHTML='<div class="empty-msg" style="padding:32px;">⏳ กำลังโหลดข้อมูล...</div>';
+  try {
+    if(!scriptUrl){body.innerHTML='<div class="empty-msg">ยังไม่ได้ตั้งค่า Script URL</div>';return;}
+    if(!name){body.innerHTML='<div class="empty-msg">กรุณาเลือกการแข่งขันก่อนครับ</div>';return;}
+    // โหลดข้อมูลใหม่เสมอให้ flags ล่าสุด
+    lbData = await api('getScores',{name});
+    renderLb(lbData);
+    renderAwards(lbData);
+  } catch(e){
+    body.innerHTML=`<div class="empty-msg" style="color:var(--red);">❌ ${e.message}</div>`;
   }
-  document.getElementById('awardsModal').classList.remove('hidden');
-  document.getElementById('awardsModalTourney').textContent=name;
-  renderAwards(lbData);
 }
 function closeAwardsModal(){document.getElementById('awardsModal').classList.add('hidden');}
 
@@ -2266,13 +2322,13 @@ function awardsRow(p,rank,val,sub,extraTag=''){
 }
 
 function awardsSection(title,players,getVal,getSub,prizeClass,prizeLabels,hasPdf=true){
-  const btnPdf=hasPdf?`<button onclick="exportSectionPDF('${title.replace(/['"]/g,'').replace(/[^\w\s฀-๿]/g,'').trim()}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:"IBM Plex Mono",monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>`:'';
+  const btnPdf=hasPdf?`<button onclick="exportSectionPDF('${title.replace(/['"]/g,'').replace(/[^\w\s฀-๿]/g,'').trim()}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>`:'';
   const rows=players.length
     ?players.map((p,i)=>{
         const tag=prizeLabels&&prizeLabels[i]?`<div style="margin-top:3px;"><span class="prize-tag ${prizeClass[i]}">${prizeLabels[i]}</span></div>`:'';
         return awardsRow(p,i+1,getVal(p),getSub(p),tag);
       }).join('')
-    :'<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
+    :'<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
   return `<div class="award-section">
     <div class="award-section-title">${title}${btnPdf}</div>
     ${rows}
@@ -2289,7 +2345,7 @@ function renderAwards(data){
     const bStyles=['background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;','background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'];
     const bLabels=['🐷 Booby Maker','🐷 Booby'];
     return `<div class="award-row award-booby-${i+1}">
-      <div class="award-rank"><img src="${BOOBY_IMG_SRC}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;"></div>
+      <div class="award-rank"><img src="${BOOBY_IMG_SRC}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" onerror="this.outerHTML='<span style=\'font-size:22px;\'>🐷</span>'"></div>
       <div class="award-info">
         <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
         <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
@@ -2305,12 +2361,12 @@ function renderAwards(data){
   body.innerHTML =
     awardsSection('🏌️ Low Gross',lowGross,p=>p.gross,p=>`Gross · H'cap ${p.hcp}`,['prize-winner'],['🏆 Winner']) +
     awardsSection('🏆 Low Net Overall',lowNet,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner'],['🏆 Winner']) +
-    awardsSection('🟢 Flight A (H.cap 0-12)',flightA,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
-    awardsSection('🔵 Flight B (H.cap 13-24)',flightB,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
-    awardsSection('🟡 Flight C (H.cap 25-36)',flightC,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
+    awardsSection('🟢 Flight A (H'cap 0–12)',flightA,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
+    awardsSection('🔵 Flight B (H'cap 13–24)',flightB,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
+    awardsSection('🟡 Flight C (H'cap 25–36)',flightC,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
     `<div class="award-section">
       <div class="award-section-title">🐷 Booby
-        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:"IBM Plex Mono",monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
+        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
       </div>
       ${booby.length>=2?boobyRows:'<div style="padding:10px;font-size:13px;color:var(--text3);">ต้องมีผู้เล่นอย่างน้อย 2 คน</div>'}
     </div>`;
