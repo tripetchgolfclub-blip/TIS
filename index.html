@@ -259,19 +259,6 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 <div id="tabAdmin" class="hidden">
   <div class="main">
 
-    <!-- Script URL -->
-    <div class="card">
-      <div class="card-title">
-        🔗 เชื่อมต่อ Google Sheets
-        <button class="btn-sm" onclick="adminLogout()">ออก</button>
-      </div>
-      <div class="form-group">
-        <label>Apps Script URL</label>
-        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
-    </div>
-
     <!-- Tournament Selector -->
     <div class="tourney-selector" id="tourneySelectorCard">
       <div class="ts-header">
@@ -370,6 +357,19 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         </div>
       </div>
       <div id="adminPlayerList" style="padding:12px 12px 6px;"><div class="empty-msg">เลือกการแข่งขันและกด 🔄 โหลด</div></div>
+    </div>
+
+    <!-- Script URL -->
+    <div class="card">
+      <div class="card-title">
+        🔗 เชื่อมต่อ Google Sheets
+        <button class="btn-sm" onclick="adminLogout()">ออก</button>
+      </div>
+      <div class="form-group">
+        <label>Apps Script URL</label>
+        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
     </div>
 
     <!-- Apps Script Code -->
