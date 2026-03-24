@@ -221,25 +221,27 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 }
 
 .pi-status.wd{background:#f5e0e0;color:#c94a2a;border:1px solid #f5c6bb;}
-.pi-status.wd::before{content:'WD · ';}
-.lb-wd{opacity:.45;text-decoration:line-through;}
-.fn-A{background:#e8f5ed;border-left:3px solid #2c6e3f;}
-.fn-B{background:#e8f0ff;border-left:3px solid #4a6abf;}
-.fn-C{background:#fffbe8;border-left:3px solid #b8922a;}
+.pi-status.lgg{background:#e8f5ed;color:#1a4a2a;border:1px solid #a3cfbb;}
+.pi-status.lno{background:#e8f0ff;color:#084298;border:1px solid #a3b8f0;}
 .fn-badge-A{background:#d1e7dd;color:#0a3622;}
 .fn-badge-B{background:#cfe2ff;color:#084298;}
 .fn-badge-C{background:#fff3cd;color:#664d03;}
+.prize-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap;}
+.prize-winner{background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+.prize-1st{background:#d1e7dd;color:#0a5c2a;border:1px solid #86c99a;}
+.prize-2nd{background:#e8f0ff;color:#084298;border:1px solid #93b4f0;}
+.prize-bmaker{background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;}
+.prize-booby{background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;}
 .award-section{margin-bottom:18px;}
 .award-section-title{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--accent2);padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--accent2);display:flex;align-items:center;gap:6px;}
 .award-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface);}
 .award-rank{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
 .award-info{flex:1;min-width:0;}
-.award-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.award-name{font-size:14px;font-weight:600;color:var(--text);}
 .award-meta{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
 .award-score{text-align:right;flex-shrink:0;}
 .award-score-val{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;color:var(--accent2);}
 .award-score-sub{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-.award-booby-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
 .award-rank-1{background:#fffbf0;border-color:#e8d89a;}
 .award-rank-2{background:#f8fafc;border-color:#c8d8e8;}
 .award-rank-3{background:#fdf8f4;border-color:#e0c8b0;}
@@ -285,6 +287,19 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 <!-- ══ ADMIN ══ -->
 <div id="tabAdmin" class="hidden">
   <div class="main">
+
+    <!-- Script URL -->
+    <div class="card">
+      <div class="card-title">
+        🔗 เชื่อมต่อ Google Sheets
+        <button class="btn-sm" onclick="adminLogout()">ออก</button>
+      </div>
+      <div class="form-group">
+        <label>Apps Script URL</label>
+        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
+    </div>
 
     <!-- Tournament Selector -->
     <div class="tourney-selector" id="tourneySelectorCard">
@@ -370,7 +385,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
       <div class="divider"></div>
       <div class="section-label">Bulk Import — ชื่อ, ฝ่าย, Gmail, กลุ่ม (ทีละบรรทัด)</div>
       <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,ฝ่าย IT,somchai@gmail.com,กลุ่ม 1&#10;สมหญิง รักดี,ฝ่ายการตลาด,somying@gmail.com,กลุ่ม 2"></textarea>
-      <button class="btn-primary" onclick="bulkImport()" style="margin-top:8px;padding:9px 18px;font-size:14px;">📋 Import ผู้เล่นทั้งหมด</button>
+      <button class="btn-sm" onclick="bulkImport()" style="margin-top:6px;">📋 Import</button>
     </div>
 
     <!-- Player List -->
@@ -383,20 +398,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <button class="btn-sm" onclick="clearAllPlayers()" style="color:var(--red);border-color:var(--red);">ล้างทั้งหมด</button>
         </div>
       </div>
-      <div id="adminPlayerList" style="padding:12px 12px 6px;"><div class="empty-msg" style="line-height:1.8;">กรุณา:<br>1. เลือกการแข่งขันจากรายการด้านบน<br>2. กดปุ่ม 🔄 โหลด เพื่อดึงรายชื่อผู้เล่น</div></div>
-    </div>
-
-    <!-- Script URL -->
-    <div class="card">
-      <div class="card-title">
-        🔗 เชื่อมต่อ Google Sheets
-        <button class="btn-sm" onclick="adminLogout()">ออก</button>
-      </div>
-      <div class="form-group">
-        <label>Apps Script URL</label>
-        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
+      <div id="adminPlayerList" style="padding:12px 12px 6px;"><div class="empty-msg">เลือกการแข่งขันและกด 🔄 โหลด</div></div>
     </div>
 
     <!-- Apps Script Code -->
@@ -536,8 +538,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
   <div class="main">
     <div class="card">
       <div class="card-title">🏆 Leaderboard
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
-          <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="lbRefreshIndicator">🔄 auto 60s</span>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="lbRefreshIndicator">🔄 60s</span>
           <button class="btn-sm" onclick="openAwardsModal()" style="background:var(--accent2);color:#fff;border-color:var(--accent2);">🏅 รางวัล</button>
           <button class="btn-sm" onclick="loadLeaderboard()">🔄 รีเฟรช</button>
         </div>
@@ -555,7 +557,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div class="flight-tab" onclick="setFlight(this,'A')">Flight A <span style="font-size:10px;opacity:.7">(0-12)</span></div>
         <div class="flight-tab" onclick="setFlight(this,'B')">Flight B <span style="font-size:10px;opacity:.7">(13-24)</span></div>
         <div class="flight-tab" onclick="setFlight(this,'C')">Flight C <span style="font-size:10px;opacity:.7">(25-36)</span></div>
-        <div class="flight-tab booby-tab" onclick="setFlight(this,'booby')">🐔 Booby</div>
+        <div class="flight-tab booby-tab" onclick="setFlight(this,'booby')">🐷 Booby</div>
       </div>
       <div id="lbPodium"></div>
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;">
@@ -691,15 +693,18 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 
 <!-- ══ AWARDS MODAL ══ -->
 <div id="awardsModal" class="hidden" style="position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.65);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px;">
-  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:680px;margin:auto;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
-    <div style="background:var(--accent2);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:auto;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .25s ease;">
+    <div style="background:var(--accent2);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
       <div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;">🏅 สรุปรางวัล</div>
         <div style="font-size:11px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="awardsModalTourney">—</div>
       </div>
-      <button onclick="closeAwardsModal()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+        <button onclick="exportAllAwardsPDF()" style="background:var(--red);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;white-space:nowrap;">📄 PDF รวม</button>
+        <button onclick="closeAwardsModal()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
+      </div>
     </div>
-    <div style="padding:16px;max-height:80vh;overflow-y:auto;" id="awardsModalBody">
+    <div style="padding:16px;max-height:82vh;overflow-y:auto;" id="awardsModalBody">
       <div class="empty-msg">กำลังโหลด...</div>
     </div>
   </div>
@@ -892,14 +897,14 @@ function getScores(tourneyName) {
   var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
   return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
     return {tourneyName:r[0],name:r[1],email:r[2],group:r[3],dept:r[4]||'',flight:r[5],
-            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,wd:r[12]===true,
-            scores:r.slice(13,31),pars:r.slice(31,49),putts:r.slice(49,67)};
+            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,lgg:r[12]===true,lno:r[13]===true,wd:r[14]===true,
+            scores:r.slice(15,33),pars:r.slice(33,51),putts:r.slice(51,69)};
   });
 }
 function submitScore(data) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()===0) {
-    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed','WD'];
+    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed','LGG','LNO','WD'];
     for(var n=1;n<=18;n++) h.push('H'+n+'_Score');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Par');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Putt');
@@ -914,9 +919,11 @@ function submitScore(data) {
     }
   }
   var confirmed = data.confirmed===true;
+  var lgg = data.lgg===true;
+  var lno = data.lno===true;
   var wd = data.wd===true;
   var row=[data.tourneyName,data.name,data.email,data.group,data.dept||'',data.flight,
-           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed,wd]
+           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed,lgg,lno,wd]
     .concat(data.scores).concat(data.pars).concat(data.putts);
   sh.appendRow(row);
   return {ok:true};
@@ -940,21 +947,6 @@ let tourneyList = [];
 let activeTourney = null;
 let lbData = [];
 let activeFlightFilter = 'lowgross';
-// email ของผู้ชนะ Low Gross ที่ Admin mark ให้ตัดออกจาก Low Net/Flight
-// key = tourneyName, value = Set of emails
-let lgExcludeMap = JSON.parse(localStorage.getItem('golf_lgExclude')||'{}');
-function getLgExclude(tourney){ return new Set(lgExcludeMap[tourney]||[]); }
-function saveLgExclude(tourney, emailSet){
-  lgExcludeMap[tourney] = [...emailSet];
-  localStorage.setItem('golf_lgExclude', JSON.stringify(lgExcludeMap));
-}
-function toggleLgExclude(email, tourney){
-  const s = getLgExclude(tourney);
-  if(s.has(email)) s.delete(email); else s.add(email);
-  saveLgExclude(tourney, s);
-  renderAwards(lbData); // re-render awards
-  renderLb(lbData);     // re-render leaderboard
-}
 let adminEditPlayer = null;
 let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
 
@@ -1211,7 +1203,6 @@ async function addPlayer() {
     document.getElementById('adName').value='';
     document.getElementById('adEmail').value='';
     document.getElementById('adDept').value='';
-    document.getElementById('adGroup').value='';
     await loadPlayersToAdmin();
     toast('✅ เพิ่มผู้เล่นแล้ว','ok');
   } catch(e){toast(e.message==='duplicate'?'Gmail นี้มีอยู่แล้ว':'❌ '+e.message,'err');}
@@ -1289,6 +1280,18 @@ function renderAdminList(players=[],scores=[]) {
         const sc=scoreMap[p.email.toLowerCase()];
         const flight=sc?calcFlight(sc.hcp):null;
         const isWD=sc&&sc.wd===true;
+        const isLGG=sc&&sc.lgg===true;
+        const isLNO=sc&&sc.lno===true;
+        let statusHtml='<div class="pi-status pending">รอสกอร์</div>';
+        if(sc){
+          if(isWD) statusHtml=`<div class="pi-status wd">WD</div>`;
+          else{
+            let tags='';
+            if(isLGG) tags+=`<span class="prize-tag prize-winner" style="font-size:9px;margin-left:3px;">LG🏆</span>`;
+            if(isLNO) tags+=`<span class="prize-tag prize-winner" style="font-size:9px;margin-left:3px;background:#e8f0ff;color:#084298;border-color:#a3b8f0;">LN🏆</span>`;
+            statusHtml=`<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span>${tags}</div>`;
+          }
+        }
         return `<div class="player-item" style="${isWD?'opacity:.6;':''}">
           <div class="pi-group">${g}</div>
           <div class="pi-info">
@@ -1296,14 +1299,19 @@ function renderAdminList(players=[],scores=[]) {
             </div>
             <div class="pi-email">${p.email}</div>
           </div>
-          ${sc
-            ? isWD
-              ? `<div class="pi-status wd">ถอนตัว</div>`
-              : `<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span></div>`
-            : '<div class="pi-status pending">รอสกอร์</div>'
-          }
-          <div style="display:flex;gap:5px;flex-shrink:0;">
-            ${sc?`<button class="btn-sm" onclick="toggleWD('${p.email}',${isWD})" style="color:${isWD?'var(--accent2)':'var(--red)'};border-color:${isWD?'var(--accent2)':'var(--red)'};" title="${isWD?'คืนสถานะ':'มาร์ค WD'}">${isWD?'↩ คืน':'WD'}</button>`:''}
+          ${statusHtml}
+          <div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+            ${sc?`
+              <button class="btn-sm" onclick="toggleFlag('${p.email}','wd',${isWD})"
+                style="color:${isWD?'var(--accent2)':'var(--red)'};border-color:${isWD?'var(--accent2)':'var(--red)'};"
+                title="${isWD?'คืนสถานะ':'ถอนตัว (WD)'}">${isWD?'↩WD':'WD'}</button>
+              <button class="btn-sm" onclick="toggleFlag('${p.email}','lgg',${isLGG})"
+                style="color:${isLGG?'var(--accent2)':'var(--bogey)'};border-color:${isLGG?'var(--accent2)':'var(--bogey)'};"
+                title="${isLGG?'ยกเลิก Low Gross Winner':'มาร์ค Low Gross Winner'}">LG${isLGG?'✓':'?'}</button>
+              <button class="btn-sm" onclick="toggleFlag('${p.email}','lno',${isLNO})"
+                style="color:${isLNO?'var(--accent2)':'#6a5acd'};border-color:${isLNO?'var(--accent2)':'#6a5acd'};"
+                title="${isLNO?'ยกเลิก Low Net Overall Winner':'มาร์ค Low Net Overall Winner'}">LN${isLNO?'✓':'?'}</button>
+            `:''}
             <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}','${p.dept||''}')" style="color:var(--accent2);border-color:var(--accent2);">✏️</button>
             <button class="btn-danger" onclick="removePlayer('${p.email}')">×</button>
           </div>
@@ -1761,7 +1769,13 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   ctx.textAlign='center';ctx.fillText('TIS Golf Club · Tri Petch Group',W/2,H-9);
 }
 
-
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
 function scoreColor(df){
   if(df===null)return '#ccc';if(df<=-2)return '#1a6b9a';if(df===-1)return '#c94a2a';
   if(df===0)return '#2c6e3f';if(df===1)return '#b8922a';return '#8a3a1a';
@@ -1929,8 +1943,6 @@ async function loadTourneyListForLb(autoLoad=false){
   }catch(e){}
 }
 async function onLbTourneyChange(){await loadLeaderboard();}
-let _lbRefreshTimer = null;
-
 async function loadLeaderboard(silent=false){
   const name=document.getElementById('lbTourneySelect')?.value;
   if(!scriptUrl||!name){renderLb([]);return;}
@@ -1938,76 +1950,62 @@ async function loadLeaderboard(silent=false){
   try{
     lbData=await api('getScores',{name});
     renderLb(lbData);
-    // อัพเดต awards modal ถ้าเปิดอยู่
-    if(!document.getElementById('awardsModal').classList.contains('hidden')) renderAwards(lbData);
-  }catch(e){if(!silent)toast('❌ '+e.message,'err');}
+    const am=document.getElementById('awardsModal');
+    if(am&&!am.classList.contains('hidden')) renderAwards(lbData);
+  }catch(e){if(!silent) toast('❌ '+e.message,'err');}
   if(!silent) loading(false);
-}
-
-function startLbAutoRefresh(){
-  stopLbAutoRefresh();
-  _lbRefreshTimer = setInterval(()=>{
-    // refresh เฉพาะตอนอยู่หน้า LB และไม่มี modal อื่นเปิดอยู่
-    const lbVisible = !document.getElementById('tabLb').classList.contains('hidden');
-    const noModal = document.getElementById('scShareModal').classList.contains('hidden')
-                 && document.getElementById('adminEditModal').classList.contains('hidden');
-    if(lbVisible && noModal) loadLeaderboard(true); // silent=true ไม่แสดง loading overlay
-  }, 60000); // 60 วินาที
-}
-function stopLbAutoRefresh(){
-  if(_lbRefreshTimer){ clearInterval(_lbRefreshTimer); _lbRefreshTimer=null; }
 }
 function setFlight(el,flight){
   activeFlightFilter=flight;
   document.querySelectorAll('.flight-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');renderLb(lbData);
 }
+function getPrizeTag(cls,label){return `<span class="prize-tag ${cls}">${label}</span>`;}
+
 function renderLb(data){
   let d=[...(data||[])];
-  const isBooby=activeFlightFilter==='booby';
-  const isLowGross=activeFlightFilter==='lowgross';
-  const isLowNet=activeFlightFilter==='lownet';
+  const isBooby   = activeFlightFilter==='booby';
+  const isLowGross= activeFlightFilter==='lowgross';
+  const isLowNet  = activeFlightFilter==='lownet';
 
-  // กรอง WD ออกเสมอ (ยกเว้นหน้า Booby ไม่ต้องกรอง)
+  // กรอง WD ออก (ยกเว้น Booby)
   if(!isBooby) d=d.filter(r=>!r.wd);
 
-  // กรอง lgExclude ออกใน Low Net และ Flight (ไม่กรองใน Low Gross และ Booby)
-  if(!isLowGross&&!isBooby){
-    const tourney = document.getElementById('lbTourneySelect')?.value||'';
-    const lgEx = getLgExclude(tourney);
-    if(lgEx.size>0) d=d.filter(r=>!lgEx.has((r.email||'').toLowerCase()));
-  }
-  // กรองตาม Flight (A/B/C เท่านั้น)
+  // Prize exclusion: lgg=ชนะ Low Gross → ตัดออกจาก net/flight/booby
+  //                  lno=ชนะ Low Net Overall → ตัดออกจาก flight/booby
+  if(!isLowGross && !isLowNet) d=d.filter(r=>!r.lgg);
+  if(!isLowGross && !isLowNet && !isBooby) {} // lno ตัดใน flight/booby ด้านล่าง
+
+  // กรองตาม Flight A/B/C
   if(!isBooby&&!isLowGross&&!isLowNet&&activeFlightFilter){
-    d=d.filter(r=>r.flight===activeFlightFilter);
+    d=d.filter(r=>r.flight===activeFlightFilter).filter(r=>!r.lno);
   }
+  if(isBooby) d=d.filter(r=>!r.lgg&&!r.lno);
 
   // จัดเรียง
-  if(isBooby){
-    d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
-  }else if(isLowGross){
-    d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
-  }else{
-    // Net (Flight A/B/C + Low Net Overall): Net น้อย→มาก, tie H'cap ต่ำ
-    d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
-  }
+  if(isBooby)      d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
+  else if(isLowGross) d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
+  else             d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
 
-  const podEl=document.getElementById('lbPodium'),tblEl=document.getElementById('lbTable');
+  const podEl=document.getElementById('lbPodium'), tblEl=document.getElementById('lbTable');
   if(!d.length){podEl.innerHTML='';tblEl.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>';return;}
 
   const medals=['🥇','🥈','🥉'];
-
-  // ─── PODIUM (ใช้ร่วมกันทุก mode) ───
+  const mainVal  = r=>isLowGross?r.gross:r.net;
+  const mainLabel= isLowGross?'Gross':'Net';
+  const podMedals= isBooby?['🐷','🐷','🐷']:medals;
+  const medalColors=['var(--gold)','#7a8a9a','#a0673a'];
   const top=d.slice(0,3);
   const podOrder=top.length>=2?[top[1],top[0],top[2]].filter(Boolean):[top[0]];
   const podCls=['pod-2','pod-1','pod-3'];
-  // Low Gross → แสดง Gross ในกราฟ | ทุกอื่น (Flight / Booby) → แสดง Net
-  const mainVal=r=>isLowGross?r.gross:r.net;
-  const mainLabel=isLowGross?'Gross':'Net';
-  const podMedals=isBooby?['🐔','🐓','🎗️']:medals;
-  const medalColors=['var(--gold)','#7a8a9a','#a0673a'];
+
+  // Low Net tab: สีพื้นแยก Flight
+  const flightBg    ={'A':'#f0faf4','B':'#f0f4ff','C':'#fffdf0'};
+  const flightBorder={'A':'#a3cfbb','B':'#a3b8f0','C':'#e8d080'};
+
+  // ─── PODIUM ───
   podEl.innerHTML=`<div class="podium">${podOrder.map((p,podIdx)=>{
-    const rank=top.indexOf(p); // rank=ตำแหน่งจริง(0=ชนะ), podIdx=ตำแหน่งบนแท่น(1=กลาง)
+    const rank=top.indexOf(p);
     return `<div class="pod">
       <div class="pod-name">${p.name}</div>
       <div class="pod-net" style="color:${medalColors[rank]}">${mainVal(p)}</div>
@@ -2015,41 +2013,31 @@ function renderLb(data){
       <div class="pod-block ${podCls[podIdx]}">${podMedals[rank]}</div>
     </div>`;}).join('')}</div>`;
 
-  // ─── TABLE ───
-  if(isBooby){
-    const boobyTag=i=>{
-      if(i===0) return `<span style="background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;">🐔 Booby Maker</span>`;
-      if(i===1) return `<span style="background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;">🐓 Booby</span>`;
+  // helper: prize label per mode & rank
+  function prizeLabel(mode, i){
+    if(mode==='booby'){
+      if(i===0) return getPrizeTag('prize-bmaker','🐷 Booby Maker');
+      if(i===1) return getPrizeTag('prize-booby','🐷 Booby');
       return '';
-    };
+    }
+    if(i===0) return getPrizeTag('prize-winner','🏆 Winner');
+    if(mode==='flight'){
+      if(i===1) return getPrizeTag('prize-1st','🥈 1st Runner-up');
+      if(i===2) return getPrizeTag('prize-2nd','🥉 2nd Runner-up');
+    }
+    return '';
+  }
+
+  // ─── TABLE ───
+  const mode = isBooby?'booby':isLowGross?'gross':isLowNet?'lownet':'flight';
+  const showPrize= true;
+
+  if(isLowNet){
     tblEl.innerHTML=`<table class="lb-table">
       <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
-        return `<tr class="${i<2?'rank-'+(i+1):''}">
-          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:15px;">'+(i===0?'🐔':'🐓')+'</span>':i+1}</td>
-          <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
-            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
-              <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
-            </div></td>
-          <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
-          <td>${r.hcp}</td>
-          <td class="lb-net">${r.net}</td>
-          <td style="text-align:center;">${boobyTag(i)}</td>
-        </tr>`;}).join('')}</tbody></table>`;
-    return;
-  }
-
-  if(isLowNet){
-    // Low Net Overall — แสดงสีพื้นแยก Flight
-    const flightBg={'A':'#f0faf4','B':'#f0f4ff','C':'#fffdf0'};
-    const flightBorder={'A':'#a3cfbb','B':'#a3b8f0','C':'#e8d080'};
-    tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th></tr></thead>
-      <tbody>${d.map((r,i)=>{
-        const diff=r.gross-(r.par||72);
-        const bg=flightBg[r.flight]||'';
-        const bd=flightBorder[r.flight]||'var(--border)';
+        const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
         return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
           <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
@@ -2059,12 +2047,33 @@ function renderLb(data){
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
+          <td style="text-align:center;">${prizeLabel('lownet',i)}</td>
         </tr>`;}).join('')}</tbody></table>`;
     return;
   }
+
+  if(isBooby){
+    tblEl.innerHTML=`<table class="lb-table">
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <tbody>${d.map((r,i)=>{
+        const diff=r.gross-(r.par||72);
+        return `<tr class="${i<2?'rank-'+(i+1):''}">
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
+          <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">
+              <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
+            </div></td>
+          <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
+          <td>${r.hcp}</td>
+          <td class="lb-net">${r.net}</td>
+          <td style="text-align:center;">${prizeLabel('booby',i)}</td>
+        </tr>`;}).join('')}</tbody></table>`;
+    return;
+  }
+
   // Low Gross / Flight A/B/C
   tblEl.innerHTML=`<table class="lb-table">
-    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th></tr></thead>
+    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
       return `<tr class="${i<3?'rank-'+(i+1):''}">
@@ -2076,6 +2085,7 @@ function renderLb(data){
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
         <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
+        <td style="text-align:center;">${prizeLabel(isLowGross?'gross':'flight',i)}</td>
       </tr>`;}).join('')}</tbody></table>`;
 }
 
@@ -2140,88 +2150,109 @@ if ('serviceWorker' in navigator) {
 }
 
 // ════════════════════════════════
-// WD TOGGLE (Admin)
+// BOOBY IMAGE SRC
 // ════════════════════════════════
-async function toggleWD(email, currentWD) {
+const BOOBY_IMG_SRC =  + BOOBY_SRC + r;
+
+// ════════════════════════════════
+// FLAG TOGGLE (WD / LGG / LNO)
+// ════════════════════════════════
+async function toggleFlag(email, flag, current) {
   if(!adminIn){toast('กรุณา Login Admin ก่อน','err');return;}
   if(!activeTourney){toast('กรุณาเลือกการแข่งขันก่อน','err');return;}
-  const action = currentWD ? 'คืนสถานะผู้เล่น' : 'มาร์ค WD (ถอนตัว)';
+  const labels={'wd':'WD (ถอนตัว)','lgg':'Low Gross Winner','lno':'Low Net Overall Winner'};
+  const action = current ? `ยกเลิก ${labels[flag]}` : `มาร์ค ${labels[flag]}`;
   if(!confirm(`${action} สำหรับ ${email}?`)) return;
-  loading(true, currentWD ? 'คืนสถานะ...' : 'มาร์ค WD...');
+  loading(true, action+'...');
   try {
-    // โหลดสกอร์เดิมแล้ว submit ใหม่พร้อม wd flag
     const allSc = await api('getScores',{name:activeTourney.tourneyName});
     const sc = allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
     if(!sc){toast('ไม่พบสกอร์ของผู้เล่นนี้','err');loading(false);return;}
-    await apiPost({
-      action:'submitScore', adminForce:true, confirmed:sc.confirmed,
-      wd: !currentWD,  // toggle
+    const payload = {
+      action:'submitScore', adminForce:true,
+      confirmed:sc.confirmed,
+      wd:  flag==='wd'  ? !current : (sc.wd===true),
+      lgg: flag==='lgg' ? !current : (sc.lgg===true),
+      lno: flag==='lno' ? !current : (sc.lno===true),
       tourneyName:activeTourney.tourneyName,
       name:sc.name, email:sc.email, group:sc.group, dept:sc.dept||'', flight:sc.flight,
       gross:sc.gross, par:sc.par, hcp:sc.hcp, net:sc.net, puttsTotal:sc.puttsTotal,
       scores:[...sc.scores], pars:[...sc.pars], putts:[...sc.putts]
-    });
-    toast(currentWD ? '↩ คืนสถานะแล้ว' : '🚩 มาร์ค WD แล้ว', 'ok');
+    };
+    await apiPost(payload);
+    toast(`✅ ${action} แล้ว`,'ok');
     await loadPlayersToAdmin();
   } catch(e){ toast('❌ '+e.message,'err'); }
   loading(false);
 }
 
 // ════════════════════════════════
-// AWARDS MODAL + PDF
+// AUTO-REFRESH
 // ════════════════════════════════
-async function openAwardsModal() {
-  if(!scriptUrl){ toast('กรุณาตั้งค่า Apps Script URL ก่อนครับ','err'); return; }
-  let tourneyName = document.getElementById('lbTourneySelect')?.value || '';
-  // ถ้า dropdown ยังว่าง ให้โหลด list ก่อนแล้วเลือกอันแรก
-  if(!tourneyName){
-    loading(true,'โหลดรายการการแข่งขัน...');
-    try{
-      const list = await api('getTourneyList');
-      const sel = document.getElementById('lbTourneySelect');
-      sel.innerHTML='<option value="">— เลือกการแข่งขัน —</option>'+
-        list.map(t=>`<option value="${t.tourneyName}">${t.tourneyName} · ${fmtD(t.date)}</option>`).join('');
-      if(list.length){ sel.value=list[0].tourneyName; tourneyName=list[0].tourneyName; }
-    }catch(e){ loading(false); toast('❌ '+e.message,'err'); return; }
-    loading(false);
-  }
-  if(!tourneyName){ toast('ไม่พบรายการการแข่งขัน','err'); return; }
-  loading(true,'โหลดข้อมูลรางวัล...');
+let _lbRefreshTimer = null;
+async function loadLeaderboardSilent(){
+  const name=document.getElementById('lbTourneySelect')?.value;
+  if(!scriptUrl||!name) return;
   try{
-    lbData = await api('getScores',{name:tourneyName});
-    loading(false);
-    document.getElementById('awardsModal').classList.remove('hidden');
-    document.getElementById('awardsModalTourney').textContent = tourneyName;
-    renderAwards(lbData);
-  }catch(e){ loading(false); toast('❌ '+e.message,'err'); }
+    lbData=await api('getScores',{name});
+    renderLb(lbData);
+    if(document.getElementById('awardsModal')&&!document.getElementById('awardsModal').classList.contains('hidden'))
+      renderAwards(lbData);
+  }catch(e){}
 }
-function closeAwardsModal() {
-  document.getElementById('awardsModal').classList.add('hidden');
+function startLbAutoRefresh(){
+  stopLbAutoRefresh();
+  _lbRefreshTimer=setInterval(()=>{
+    const lbVisible=!document.getElementById('tabLb').classList.contains('hidden');
+    if(lbVisible) loadLeaderboardSilent();
+  },60000);
+}
+function stopLbAutoRefresh(){
+  if(_lbRefreshTimer){clearInterval(_lbRefreshTimer);_lbRefreshTimer=null;}
 }
 
-function getAwardsData(data, tourney) {
-  tourney = tourney || document.getElementById('awardsModalTourney').textContent || '';
-  const lgEx = getLgExclude(tourney);
-  const d = (data||[]).filter(r=>!r.wd);
-  // กรองผู้ชนะ Low Gross ออกจาก Net/Flight (ถ้า Admin mark ไว้)
-  const dNet = d.filter(r=>!lgEx.has(r.email?.toLowerCase()));
+// ════════════════════════════════
+// AWARDS MODAL
+// ════════════════════════════════
+function getAwardsData(data){
+  const d=(data||[]).filter(r=>!r.wd);
+  const noLgg=d.filter(r=>!r.lgg);
+  const noLggLno=noLgg.filter(r=>!r.lno);
   return {
-    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,3),
-    lowNet:   [...dNet].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightA:  [...dNet].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightB:  [...dNet].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightC:  [...dNet].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    booby:    [...d].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
-    lgEx,
+    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
+    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
+    flightA:  [...noLggLno].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightB:  [...noLggLno].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightC:  [...noLggLno].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    booby:    [...noLggLno].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
   };
 }
 
-function awardsRowHtml(p, rank, val, sub, extraTag='') {
-  const cls = rank<=3?`award-rank-${rank}`:'';
+function openAwardsModal(){
+  const name=document.getElementById('lbTourneySelect')?.value||'—';
+  if(!lbData||!lbData.length){
+    if(scriptUrl&&name!=='—'){
+      loading(true,'โหลดข้อมูลรางวัล...');
+      api('getScores',{name}).then(s=>{lbData=s;loading(false);
+        document.getElementById('awardsModal').classList.remove('hidden');
+        document.getElementById('awardsModalTourney').textContent=name;
+        renderAwards(lbData);
+      }).catch(e=>{loading(false);toast('❌ '+e.message,'err');});
+      return;
+    }
+    toast('กรุณาเปิดหน้า Leaderboard และเลือกการแข่งขันก่อนครับ','err');return;
+  }
+  document.getElementById('awardsModal').classList.remove('hidden');
+  document.getElementById('awardsModalTourney').textContent=name;
+  renderAwards(lbData);
+}
+function closeAwardsModal(){document.getElementById('awardsModal').classList.add('hidden');}
+
+function awardsRow(p,rank,val,sub,extraTag=''){
   const medals=['🥇','🥈','🥉'];
-  const icon = rank<=3?medals[rank-1]:rank;
+  const cls=rank<=3?`award-rank-${rank}`:'';
   return `<div class="award-row ${cls}">
-    <div class="award-rank">${icon}</div>
+    <div class="award-rank">${rank<=3?medals[rank-1]:rank}</div>
     <div class="award-info">
       <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
       <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
@@ -2234,262 +2265,319 @@ function awardsRowHtml(p, rank, val, sub, extraTag='') {
   </div>`;
 }
 
-function awardsSectionHtml(title, players, getVal, getSub) {
-  const rows = players.length
-    ? players.map((p,i)=>awardsRowHtml(p,i+1,getVal(p),getSub(p))).join('')
-    : `<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>`;
+function awardsSection(title,players,getVal,getSub,prizeClass,prizeLabels,hasPdf=true){
+  const btnPdf=hasPdf?`<button onclick="exportSectionPDF('${title.replace(/['"]/g,'').replace(/[^\w\s฀-๿]/g,'').trim()}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>`:'';
+  const rows=players.length
+    ?players.map((p,i)=>{
+        const tag=prizeLabels&&prizeLabels[i]?`<div style="margin-top:3px;"><span class="prize-tag ${prizeClass[i]}">${prizeLabels[i]}</span></div>`:'';
+        return awardsRow(p,i+1,getVal(p),getSub(p),tag);
+      }).join('')
+    :'<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
   return `<div class="award-section">
-    <div class="award-section-title">${title}
-      <button onclick="exportSectionPDF('${title.replace(/['"<>]/g,'')}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
-    </div>
+    <div class="award-section-title">${title}${btnPdf}</div>
     ${rows}
   </div>`;
 }
 
-function renderAwards(data) {
-  const body = document.getElementById('awardsModalBody');
-  if (!data||!data.length) { body.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>'; return; }
-  const tourney = document.getElementById('awardsModalTourney').textContent || '';
-  const {lowGross,lowNet,flightA,flightB,flightC,booby,lgEx} = getAwardsData(data, tourney);
-  const isAdminView = adminIn;
+function renderAwards(data){
+  const body=document.getElementById('awardsModalBody');
+  if(!body) return;
+  if(!data||!data.length){body.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>';return;}
+  const {lowGross,lowNet,flightA,flightB,flightC,booby}=getAwardsData(data);
 
-  // Low Gross rows — มีปุ่ม mark สำหรับ Admin
-  const lgRows = lowGross.length
-    ? lowGross.map((p,i)=>{
-        const isExcluded = lgEx.has((p.email||'').toLowerCase());
-        const markBtn = isAdminView
-          ? `<button onclick="toggleLgExclude('${(p.email||'').toLowerCase()}','${tourney.replace(/'/g,"\'")}')"
-               style="margin-top:4px;display:block;width:100%;font-size:10px;padding:2px 6px;border-radius:4px;cursor:pointer;border:1px solid ${isExcluded?'#2c6e3f':'#b8922a'};background:${isExcluded?'#d1e7dd':'#fff3cd'};color:${isExcluded?'#1a4a2a':'#856404'};">
-               ${isExcluded?'✅ ตัดออกจาก Net แล้ว — คลิกยกเลิก':'⚠️ ตัด Low Gross Winner ออกจาก Net'}
-             </button>` : '';
-        return awardsRowHtml(p,i+1,p.gross,`Gross · H'cap ${p.hcp}`,markBtn);
-      }).join('')
-    : '<div style="padding:10px 12px;font-size:13px;color:var(--text3);">ยังไม่มีผู้เล่น</div>';
-
-  const lgNote = lgEx.size>0
-    ? `<div style="font-size:11px;color:#856404;background:#fff3cd;border-radius:6px;padding:6px 10px;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;">⚠️ ตัด ${lgEx.size} คน ออกจากการคำนวณ Low Net / Flight</div>`
-    : '';
-
-  const boobyIcons=['🐔','🐓'];
-  const boobyStyles=['background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;','background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'];
-  const boobyLabels=['🐔 Booby Maker','🐓 Booby'];
-  const boobyRows = booby.slice(0,2).map((p,i)=>`<div class="award-row award-booby-${i+1}">
-    <div class="award-rank">${boobyIcons[i]}</div>
-    <div class="award-info">
-      <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
-      <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
-    </div>
-    <div class="award-score">
-      <div class="award-score-val" style="color:#c94a2a;">${p.net}</div>
-      <div class="award-score-sub">Net · H'cap ${p.hcp}</div>
-      <div style="margin-top:3px;"><span class="award-booby-tag" style="${boobyStyles[i]}">${boobyLabels[i]}</span></div>
-    </div>
-  </div>`).join('');
+  const boobyRows=booby.slice(0,2).map((p,i)=>{
+    const bStyles=['background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;','background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'];
+    const bLabels=['🐷 Booby Maker','🐷 Booby'];
+    return `<div class="award-row award-booby-${i+1}">
+      <div class="award-rank"><img src="${BOOBY_IMG_SRC}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;"></div>
+      <div class="award-info">
+        <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+        <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
+      </div>
+      <div class="award-score">
+        <div class="award-score-val" style="color:#c94a2a;">${p.net}</div>
+        <div class="award-score-sub">Net · H'cap ${p.hcp}</div>
+        <div style="margin-top:3px;"><span class="prize-tag" style="${bStyles[i]}">${bLabels[i]}</span></div>
+      </div>
+    </div>`;
+  }).join('');
 
   body.innerHTML =
+    awardsSection('🏌️ Low Gross',lowGross,p=>p.gross,p=>`Gross · H'cap ${p.hcp}`,['prize-winner'],['🏆 Winner']) +
+    awardsSection('🏆 Low Net Overall',lowNet,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner'],['🏆 Winner']) +
+    awardsSection('🟢 Flight A (H'cap 0–12)',flightA,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
+    awardsSection('🔵 Flight B (H'cap 13–24)',flightB,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
+    awardsSection('🟡 Flight C (H'cap 25–36)',flightC,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
     `<div class="award-section">
-      <div class="award-section-title">🏌️ Low Gross
-        <button onclick="exportSectionPDF('Low Gross',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
+      <div class="award-section-title">🐷 Booby
+        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
       </div>
-      ${lgNote}${lgRows}
-    </div>` +
-    awardsSectionHtml('🏆 Low Net Overall', lowNet, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    awardsSectionHtml('🟢 Flight A (Hcap 0-12)', flightA, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    awardsSectionHtml('🔵 Flight B (Hcap 13-24)', flightB, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    awardsSectionHtml('🟡 Flight C (Hcap 25-36)', flightC, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
-    `<div class="award-section">
-      <div class="award-section-title">🐔 Booby
-        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
-      </div>
-      ${booby.length>=2 ? boobyRows : '<div style="padding:10px 12px;font-size:13px;color:var(--text3);">ต้องมีผู้เล่นอย่างน้อย 2 คน</div>'}
+      ${booby.length>=2?boobyRows:'<div style="padding:10px;font-size:13px;color:var(--text3);">ต้องมีผู้เล่นอย่างน้อย 2 คน</div>'}
     </div>`;
 }
 
 // ════════════════════════════════
-// PDF EXPORT (Canvas-based)
+// PDF EXPORT
 // ════════════════════════════════
-function exportSectionPDF(sectionTitle, btn) {
-  const tourneyName = document.getElementById('awardsModalTourney').textContent || '';
-  const {lowGross,flightA,flightB,flightC,booby} = getAwardsData(lbData);
-  const sectionMap = {
-    '🏌️ Low Gross': {players:lowGross, getVal:p=>p.gross, getSub:p=>`Gross · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
-    'Flight A (Hcap 0-12)': {players:flightA, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#2c6e3f', isBooby:false},
-    'Flight B (Hcap 13-24)': {players:flightB, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#084298', isBooby:false},
-    'Flight C (Hcap 25-36)': {players:flightC, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#664d03', isBooby:false},
-    'Booby': {players:booby, getVal:p=>p.net, getSub:p=>`Net · H'cap ${p.hcp}`, color:'#c94a2a', isBooby:true},
-  };
-  // clean key match
-  const key = Object.keys(sectionMap).find(k=>sectionTitle.includes(k.replace(/[🏌️🟢🔵🟡]/g,'').trim())||sectionTitle.includes(k));
-  const sec = sectionMap[key]||sectionMap[Object.keys(sectionMap)[0]];
-
-  const canvas = document.createElement('canvas');
-  const DPR=2, W=600, ROW_H=80, HEADER_H=130, CHART_H=220, FOOTER_H=50;
-  const H = HEADER_H + CHART_H + (sec.players.length*ROW_H) + FOOTER_H + 20;
-  canvas.width=W*DPR; canvas.height=H*DPR;
-  canvas.style.width=W+'px'; canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d');
-  ctx.scale(DPR,DPR);
-
-  const C={bg:'#fffdf5',green:'#1a4a2a',green2:'#2c6e3f',gold:'#c9a830',
-           text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',
-           white:'#ffffff',accent:sec.color};
-  const medals=['🥇','🥈','🥉'];
-  const podColors=[C.gold,'#8a9aaa','#a0673a'];
-  const boobyIcons=['🐔','🐓'];
-
-  // BG
-  ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
-
-  // Header bar
-  ctx.fillStyle=C.green; roundRect(ctx,0,0,W,HEADER_H,0); ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.04)';
-  for(let i=0;i<W;i+=10) ctx.fillRect(i,0,5,HEADER_H);
-
-  // Logo
-  const logoImg=new Image();
-  logoImg.src=LOGO_SRC;
-
-  // Title text (draw immediately, logo async)
-  ctx.fillStyle='rgba(255,255,255,.55)'; ctx.font='11px "IBM Plex Mono",sans-serif';
-  ctx.textAlign='center'; ctx.fillText(tourneyName, W/2, 28);
-  ctx.fillStyle='#fff'; ctx.font='bold 26px "Cormorant Garamond",serif';
-  ctx.fillText(sectionTitle.replace(/[🏌️🟢🔵🟡🐔]/gu,'').trim(), W/2, 64);
-  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='12px "IBM Plex Mono",sans-serif';
-  ctx.fillText('ผลการแข่งขัน · '+new Date().toLocaleDateString('th-TH'), W/2, 88);
-
-  // BAR CHART
-  const chartY=HEADER_H+16;
-  const players=sec.players.slice(0,3);
-  if(players.length>0){
-    const maxVal=Math.max(...players.map(p=>sec.getVal(p)))||1;
-    const minVal=Math.min(...players.map(p=>sec.getVal(p)));
-    // golf = น้อยดี → ปรับสเกลกลับด้าน
-    const isBoobyChart=sec.isBooby;
-    const BAR_AREA_H=CHART_H-40;
-    const BAR_W=100, GAP=40;
-    const totalW=players.length*(BAR_W+GAP)-GAP;
-    const startX=(W-totalW)/2;
-
-    players.forEach((p,i)=>{
-      const val=sec.getVal(p);
-      // สูงสุดของคนที่ชนะ = แท่งสูงสุด
-      let ratio;
-      if(players.length===1) ratio=0.7;
-      else {
-        const sorted=isBoobyChart?[...players].sort((a,b)=>b.net-a.net):
-                                  isNaN(val)?0:[...players].sort((a,b)=>a.net-b.net||a.gross-b.gross);
-        // แท่งที่ 1 สูงสุด ลดลงตาม rank
-        ratio = [0.85,0.65,0.5][i];
-      }
-      const barH=Math.max(30, BAR_AREA_H*ratio);
-      const bx=startX+i*(BAR_W+GAP);
-      const by=chartY+BAR_AREA_H-barH+10;
-
-      // Bar shadow
-      ctx.fillStyle='rgba(0,0,0,.08)';
-      roundRect(ctx,bx+3,by+3,BAR_W,barH,8); ctx.fill();
-
-      // Bar gradient
-      const grad=ctx.createLinearGradient(bx,by,bx,by+barH);
-      grad.addColorStop(0, i===0?C.gold:i===1?'#8a9aaa':'#b08060');
-      grad.addColorStop(1, i===0?'#a07820':i===1?'#607080':'#806040');
-      ctx.fillStyle=grad;
-      roundRect(ctx,bx,by,BAR_W,barH,8); ctx.fill();
-
-      // Medal icon on bar
-      ctx.font='24px sans-serif'; ctx.textAlign='center';
-      ctx.fillText(sec.isBooby?boobyIcons[i]||'':medals[i]||'', bx+BAR_W/2, by+30);
-
-      // Score value
-      ctx.fillStyle='#fff'; ctx.font='bold 22px "IBM Plex Mono",sans-serif';
-      ctx.fillText(String(val), bx+BAR_W/2, by+barH-12);
-
-      // Name below bar
-      ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif';
-      const shortName=p.name.length>12?p.name.substring(0,11)+'…':p.name;
-      ctx.fillText(shortName, bx+BAR_W/2, chartY+BAR_AREA_H+26);
-      ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
-      ctx.fillText(sec.getSub(p), bx+BAR_W/2, chartY+BAR_AREA_H+42);
-    });
-  }
-
-  // Divider
-  const listY=HEADER_H+CHART_H+10;
-  ctx.strokeStyle=C.border; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(24,listY); ctx.lineTo(W-24,listY); ctx.stroke();
-
-  // Player rows
-  sec.players.forEach((p,i)=>{
-    const ry=listY+8+i*ROW_H;
-    // row bg
-    ctx.fillStyle=i%2===0?C.white:'#f8f6f2';
-    roundRect(ctx,20,ry,W-40,ROW_H-6,8); ctx.fill();
-    ctx.strokeStyle=C.border; ctx.lineWidth=.5;
-    roundRect(ctx,20,ry,W-40,ROW_H-6,8); ctx.stroke();
-
-    // Rank
-    ctx.font='22px sans-serif'; ctx.textAlign='left';
-    ctx.fillText(sec.isBooby?(boobyIcons[i]||String(i+1)):(medals[i]||String(i+1)), 30, ry+42);
-
-    // Name
-    ctx.fillStyle=C.text; ctx.font='bold 15px "Sarabun",sans-serif'; ctx.textAlign='left';
-    ctx.fillText(p.name, 66, ry+28);
-    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
-    ctx.fillText((p.group||'')+(p.dept?' · '+p.dept:''), 66, ry+46);
-
-    // Score
-    ctx.fillStyle=sec.isBooby?'#c94a2a':C.accent;
-    ctx.font='bold 24px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-    ctx.fillText(String(sec.getVal(p)), W-30, ry+34);
-    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
-    ctx.fillText(sec.getSub(p), W-30, ry+52);
-
-    // Flight badge
-    const fbColors={'A':['#d1e7dd','#0a3622'],'B':['#cfe2ff','#084298'],'C':['#fff3cd','#664d03']};
-    const [fbg,ftc]=fbColors[p.flight]||['#eee','#333'];
-    ctx.fillStyle=fbg; roundRect(ctx,W-90,ry+10,36,16,8); ctx.fill();
-    ctx.fillStyle=ftc; ctx.font='bold 9px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(p.flight, W-72, ry+22);
-
-    // Booby tag
-    if(sec.isBooby&&i<2){
-      const btag=i===0?'Booby Maker':'Booby';
-      ctx.fillStyle=i===0?'#fde8e3':'#fff0e8';
-      roundRect(ctx,66,ry+52,btag.length*7+12,16,4); ctx.fill();
-      ctx.fillStyle=i===0?'#c94a2a':'#e07a40'; ctx.font='bold 9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
-      ctx.fillText(btag, 72, ry+64);
-    }
-  });
-
-  // Footer
-  ctx.fillStyle=C.green; ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
-  const logoSmall=new Image(); logoSmall.src=LOGO_SRC;
-  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-  ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'), W/2, H-FOOTER_H+20);
-  ctx.fillText(tourneyName, W/2, H-FOOTER_H+36);
-
-  // Draw logo async then download
-  const doDownload = () => {
-    try{ctx.drawImage(logoImg, W/2-130, H-FOOTER_H+4, 28, 28);}catch(e){}
-    const link=document.createElement('a');
-    const safeTitle=sectionTitle.replace(/[^\w\sก-๙]/g,'').trim().replace(/\s+/g,'-');
-    link.download=`award-${safeTitle}-${tourneyName}.png`;
-    link.href=canvas.toDataURL('image/png');
-    link.click();
-    toast('✅ บันทึกรูปแล้ว','ok');
-    if(btn){btn.textContent='⬇ PDF';btn.disabled=false;}
-  };
-  if(btn){btn.textContent='⏳...';btn.disabled=true;}
-  if(logoImg.complete) doDownload();
-  else logoImg.onload=doDownload;
-}
-
-function roundRect(ctx,x,y,w,h,r){
+function roundRectPdf(ctx,x,y,w,h,r){
   ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
   ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
   ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
   ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
   ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+function getSectionConfig(sectionKey){
+  const {lowGross,lowNet,flightA,flightB,flightC,booby}=getAwardsData(lbData);
+  const cfg={
+    'Low Gross':          {players:lowGross,getVal:p=>p.gross,getSub:p=>`Gross · H'cap ${p.hcp}`,color:'#1a4a2a',isBooby:false,prizeLabels:['🏆 Winner']},
+    'Low Net Overall':    {players:lowNet,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#084298',isBooby:false,prizeLabels:['🏆 Winner']},
+    'Flight A':           {players:flightA,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#0a5c2a',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+    'Flight B':           {players:flightB,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#084298',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+    'Flight C':           {players:flightC,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#664d03',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+    'Booby':              {players:booby,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#c94a2a',isBooby:true,prizeLabels:['🐷 Booby Maker','🐷 Booby']},
+  };
+  return Object.entries(cfg).find(([k])=>sectionKey.includes(k))?.[1]||cfg['Low Gross'];
+}
+
+function exportSectionPDF(sectionTitle,btn){
+  const tourneyName=document.getElementById('awardsModalTourney').textContent||'';
+  const sec=getSectionConfig(sectionTitle);
+  const canvas=document.createElement('canvas');
+  const DPR=2,W=600,ROW_H=72,HEADER_H=120,CHART_H=200,FOOTER_H=46;
+  const H=HEADER_H+CHART_H+(sec.players.length*ROW_H)+FOOTER_H+24;
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  const ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);
+  const C={bg:'#fffdf5',green:'#1a4a2a',gold:'#c9a830',text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',white:'#fff'};
+  const medals=['🥇','🥈','🥉'];
+  const podColors=[C.gold,'#8a9aaa','#a0673a'];
+
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=C.green;roundRectPdf(ctx,0,0,W,HEADER_H,0);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='11px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+  ctx.fillText(tourneyName,W/2,26);
+  ctx.fillStyle='#fff';ctx.font='bold 24px "Cormorant Garamond",serif';
+  ctx.fillText(sectionTitle,W/2,60);
+  ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='11px "IBM Plex Mono",sans-serif';
+  ctx.fillText('ผลการแข่งขัน · '+new Date().toLocaleDateString('th-TH'),W/2,82);
+
+  // BAR CHART
+  const chartY=HEADER_H+12;
+  const players=sec.players.slice(0,3);
+  if(players.length>0){
+    const BAR_AREA_H=CHART_H-48,BAR_W=90,GAP=36;
+    const totalW=players.length*(BAR_W+GAP)-GAP;
+    const startX=(W-totalW)/2;
+    const ratios=[0.85,0.65,0.50];
+    players.forEach((p,i)=>{
+      const barH=Math.max(28,BAR_AREA_H*ratios[i]);
+      const bx=startX+i*(BAR_W+GAP),by=chartY+BAR_AREA_H-barH+8;
+      ctx.fillStyle='rgba(0,0,0,.07)';roundRectPdf(ctx,bx+3,by+3,BAR_W,barH,7);ctx.fill();
+      const grad=ctx.createLinearGradient(bx,by,bx,by+barH);
+      grad.addColorStop(0,i===0?C.gold:i===1?'#8a9aaa':'#b08060');
+      grad.addColorStop(1,i===0?'#a07820':i===1?'#607080':'#806040');
+      ctx.fillStyle=grad;roundRectPdf(ctx,bx,by,BAR_W,barH,7);ctx.fill();
+      // icon
+      if(sec.isBooby){
+        const bi=new Image();bi.src=BOOBY_IMG_SRC;
+        try{ctx.drawImage(bi,bx+BAR_W/2-12,by+4,24,24);}catch(e){ctx.font='18px sans-serif';ctx.fillText('🐷',bx+BAR_W/2,by+26);}
+      }else{
+        ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText(medals[i]||'',bx+BAR_W/2,by+26);
+      }
+      // score on bar
+      ctx.fillStyle='#fff';ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+      ctx.fillText(String(sec.getVal(p)),bx+BAR_W/2,by+barH-10);
+      // name under bar
+      ctx.fillStyle=C.text;ctx.font='bold 12px "Sarabun",sans-serif';ctx.textAlign='center';
+      const nm=p.name.length>13?p.name.slice(0,12)+'…':p.name;
+      ctx.fillText(nm,bx+BAR_W/2,chartY+BAR_AREA_H+22);
+      // flight badge
+      const fbg={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'}[p.flight]||'#eee';
+      const ftc={'A':'#0a3622','B':'#084298','C':'#664d03'}[p.flight]||'#333';
+      ctx.fillStyle=fbg;roundRectPdf(ctx,bx+BAR_W/2-14,chartY+BAR_AREA_H+26,28,14,7);ctx.fill();
+      ctx.fillStyle=ftc;ctx.font='bold 8px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+      ctx.fillText(p.flight,bx+BAR_W/2,chartY+BAR_AREA_H+36);
+      // sub
+      ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
+      ctx.fillText(sec.getSub(p),bx+BAR_W/2,chartY+BAR_AREA_H+50);
+    });
+  }
+
+  // Divider
+  const listY=HEADER_H+CHART_H+8;
+  ctx.strokeStyle=C.border;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(20,listY);ctx.lineTo(W-20,listY);ctx.stroke();
+
+  // Player rows
+  sec.players.forEach((p,i)=>{
+    const ry=listY+8+i*ROW_H;
+    ctx.fillStyle=i%2===0?C.white:'#f8f6f2';
+    roundRectPdf(ctx,18,ry,W-36,ROW_H-6,8);ctx.fill();
+    ctx.strokeStyle=C.border;ctx.lineWidth=.5;
+    roundRectPdf(ctx,18,ry,W-36,ROW_H-6,8);ctx.stroke();
+    // rank icon
+    if(sec.isBooby){
+      const bi=new Image();bi.src=BOOBY_IMG_SRC;
+      try{ctx.drawImage(bi,26,ry+10,28,28);}catch(e){ctx.font='20px sans-serif';ctx.fillText('🐷',40,ry+34);}
+    }else{
+      ctx.font='20px sans-serif';ctx.textAlign='left';ctx.fillText(medals[i]||String(i+1),28,ry+36);
+    }
+    // name + flight badge after name
+    ctx.fillStyle=C.text;ctx.font='bold 14px "Sarabun",sans-serif';ctx.textAlign='left';
+    ctx.fillText(p.name,64,ry+26);
+    // flight badge (after name, small)
+    const fbg={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'}[p.flight]||'#eee';
+    const ftc={'A':'#0a3622','B':'#084298','C':'#664d03'}[p.flight]||'#333';
+    const nmW=ctx.measureText(p.name).width;
+    ctx.fillStyle=fbg;roundRectPdf(ctx,64+nmW+6,ry+14,22,13,6);ctx.fill();
+    ctx.fillStyle=ftc;ctx.font='bold 8px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+    ctx.fillText(p.flight,64+nmW+11,ry+24);
+    // group/dept
+    ctx.fillStyle=C.text3;ctx.font='10px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+    ctx.fillText((p.group||'')+(p.dept?' · '+p.dept:''),64,ry+44);
+    // prize tag
+    const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
+    if(pl){
+      ctx.fillStyle=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
+      roundRectPdf(ctx,64,ry+50,pl.length*6+12,14,6);ctx.fill();
+      ctx.fillStyle=i===0?'#856404':i===1?'#0a5c2a':'#084298';
+      ctx.font='bold 8px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+      ctx.fillText(pl,70,ry+61);
+    }
+    // score (right side)
+    ctx.fillStyle=sec.isBooby?'#c94a2a':sec.color;
+    ctx.font='bold 22px "IBM Plex Mono",sans-serif';ctx.textAlign='right';
+    ctx.fillText(String(sec.getVal(p)),W-28,ry+32);
+    ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
+    ctx.fillText(sec.getSub(p),W-28,ry+50);
+  });
+
+  // Footer
+  ctx.fillStyle=C.green;ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
+  ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='10px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+  ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'),W/2,H-FOOTER_H+18);
+  ctx.fillText(tourneyName,W/2,H-FOOTER_H+34);
+
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
+  const logoImg=new Image();logoImg.src=LOGO_SRC;
+  const doSave=()=>{
+    try{ctx.drawImage(logoImg,20,H-FOOTER_H+8,28,28);}catch(e){}
+    const link=document.createElement('a');
+    const safe=sectionTitle.replace(/[^\w\s฀-๿]/g,'').trim().replace(/\s+/g,'-');
+    link.download=`award-${safe}-${tourneyName||'golf'}.png`;
+    link.href=canvas.toDataURL('image/png');link.click();
+    toast('✅ บันทึกรูปแล้ว','ok');
+    if(btn){btn.textContent='⬇ PDF';btn.disabled=false;}
+  };
+  if(logoImg.complete)doSave();else logoImg.onload=doSave;
+}
+
+// ════════════════════════════════
+// PDF รวมทุกรางวัล (ไม่มีกราฟ)
+// ════════════════════════════════
+function exportAllAwardsPDF(){
+  const tourneyName=document.getElementById('awardsModalTourney').textContent||'';
+  const {lowGross,lowNet,flightA,flightB,flightC,booby}=getAwardsData(lbData);
+  const sections=[
+    {title:'🏌️ Low Gross',players:lowGross,getVal:p=>p.gross,getSub:p=>`Gross · H'cap ${p.hcp}`,color:'#1a4a2a',isBooby:false,prizeLabels:['🏆 Winner']},
+    {title:'🏆 Low Net Overall',players:lowNet,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#084298',isBooby:false,prizeLabels:['🏆 Winner']},
+    {title:'🟢 Flight A',players:flightA,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#0a5c2a',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+    {title:'🔵 Flight B',players:flightB,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#084298',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+    {title:'🟡 Flight C',players:flightC,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#664d03',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+    {title:'🐷 Booby',players:booby,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#c94a2a',isBooby:true,prizeLabels:['🐷 Booby Maker','🐷 Booby']},
+  ];
+  const canvas=document.createElement('canvas');
+  const DPR=2,W=600,ROW_H=64,SEC_HEAD=44,PAD=16,HEADER_H=110,FOOTER_H=44;
+  const totalRows=sections.reduce((a,s)=>a+Math.max(s.players.length,1),0);
+  const H=HEADER_H+sections.length*(SEC_HEAD+PAD)+totalRows*ROW_H+FOOTER_H+32;
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  const ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);
+  const C={bg:'#fffdf5',green:'#1a4a2a',text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',white:'#fff'};
+  const medals=['🥇','🥈','🥉'];
+
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+  // Header
+  ctx.fillStyle=C.green;roundRectPdf(ctx,0,0,W,HEADER_H,0);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 22px "Cormorant Garamond",serif';ctx.textAlign='center';
+  ctx.fillText('🏅 สรุปรางวัลการแข่งขัน',W/2,44);
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='12px "IBM Plex Mono",sans-serif';
+  ctx.fillText(tourneyName,W/2,68);
+  ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='10px "IBM Plex Mono",sans-serif';
+  ctx.fillText(new Date().toLocaleDateString('th-TH'),W/2,88);
+
+  let curY=HEADER_H+12;
+  sections.forEach(sec=>{
+    // Section header
+    ctx.fillStyle=sec.color+'22';roundRectPdf(ctx,16,curY,W-32,SEC_HEAD-8,8);ctx.fill();
+    ctx.fillStyle=sec.color;ctx.font='bold 14px "Cormorant Garamond",serif';ctx.textAlign='left';
+    ctx.fillText(sec.title,28,curY+SEC_HEAD-18);
+    curY+=SEC_HEAD;
+
+    if(!sec.players.length){
+      ctx.fillStyle=C.text3;ctx.font='11px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+      ctx.fillText('ยังไม่มีผู้เล่น',32,curY+20);
+      curY+=ROW_H;
+    } else {
+      sec.players.forEach((p,i)=>{
+        ctx.fillStyle=i%2===0?C.white:'#f4f2ee';
+        roundRectPdf(ctx,16,curY,W-32,ROW_H-6,7);ctx.fill();
+        ctx.strokeStyle=C.border;ctx.lineWidth=.4;
+        roundRectPdf(ctx,16,curY,W-32,ROW_H-6,7);ctx.stroke();
+        // rank
+        if(sec.isBooby){
+          const bi=new Image();bi.src=BOOBY_IMG_SRC;
+          try{ctx.drawImage(bi,24,curY+8,24,24);}catch(e){ctx.font='16px sans-serif';ctx.textAlign='left';ctx.fillText('🐷',26,curY+28);}
+        }else{
+          ctx.font='16px sans-serif';ctx.textAlign='left';ctx.fillText(medals[i]||String(i+1),26,curY+28);
+        }
+        // name + flight badge
+        ctx.fillStyle=C.text;ctx.font='bold 13px "Sarabun",sans-serif';ctx.textAlign='left';
+        ctx.fillText(p.name,58,curY+22);
+        const nmW=ctx.measureText(p.name).width;
+        const fbg={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'}[p.flight]||'#eee';
+        const ftc={'A':'#0a3622','B':'#084298','C':'#664d03'}[p.flight]||'#333';
+        ctx.fillStyle=fbg;roundRectPdf(ctx,58+nmW+5,curY+12,20,12,5);ctx.fill();
+        ctx.fillStyle=ftc;ctx.font='bold 7px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+        ctx.fillText(p.flight,58+nmW+9,curY+22);
+        // sub
+        ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+        ctx.fillText((p.group||'')+(p.dept?' · '+p.dept:''),58,curY+38);
+        // prize
+        const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
+        if(pl){
+          ctx.fillStyle=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
+          roundRectPdf(ctx,58,curY+42,pl.length*6+8,12,4);ctx.fill();
+          ctx.fillStyle=i===0?'#856404':i===1?'#0a5c2a':'#084298';
+          ctx.font='bold 7px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+          ctx.fillText(pl,62,curY+52);
+        }
+        // score
+        ctx.fillStyle=sec.isBooby?'#c94a2a':sec.color;
+        ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='right';
+        ctx.fillText(String(sec.getVal(p)),W-26,curY+28);
+        ctx.fillStyle=C.text3;ctx.font='8px "IBM Plex Mono",sans-serif';
+        ctx.fillText(sec.getSub(p),W-26,curY+44);
+        curY+=ROW_H;
+      });
+    }
+    curY+=8;
+  });
+
+  // Footer
+  ctx.fillStyle=C.green;ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
+  ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='10px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+  ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'),W/2,H-FOOTER_H+18);
+  ctx.fillText(tourneyName,W/2,H-FOOTER_H+34);
+
+  const logoImg=new Image();logoImg.src=LOGO_SRC;
+  const doSave=()=>{
+    try{ctx.drawImage(logoImg,20,H-FOOTER_H+8,26,26);}catch(e){}
+    const link=document.createElement('a');
+    link.download=`awards-summary-${tourneyName||'golf'}.png`;
+    link.href=canvas.toDataURL('image/png');link.click();
+    toast('✅ บันทึกรายงานรวมแล้ว','ok');
+  };
+  if(logoImg.complete)doSave();else logoImg.onload=doSave;
 }
 
 </script>
