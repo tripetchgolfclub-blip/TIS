@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1a4a2a">
-<meta name="mobile-web-app-capable" content="yes">
+<title>TIS Golf Club</title>
+<link rel="manifest" href="/TIS/manifest.json">
+<link rel="icon" type="image/png" href="/TIS/icon-192.png">
+<link rel="apple-touch-icon" href="/TIS/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Golf Score">
-<link rel="manifest" href="manifest.json">
-<title>Golf Scorecard System</title>
+<meta name="apple-mobile-web-app-title" content="TIS Golf Club">
+<meta name="theme-color" content="#1a4a2a">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -18,7 +19,7 @@
   --accent:#2c6e3f;--accent2:#1a4a2a;
   --red:#c94a2a;--red-bg:#fdf0ed;
   --gold:#b8922a;--gold-bg:#fdf6e3;
-  --eagle:#1a6b9a;--birdie:#c94a2a;--par-col:#2c6e3f;--bogey:#b8922a;--double:#8a3a1a;--trpl:#5a1a6a;
+  --eagle:#1a6b9a;--birdie:#c94a2a;--par-col:#2c6e3f;--bogey:#b8922a;--double:#8a3a1a;
   --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
   --shadow-lg:0 4px 20px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.07);
 }
@@ -133,7 +134,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sub-row.total-row span{color:rgba(255,255,255,.85);border-right-color:rgba(255,255,255,.1);}
 .sub-row.total-row span:first-child{color:rgba(255,255,255,.5);}
 .c-empty{color:var(--border2);}.c-eagle{color:var(--eagle);}.c-birdie{color:var(--birdie);}
-.c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}.c-trpl{color:var(--trpl);}
+.c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}
 .hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg);}
 .leg{display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);}
@@ -208,7 +209,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 </div>
 
 <header>
-  <div class="logo">⛳ Golf Scorecard</div>
+  <div class="logo"><img src="/TIS/icon-192.png" style="width:34px;height:34px;border-radius:50%;object-fit:cover;"> TIS Golf Club</div>
   <div class="nav-tabs">
     <div class="nav-tab" id="tab-admin" onclick="switchTab('admin')" style="display:none;">🔧 Admin</div>
     <div class="nav-tab active" id="tab-player" onclick="switchTab('player')">บันทึกสกอร์</div>
@@ -221,7 +222,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 <div id="tabLogin" class="hidden">
   <div class="center-screen">
     <div class="center-box">
-      <div class="box-icon">🔐</div>
+      <div class="box-icon"><img src="/TIS/icon-192.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>
       <div class="box-title">Admin Login</div>
       <div class="box-sub">สำหรับผู้จัดการแข่งขัน</div>
       <div class="err-box" id="loginErr">รหัสผ่านไม่ถูกต้อง</div>
@@ -375,7 +376,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
   <div id="gmailScreen">
     <div class="center-screen">
       <div class="center-box" style="max-width:420px;">
-        <div class="box-icon">📧</div>
+        <div class="box-icon"><img src="/TIS/icon-192.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>
         <div class="box-title">ยืนยันตัวตน</div>
         <div class="box-sub">กรอก Gmail ที่ลงทะเบียนไว้กับผู้จัดการแข่งขัน</div>
         <div class="err-box" id="gmailErr">ไม่พบ Gmail นี้ในรายชื่อผู้เล่น<br>กรุณาติดต่อผู้จัดการแข่งขัน</div>
@@ -434,8 +435,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--birdie)"></div>Birdie</div>
           <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
           <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Dbl Bogey→+2</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--trpl)"></div>&gt;Dbl Bg.→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double+→+2</div>
         </div>
       </div>
       <div class="net-box">
@@ -563,8 +563,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--eagle)"></div>Eagle</div>
           <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
           <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Dbl Bogey→+2</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--trpl)"></div>&gt;Dbl Bg.→+2</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double+→+2</div>
         </div>
       </div>
       <div class="net-box" style="margin-bottom:13px;">
@@ -632,16 +631,6 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 </div>
 
 <div class="toast" id="toast"></div>
-
-<!-- LINE Browser Warning -->
-<div id="lineBrowserBanner" class="hidden" style="position:fixed;top:0;left:0;right:0;z-index:1000;background:#06c755;color:#fff;padding:12px 16px;font-size:13px;font-family:'Sarabun',sans-serif;display:flex;align-items:flex-start;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.2);">
-  <span style="font-size:20px;flex-shrink:0;">⚠️</span>
-  <div style="flex:1;">
-    <div style="font-weight:600;margin-bottom:3px;">กรุณาเปิดในเบราว์เซอร์ Chrome</div>
-    <div style="font-size:12px;opacity:.9;line-height:1.5;">กด <strong>⋮ → เปิดใน Chrome</strong> หรือ Copy ลิงก์ไปวางใน Chrome<br>จากนั้นกด ⋮ → <strong>"เพิ่มในหน้าจอหลัก"</strong> เพื่อใช้งานเหมือนแอป ⛳</div>
-  </div>
-  <button onclick="document.getElementById('lineBrowserBanner').classList.add('hidden')" style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;">ปิด</button>
-</div>
 
 <script>
 // ════════════════════════════════
@@ -862,12 +851,13 @@ document.getElementById('appsScriptCode').textContent = APPS_SCRIPT_CODE;
 // ════════════════════════════════
 // CONFIG & STATE
 // ════════════════════════════════
+const LOGO_SRC = '/TIS/icon-192.png';
 const ADMIN_PASSWORD = 'golf2024';
 const DEF_PARS_18 = [4,4,3,5,4,3,4,5,4,4,3,5,4,4,3,5,4,4];
 const DEF_PARS_9  = [4,4,3,5,4,3,4,5,4];
 
 let adminIn = false;
-let scriptUrl = localStorage.getItem('golf_scriptUrl') || 'https://script.google.com/macros/s/AKfycbwGDVw99PpA1VcDxzOF2ydM2pV-89HsnfalNNuT3WbIjCdCO0uGvOpMPSreJ3pgzQlqkA/exec';
+let scriptUrl = localStorage.getItem('golf_scriptUrl') || '';
 let currentPlayer = null;
 let scoreState = { scores:[], putts:[], pars:[], holes:18 };
 let tourneyList = [];
@@ -884,15 +874,6 @@ let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
   document.getElementById('adDate').value = new Date().toISOString().split('T')[0];
   if (scriptUrl) document.getElementById('adScriptUrl').value = scriptUrl;
   renderParTable();
-  // ตรวจจับ LINE browser แล้วแสดง banner แนะนำให้เปิดใน Chrome
-  if (/Line\//i.test(navigator.userAgent)) {
-    document.getElementById('lineBrowserBanner').classList.remove('hidden');
-  }
-  // PWA install prompt (Android Chrome)
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    window._pwaPrompt = e;
-  });
 })();
 
 // ════════════════════════════════
@@ -1430,11 +1411,11 @@ function updateBar(){
   document.getElementById('flightNote').textContent=played?`Flight ${calcFlight(hcp)}`:'Flight —';
 }
 function updateSummary(){
-  let e=0,b=0,p=0,bg=0,db=0,tr=0,pts=0,pc=0;
+  let e=0,b=0,p=0,bg=0,db=0,pts=0,pc=0;
   scoreState.scores.forEach((s,i)=>{
     if(s===null)return;
     const d=s-scoreState.pars[i];
-    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else if(d===2)db++;else tr++;
+    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else db++;
     if(scoreState.putts[i]!==null){pts+=scoreState.putts[i];pc++;}
   });
   document.getElementById('sumGrid').innerHTML=
@@ -1442,8 +1423,7 @@ function updateSummary(){
      <div class="sum-item"><div class="sum-label">Birdie</div><div class="sum-val c-birdie">${b}</div></div>
      <div class="sum-item"><div class="sum-label">Par</div><div class="sum-val c-par">${p}</div></div>
      <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
-     <div class="sum-item"><div class="sum-label">Dbl Bogey</div><div class="sum-val c-double">${db}</div></div>
-     <div class="sum-item"><div class="sum-label">&gt;Dbl Bg.</div><div class="sum-val c-trpl">${tr}</div></div>
+     <div class="sum-item"><div class="sum-label">Double+</div><div class="sum-val c-double">${db}</div></div>
      <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
   updateBar();
 }
@@ -1465,17 +1445,12 @@ function reviewScore() {
   const { scores } = scoreState;
   const played = scores.filter(v=>v!==null).length;
   if (!played) { toast('กรุณาบันทึกสกอร์อย่างน้อย 1 หลุมก่อนครับ','err'); return; }
+  // แสดง modal พร้อม canvas และปุ่มยืนยัน
   document.getElementById('scShareModal').classList.remove('hidden');
-  // ถ้ายืนยันแล้ว → ข้ามปุ่มยืนยัน แสดงปุ่มบันทึก/แชร์ได้เลย
-  if (scoreState.locked) {
-    document.getElementById('scConfirmSection').classList.add('hidden');
-    document.getElementById('scShareSection').classList.remove('hidden');
-  } else {
-    document.getElementById('scConfirmSection').classList.remove('hidden');
-    document.getElementById('scShareSection').classList.add('hidden');
-    document.getElementById('btnConfirmSubmit').disabled = false;
-    document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
-  }
+  document.getElementById('scConfirmSection').classList.remove('hidden');
+  document.getElementById('scShareSection').classList.add('hidden');
+  document.getElementById('btnConfirmSubmit').disabled = false;
+  document.getElementById('btnConfirmSubmit').innerHTML = '✅ ยืนยันและส่งสกอร์';
   // render canvas หลัง modal แสดง
   setTimeout(() => {
     const { gross, parSum, hcp, net } = calcTotals();
@@ -1653,9 +1628,9 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
   // Stats footer
   const ftY=smY+SUMMARY_H+6;
   ctx.fillStyle=C.green;ctx.fillRect(OX,ftY,TW,1);
-  let eagle=0,birdie=0,par_=0,bogey=0,dbl=0,trpl=0;
-  scores.forEach((s,i)=>{if(s===null)return;const d=s-pars[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par_++;else if(d===1)bogey++;else if(d===2)dbl++;else trpl++;});
-  [{l:'Eagle',v:eagle,c:C.blue},{l:'Birdie',v:birdie,c:C.red},{l:'Par',v:par_,c:C.green2},{l:'Bogey',v:bogey,c:C.bogey},{l:'Dbl Bg.',v:dbl,c:C.dbl},{l:'>Dbl Bg.',v:trpl,c:'#5a1a6a'}]
+  let eagle=0,birdie=0,par_=0,bogey=0,dbl=0;
+  scores.forEach((s,i)=>{if(s===null)return;const d=s-pars[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par_++;else if(d===1)bogey++;else dbl++;});
+  [{l:'Eagle',v:eagle,c:C.blue},{l:'Birdie',v:birdie,c:C.red},{l:'Par',v:par_,c:C.green2},{l:'Bogey',v:bogey,c:C.bogey},{l:'Dbl+',v:dbl,c:C.dbl}]
     .forEach((st,i)=>{
       const sx=OX+i*(TW/5)+TW/10;
       ctx.fillStyle=st.c;ctx.font='bold 16px "IBM Plex Mono",monospace';
@@ -1665,8 +1640,16 @@ function renderCanvas(scores,pars,putts,holes,gross,parSum,hcp,net,flight,t){
     });
   // Branding
   ctx.fillStyle=C.green;ctx.fillRect(0,H-26,W,26);
+  // Draw logo on canvas footer
+  const logoImg = new Image();
+  logoImg.onload = function(){
+    ctx.drawImage(logoImg, W/2 - 13, H-24, 22, 22);
+    ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='bold 10px "IBM Plex Mono",monospace';
+    ctx.textAlign='left';ctx.fillText('TIS Golf Club', W/2+13, H-9);
+  };
+  logoImg.src = LOGO_SRC;
   ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px "IBM Plex Mono",monospace';
-  ctx.textAlign='center';ctx.fillText('⛳ Golf Scorecard System',W/2,H-9);
+  ctx.textAlign='center';ctx.fillText('TIS Golf Club · Tri Petch Group',W/2,H-9);
 }
 
 function roundRect(ctx,x,y,w,h,r){
@@ -1678,42 +1661,27 @@ function roundRect(ctx,x,y,w,h,r){
 }
 function scoreColor(df){
   if(df===null)return '#ccc';if(df<=-2)return '#1a6b9a';if(df===-1)return '#c94a2a';
-  if(df===0)return '#2c6e3f';if(df===1)return '#b8922a';if(df===2)return '#8a3a1a';return '#5a1a6a';
+  if(df===0)return '#2c6e3f';if(df===1)return '#b8922a';return '#8a3a1a';
 }
 
 async function downloadCard(){
   const canvas=document.getElementById('scCanvas');
-  // ใช้ toBlob + createObjectURL ดีกว่า toDataURL บน Android
-  canvas.toBlob(blob=>{
-    const url=URL.createObjectURL(blob);
-    const link=document.createElement('a');
-    link.download='scorecard-'+(currentPlayer?.name||'golf')+'.png';
-    link.href=url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    toast('✅ บันทึกรูปแล้ว ตรวจสอบในแกลเลอรี่ได้เลยครับ','ok');
-  },'image/png');
+  const link=document.createElement('a');
+  link.download='scorecard-'+(currentPlayer?.name||'golf')+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  toast('✅ บันทึกรูปแล้ว','ok');
 }
 async function shareCard(){
   const canvas=document.getElementById('scCanvas');
-  canvas.toBlob(async blob=>{
-    const file=new File([blob],'scorecard.png',{type:'image/png'});
-    // Web Share API (Android Chrome รองรับ)
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      try{
+  try{
+    canvas.toBlob(async blob=>{
+      const file=new File([blob],'scorecard.png',{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file],title:'สกอร์การ์ด '+(currentPlayer?.name||'')});
-        return;
-      }catch(e){
-        // ผู้ใช้กด cancel หรือ error → fallback
-        if(e.name==='AbortError') return;
-      }
-    }
-    // Fallback: บันทึกรูปลงเครื่องแล้วให้ไปแชร์เอง
-    downloadCard();
-    toast('บันทึกรูปแล้ว เปิด LINE แล้วแชร์รูปจากแกลเลอรี่ได้เลยครับ');
-  },'image/png');
+      }else{downloadCard();toast('กรุณาบันทึกรูปแล้วแชร์ผ่าน LINE ครับ');}
+    });
+  }catch(e){downloadCard();}
 }
 
 // ════════════════════════════════
@@ -1803,10 +1771,10 @@ function updateAeBar(){
   document.getElementById('aeFlightNote').textContent=played?`Flight ${calcFlight(hcp)}`:'Flight —';
 }
 function updateAeSummary(){
-  let e=0,b=0,p=0,bg=0,db=0,tr=0,pts=0,pc=0;
+  let e=0,b=0,p=0,bg=0,db=0,pts=0,pc=0;
   adminEditState.scores.forEach((s,i)=>{
     if(s===null)return;const d=s-adminEditState.pars[i];
-    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else if(d===2)db++;else tr++;
+    if(d<=-2)e++;else if(d===-1)b++;else if(d===0)p++;else if(d===1)bg++;else db++;
     if(adminEditState.putts[i]!==null){pts+=adminEditState.putts[i];pc++;}
   });
   document.getElementById('aeSumGrid').innerHTML=
@@ -1814,8 +1782,7 @@ function updateAeSummary(){
      <div class="sum-item"><div class="sum-label">Birdie</div><div class="sum-val c-birdie">${b}</div></div>
      <div class="sum-item"><div class="sum-label">Par</div><div class="sum-val c-par">${p}</div></div>
      <div class="sum-item"><div class="sum-label">Bogey</div><div class="sum-val c-bogey">${bg}</div></div>
-     <div class="sum-item"><div class="sum-label">Dbl Bogey</div><div class="sum-val c-double">${db}</div></div>
-     <div class="sum-item"><div class="sum-label">&gt;Dbl Bg.</div><div class="sum-val c-trpl">${tr}</div></div>
+     <div class="sum-item"><div class="sum-label">Double+</div><div class="sum-val c-double">${db}</div></div>
      <div class="sum-item"><div class="sum-label">Avg Putt</div><div class="sum-val" style="color:var(--text2)">${pc?(pts/pc).toFixed(1):'—'}</div></div>`;
   updateAeBar();
 }
@@ -1903,14 +1870,13 @@ function renderLb(data){
   const mainVal=r=>isLowGross?r.gross:r.net;
   const mainLabel=isLowGross?'Gross':'Net';
   const podMedals=isBooby?['🐔','🐓','🎗️']:medals;
-  const medalColors=['var(--gold)','#7a8a9a','#a0673a'];
-  podEl.innerHTML=`<div class="podium">${podOrder.map((p,podIdx)=>{
+  podEl.innerHTML=`<div class="podium">${podOrder.map(p=>{
     const rank=top.indexOf(p);
     return `<div class="pod">
       <div class="pod-name">${p.name}</div>
-      <div class="pod-net" style="color:${medalColors[rank]}">${mainVal(p)}</div>
+      <div class="pod-net" style="color:${rank===0?'var(--gold)':rank===1?'#7a8a9a':'#a0673a'}">${mainVal(p)}</div>
       <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
-      <div class="pod-block ${podCls[podIdx]}">${podMedals[rank]}</div>
+      <div class="pod-block ${podCls[rank]}">${podMedals[rank]}</div>
     </div>`;}).join('')}</div>`;
 
   // ─── TABLE ───
@@ -1961,7 +1927,7 @@ function renderLb(data){
 function calcFlight(hcp){return hcp<=12?'A':hcp<=24?'B':'C';}
 function dStr(d){return d===0?'E':d>0?`+${d}`:`${d}`;}
 function dColor(d){return d<=-2?'var(--eagle)':d===-1?'var(--birdie)':d===0?'var(--par-col)':d===1?'var(--bogey)':'var(--double)';}
-function clsCls(d){if(d===null)return 'c-empty';if(d<=-2)return 'c-eagle';if(d===-1)return 'c-birdie';if(d===0)return 'c-par';if(d===1)return 'c-bogey';if(d===2)return 'c-double';return 'c-trpl';}
+function clsCls(d){if(d===null)return 'c-empty';if(d<=-2)return 'c-eagle';if(d===-1)return 'c-birdie';if(d===0)return 'c-par';if(d===1)return 'c-bogey';return 'c-double';}
 function fmtD(d){
   if(!d) return '';
   try {
@@ -2003,6 +1969,16 @@ function toast(msg,type=''){
   t.textContent=msg;t.className='toast '+type;
   requestAnimationFrame(()=>t.classList.add('show'));
   tTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/TIS/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
+  });
 }
 </script>
 </body>
