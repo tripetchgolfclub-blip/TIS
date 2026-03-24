@@ -940,6 +940,21 @@ let tourneyList = [];
 let activeTourney = null;
 let lbData = [];
 let activeFlightFilter = 'lowgross';
+// email ของผู้ชนะ Low Gross ที่ Admin mark ให้ตัดออกจาก Low Net/Flight
+// key = tourneyName, value = Set of emails
+let lgExcludeMap = JSON.parse(localStorage.getItem('golf_lgExclude')||'{}');
+function getLgExclude(tourney){ return new Set(lgExcludeMap[tourney]||[]); }
+function saveLgExclude(tourney, emailSet){
+  lgExcludeMap[tourney] = [...emailSet];
+  localStorage.setItem('golf_lgExclude', JSON.stringify(lgExcludeMap));
+}
+function toggleLgExclude(email, tourney){
+  const s = getLgExclude(tourney);
+  if(s.has(email)) s.delete(email); else s.add(email);
+  saveLgExclude(tourney, s);
+  renderAwards(lbData); // re-render awards
+  renderLb(lbData);     // re-render leaderboard
+}
 let adminEditPlayer = null;
 let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
 
@@ -1955,6 +1970,12 @@ function renderLb(data){
   // กรอง WD ออกเสมอ (ยกเว้นหน้า Booby ไม่ต้องกรอง)
   if(!isBooby) d=d.filter(r=>!r.wd);
 
+  // กรอง lgExclude ออกใน Low Net และ Flight (ไม่กรองใน Low Gross และ Booby)
+  if(!isLowGross&&!isBooby){
+    const tourney = document.getElementById('lbTourneySelect')?.value||'';
+    const lgEx = getLgExclude(tourney);
+    if(lgEx.size>0) d=d.filter(r=>!lgEx.has((r.email||'').toLowerCase()));
+  }
   // กรองตาม Flight (A/B/C เท่านั้น)
   if(!isBooby&&!isLowGross&&!isLowNet&&activeFlightFilter){
     d=d.filter(r=>r.flight===activeFlightFilter);
@@ -2149,40 +2170,39 @@ async function toggleWD(email, currentWD) {
 // AWARDS MODAL + PDF
 // ════════════════════════════════
 function openAwardsModal() {
-  const tourneyName = document.getElementById('lbTourneySelect')?.value || '—';
-  if(!lbData||!lbData.length){
-    // ถ้ายังไม่มีข้อมูล ให้ลองโหลดก่อนแล้วค่อยเปิด
-    if(scriptUrl && tourneyName !== '—'){
-      loading(true,'โหลดข้อมูลรางวัล...');
-      api('getScores',{name:tourneyName}).then(scores=>{
-        lbData=scores;
-        loading(false);
-        document.getElementById('awardsModal').classList.remove('hidden');
-        document.getElementById('awardsModalTourney').textContent = tourneyName;
-        renderAwards(lbData);
-      }).catch(e=>{loading(false);toast('❌ '+e.message,'err');});
-      return;
-    }
-    toast('กรุณาเปิดหน้า Leaderboard และเลือกการแข่งขันก่อนครับ','err');
+  const tourneyName = document.getElementById('lbTourneySelect')?.value || '';
+  if(!tourneyName){
+    toast('กรุณาเลือกการแข่งขันก่อนครับ','err');
     return;
   }
-  document.getElementById('awardsModal').classList.remove('hidden');
-  document.getElementById('awardsModalTourney').textContent = tourneyName;
-  renderAwards(lbData);
+  // โหลดข้อมูลใหม่ทุกครั้งเพื่อให้แน่ใจว่าข้อมูลล่าสุด
+  loading(true,'โหลดข้อมูลรางวัล...');
+  api('getScores',{name:tourneyName}).then(scores=>{
+    lbData = scores;
+    loading(false);
+    document.getElementById('awardsModal').classList.remove('hidden');
+    document.getElementById('awardsModalTourney').textContent = tourneyName;
+    renderAwards(lbData);
+  }).catch(e=>{ loading(false); toast('❌ '+e.message,'err'); });
 }
 function closeAwardsModal() {
   document.getElementById('awardsModal').classList.add('hidden');
 }
 
-function getAwardsData(data) {
+function getAwardsData(data, tourney) {
+  tourney = tourney || document.getElementById('awardsModalTourney').textContent || '';
+  const lgEx = getLgExclude(tourney);
   const d = (data||[]).filter(r=>!r.wd);
+  // กรองผู้ชนะ Low Gross ออกจาก Net/Flight (ถ้า Admin mark ไว้)
+  const dNet = d.filter(r=>!lgEx.has(r.email?.toLowerCase()));
   return {
     lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,3),
-    lowNet:   [...d].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightA:  [...d].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightB:  [...d].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightC:  [...d].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    lowNet:   [...dNet].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightA:  [...dNet].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightB:  [...dNet].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    flightC:  [...dNet].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
     booby:    [...d].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
+    lgEx,
   };
 }
 
@@ -2219,12 +2239,29 @@ function awardsSectionHtml(title, players, getVal, getSub) {
 function renderAwards(data) {
   const body = document.getElementById('awardsModalBody');
   if (!data||!data.length) { body.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>'; return; }
-  const {lowGross,flightA,flightB,flightC,booby} = getAwardsData(data);
+  const tourney = document.getElementById('awardsModalTourney').textContent || '';
+  const {lowGross,lowNet,flightA,flightB,flightC,booby,lgEx} = getAwardsData(data, tourney);
+  const isAdminView = adminIn;
+
+  // Low Gross rows — มีปุ่ม mark สำหรับ Admin
+  const lgRows = lowGross.length
+    ? lowGross.map((p,i)=>{
+        const isExcluded = lgEx.has((p.email||'').toLowerCase());
+        const markBtn = isAdminView
+          ? `<button onclick="toggleLgExclude('${(p.email||'').toLowerCase()}','${tourney.replace(/'/g,"\'")}')"
+               style="margin-top:4px;display:block;width:100%;font-size:10px;padding:2px 6px;border-radius:4px;cursor:pointer;border:1px solid ${isExcluded?'#2c6e3f':'#b8922a'};background:${isExcluded?'#d1e7dd':'#fff3cd'};color:${isExcluded?'#1a4a2a':'#856404'};">
+               ${isExcluded?'✅ ตัดออกจาก Net แล้ว — คลิกยกเลิก':'⚠️ ตัด Low Gross Winner ออกจาก Net'}
+             </button>` : '';
+        return awardsRowHtml(p,i+1,p.gross,`Gross · H'cap ${p.hcp}`,markBtn);
+      }).join('')
+    : '<div style="padding:10px 12px;font-size:13px;color:var(--text3);">ยังไม่มีผู้เล่น</div>';
+
+  const lgNote = lgEx.size>0
+    ? `<div style="font-size:11px;color:#856404;background:#fff3cd;border-radius:6px;padding:6px 10px;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;">⚠️ ตัด ${lgEx.size} คน ออกจากการคำนวณ Low Net / Flight</div>`
+    : '';
+
   const boobyIcons=['🐔','🐓'];
-  const boobyStyles=[
-    'background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;',
-    'background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'
-  ];
+  const boobyStyles=['background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;','background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'];
   const boobyLabels=['🐔 Booby Maker','🐓 Booby'];
   const boobyRows = booby.slice(0,2).map((p,i)=>`<div class="award-row award-booby-${i+1}">
     <div class="award-rank">${boobyIcons[i]}</div>
@@ -2240,7 +2277,13 @@ function renderAwards(data) {
   </div>`).join('');
 
   body.innerHTML =
-    awardsSectionHtml('🏌️ Low Gross', lowGross, p=>p.gross, p=>`Gross · H'cap ${p.hcp}`) +
+    `<div class="award-section">
+      <div class="award-section-title">🏌️ Low Gross
+        <button onclick="exportSectionPDF('Low Gross',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
+      </div>
+      ${lgNote}${lgRows}
+    </div>` +
+    awardsSectionHtml('🏆 Low Net Overall', lowNet, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
     awardsSectionHtml('🟢 Flight A (H'cap 0–12)', flightA, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
     awardsSectionHtml('🔵 Flight B (H'cap 13–24)', flightB, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
     awardsSectionHtml('🟡 Flight C (H'cap 25–36)', flightC, p=>p.net, p=>`Net · H'cap ${p.hcp}`) +
