@@ -1329,14 +1329,14 @@ function renderAdminList(players=[],scores=[]) {
   document.getElementById('playerCountBadge').textContent=players.length?players.length+' คน':'';
   if (!players.length){el.innerHTML='<div class="empty-msg">ยังไม่มีผู้เล่น</div>';return;}
   const scoreMap={};
-  scores.forEach(s=>{if(s&&s.email!=null) scoreMap[String(s.email).toLowerCase()]=s;});
+  scores.forEach(s=>{if(s&&s.email!=null&&s.email!==undefined) scoreMap[String(s.email).toLowerCase()]=s;});
   const groups=[...new Set(players.map(p=>p.group))];
   el.innerHTML=groups.map(g=>{
     const gp=players.filter(p=>p.group===g);
     return `<div style="margin-bottom:13px;">
       <div class="section-label">${g}</div>
       ${gp.map(p=>{
-        const sc=scoreMap[p.email.toLowerCase()];
+        const sc=p.email?scoreMap[p.email.toLowerCase()]:undefined;
         const flight=sc?calcFlight(sc.hcp):null;
         const isWD=sc&&sc.wd===true;
         const isLGG=sc&&sc.lgg===true;
@@ -2134,10 +2134,12 @@ function renderLb(data){
 
   if(isLowNet){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">&#x26F3;</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
+        const playedHoles=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&v!=='0'&&Number(v)>0).length;
+        const totalHoles=(r.scores||[]).length||18;
         return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
           <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
@@ -2147,18 +2149,20 @@ function renderLb(data){
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
-          <td style="text-align:center;">${prizeLabel('lownet',i)}</td>
+          <td style="text-align:center;font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text2);">${playedHoles}/${totalHoles}</td>
         </tr>`;}).join('')}</tbody></table>`;
     return;
   }
 
   if(isBooby){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">&#x26F3;</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
+        const playedHoles=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&v!=='0'&&Number(v)>0).length;
+        const totalHoles=(r.scores||[]).length||18;
         return `<tr class="${i<2?'rank-'+(i+1):''}">
-          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">&#x1F437;</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
             <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
@@ -2166,16 +2170,18 @@ function renderLb(data){
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
-          <td style="text-align:center;">${prizeLabel('booby',i)}</td>
+          <td style="text-align:center;font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text2);">${playedHoles}/${totalHoles}</td>
         </tr>`;}).join('')}</tbody></table>`;
     return;
   }
 
   // Low Gross / Flight A/B/C
   tblEl.innerHTML=`<table class="lb-table">
-    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">&#x26F3;</th></tr></thead>
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
+      const playedHoles=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&v!=='0'&&Number(v)>0).length;
+      const totalHoles=(r.scores||[]).length||18;
       return `<tr class="${i<3?'rank-'+(i+1):''}">
         <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
         <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
@@ -2185,7 +2191,7 @@ function renderLb(data){
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
         <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
-        <td style="text-align:center;">${prizeLabel(isLowGross?'gross':'flight',i)}</td>
+        <td style="text-align:center;font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text2);">${playedHoles}/${totalHoles}</td>
       </tr>`;}).join('')}</tbody></table>`;
 }
 
