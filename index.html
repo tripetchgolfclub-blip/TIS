@@ -2024,6 +2024,7 @@ function renderLb(data){
   const isLowGross= activeFlightFilter==='lowgross';
   const isLowNet  = activeFlightFilter==='lownet';
 
+  // กรอง WD ออก (ยกเว้น Booby)
   // กรอง WD ออกทุก mode (รวมถึง Booby)
   d = d.filter(r=>r.wd!==true);
 
@@ -2037,7 +2038,7 @@ function renderLb(data){
          .filter(r=>r.lno!==true);
   }
 
-  // Booby: ตัด LG และ LN ออก (WD ตัดแล้วข้างบน)
+  // Booby: ตัด LG และ LN ออก
   if(isBooby) d = d.filter(r=>r.lgg!==true && r.lno!==true);
   if(isBooby)      d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
   else if(isLowGross) d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
@@ -2208,7 +2209,7 @@ if ('serviceWorker' in navigator) {
 // ════════════════════════════════
 // BOOBY IMAGE SRC
 // ════════════════════════════════
-const BOOBY_IMG_SRC =  + BOOBY_SRC + r;
+const BOOBY_IMG_SRC = LOGO_SRC;
 
 // ════════════════════════════════
 // FLAG TOGGLE (WD / LGG / LNO)
@@ -2275,8 +2276,8 @@ function stopLbAutoRefresh(){
 // ════════════════════════════════
 function getAwardsData(data){
   const d=(data||[]).filter(r=>!r.wd);
-  const noLgg=d.filter(r=>!r.lgg);
-  const noLggLno=noLgg.filter(r=>!r.lno);
+  const noLgg=d.filter(r=>r.lgg!==true);
+  const noLggLno=noLgg.filter(r=>r.lno!==true);
   return {
     lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
     lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
