@@ -758,26 +758,16 @@ function fmtDate(d) {
   if (isNaN(dt.getTime())) return String(d);
   return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
 }
-
-// ─────────────────────────────────────────────────
-// PlayerFlags sheet: TourneyName | Email | WD | LGG | LNO
-// flags แยกออกจาก Scores เพื่อแก้ไขได้โดยไม่ต้อง overwrite score
-// ─────────────────────────────────────────────────
 function getFlagsMap(tourneyName) {
   var sh = getSheet('PlayerFlags');
   if (sh.getLastRow() < 2) return {};
   var rows = sh.getRange(2,1,sh.getLastRow()-1,5).getValues();
   var map = {};
   rows.filter(function(r){return r[0]===tourneyName;}).forEach(function(r){
-    map[r[1].toString().toLowerCase()] = {
-      wd:  r[2]===true,
-      lgg: r[3]===true,
-      lno: r[4]===true
-    };
+    map[r[1].toString().toLowerCase()] = {wd:r[2]===true, lgg:r[3]===true, lno:r[4]===true};
   });
   return map;
 }
-
 function setPlayerFlag(data) {
   var sh = getSheet('PlayerFlags');
   if (sh.getLastRow()===0) {
@@ -802,7 +792,6 @@ function setPlayerFlag(data) {
   }
   return {ok:true};
 }
-
 function getTourneyList() {
   var sh = getSheet('Tournament');
   if (sh.getLastRow() < 2) return [];
@@ -935,7 +924,6 @@ function clearPlayers(data) {
   var sc = getSheet('Scores');
   var scRows = sc.getDataRange().getValues();
   for(var i=scRows.length-1;i>=1;i--){ if(scRows[i][0]===data.tourneyName) sc.deleteRow(i+1); }
-  // ลบ flags ด้วย
   var fl = getSheet('PlayerFlags');
   if(fl.getLastRow()>1){
     var flRows = fl.getRange(2,1,fl.getLastRow()-1,5).getValues();
@@ -946,7 +934,6 @@ function clearPlayers(data) {
 function getScores(tourneyName) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()<2) return [];
-  // โหลด flags จาก PlayerFlags sheet แล้ว join กับ Scores
   var flagsMap = getFlagsMap(tourneyName);
   var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
   return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
@@ -2241,7 +2228,7 @@ if ('serviceWorker' in navigator) {
 // ════════════════════════════════
 // BOOBY IMAGE SRC
 // ════════════════════════════════
-const BOOBY_IMG_SRC = '/TIS/booby.png';
+const BOOBY_IMG_SRC = LOGO_SRC;
 
 // ════════════════════════════════
 // FLAG TOGGLE (WD / LGG / LNO)
