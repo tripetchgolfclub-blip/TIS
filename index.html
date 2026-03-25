@@ -2024,21 +2024,21 @@ function renderLb(data){
   const isLowGross= activeFlightFilter==='lowgross';
   const isLowNet  = activeFlightFilter==='lownet';
 
-  // กรอง WD ออก (ยกเว้น Booby)
-  if(!isBooby) d=d.filter(r=>!r.wd);
+  // กรอง WD ออกทุก mode (รวมถึง Booby)
+  d = d.filter(r=>r.wd!==true);
 
-  // Prize exclusion: lgg=ชนะ Low Gross → ตัดออกจาก net/flight/booby
-  //                  lno=ชนะ Low Net Overall → ตัดออกจาก flight/booby
-  if(!isLowGross && !isLowNet) d=d.filter(r=>!r.lgg);
-  if(!isLowGross && !isLowNet && !isBooby) {} // lno ตัดใน flight/booby ด้านล่าง
+  // Low Net: ตัด LG ออก
+  if(isLowNet) d = d.filter(r=>r.lgg!==true);
 
-  // กรองตาม Flight A/B/C
+  // Flight A/B/C: ตัด LG และ LN ออก
   if(!isBooby&&!isLowGross&&!isLowNet&&activeFlightFilter){
-    d=d.filter(r=>r.flight===activeFlightFilter).filter(r=>!r.lno);
+    d = d.filter(r=>r.flight===activeFlightFilter)
+         .filter(r=>r.lgg!==true)
+         .filter(r=>r.lno!==true);
   }
-  if(isBooby) d=d.filter(r=>!r.lgg&&!r.lno);
 
-  // จัดเรียง
+  // Booby: ตัด LG และ LN ออก (WD ตัดแล้วข้างบน)
+  if(isBooby) d = d.filter(r=>r.lgg!==true && r.lno!==true);
   if(isBooby)      d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
   else if(isLowGross) d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
   else             d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
@@ -2208,7 +2208,7 @@ if ('serviceWorker' in navigator) {
 // ════════════════════════════════
 // BOOBY IMAGE SRC
 // ════════════════════════════════
-const BOOBY_IMG_SRC = LOGO_SRC; // ใช้โลโก้คลับแทน
+const BOOBY_IMG_SRC =  + BOOBY_SRC + r;
 
 // ════════════════════════════════
 // FLAG TOGGLE (WD / LGG / LNO)
@@ -2274,13 +2274,12 @@ function stopLbAutoRefresh(){
 // AWARDS MODAL
 // ════════════════════════════════
 function getAwardsData(data){
-  // กรองเงื่อนไขแต่ละระดับ
-  const d       = (data||[]).filter(r=>!r.wd);              // ทุกคน ยกเว้น WD
-  const noLgg   = d.filter(r=>r.lgg!==true);                // ตัด LG winner ออก
-  const noLggLno= noLgg.filter(r=>r.lno!==true);            // ตัด LN winner ออกด้วย
+  const d=(data||[]).filter(r=>!r.wd);
+  const noLgg=d.filter(r=>!r.lgg);
+  const noLggLno=noLgg.filter(r=>!r.lno);
   return {
-    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,3),
-    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
+    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
+    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
     flightA:  [...noLggLno].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
     flightB:  [...noLggLno].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
     flightC:  [...noLggLno].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
