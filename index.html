@@ -1415,7 +1415,7 @@ function showTourneyPicker(name,email,list) {
           ?`<div class="pt-score-val">Net ${t.net}</div>
             <div class="pt-score-sub">Gross ${t.gross} · H'cap ${t.hcp}</div>
             <div class="pt-score-sub" style="color:var(--accent2);">✓ มีสกอร์แล้ว</div>`
-          :`<div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">ยังไม่มีสกอร์</div>`}
+          :`<div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">ยังไม่มีสกอร์</div>`}
       </div>
       <div style="color:var(--accent2);font-size:18px;">›</div>
     </div>`).join('');
@@ -2095,9 +2095,9 @@ function renderLb(data){
         const diff=r.gross-(r.par||72);
         const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
         return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
-          <td style="font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
-            <div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">
+            <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
@@ -2114,9 +2114,9 @@ function renderLb(data){
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         return `<tr class="${i<2?'rank-'+(i+1):''}">
-          <td style="font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
-            <div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">
+            <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
@@ -2133,9 +2133,9 @@ function renderLb(data){
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
       return `<tr class="${i<3?'rank-'+(i+1):''}">
-        <td style="font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+        <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
         <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
-          <div style="font-size:11px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">
+          <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
             <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
           </div></td>
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
@@ -2296,7 +2296,7 @@ async function openAwardsModal(){
   // เปิด modal ทันที แสดง spinner ใน body (ไม่ใช้ loading overlay)
   modal.classList.remove('hidden');
   tEl.textContent = name || '—';
-  body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:13px;">⏳ กำลังโหลดข้อมูลรางวัล...</div>';
+  body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-family:IBM Plex Mono,monospace;font-size:13px;">⏳ กำลังโหลดข้อมูลรางวัล...</div>';
 
   if(!scriptUrl){
     body.innerHTML='<div class="empty-msg">ยังไม่ได้ตั้งค่า Script URL</div>';
@@ -2335,13 +2335,13 @@ function awardsRow(p,rank,val,sub,extraTag=''){
 }
 
 function awardsSection(title,players,getVal,getSub,prizeClass,prizeLabels,hasPdf=true){
-  const btnPdf=hasPdf?`<button onclick="exportSectionPDF('${title.replace(/['"]/g,'').replace(/[^\w\s฀-๿]/g,'').trim()}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:"IBM Plex Mono",monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>`:'';
+  const btnPdf=hasPdf?`<button onclick="exportSectionPDF('${title.replace(/['"]/g,'').replace(/[^\w\s฀-๿]/g,'').trim()}',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:IBM Plex Mono,monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>`:'';
   const rows=players.length
     ?players.map((p,i)=>{
         const tag=prizeLabels&&prizeLabels[i]?`<div style="margin-top:3px;"><span class="prize-tag ${prizeClass[i]}">${prizeLabels[i]}</span></div>`:'';
         return awardsRow(p,i+1,getVal(p),getSub(p),tag);
       }).join('')
-    :'<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:"IBM Plex Mono",monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
+    :'<div style="padding:10px 12px;font-size:13px;color:var(--text3);font-family:IBM Plex Mono,monospace;">ยังไม่มีผู้เล่นในกลุ่มนี้</div>';
   return `<div class="award-section">
     <div class="award-section-title">${title}${btnPdf}</div>
     ${rows}
@@ -2379,7 +2379,7 @@ function renderAwards(data){
     awardsSection('🟡 Flight C (H.cap 25-36)',flightC,p=>p.net,p=>`Net · H'cap ${p.hcp}`,['prize-winner','prize-1st','prize-2nd'],['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']) +
     `<div class="award-section">
       <div class="award-section-title">🐷 Booby
-        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:"IBM Plex Mono",monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
+        <button onclick="exportSectionPDF('Booby',this)" style="margin-left:auto;background:var(--red);color:#fff;border:none;padding:3px 9px;border-radius:5px;font-size:10px;font-family:IBM Plex Mono,monospace;cursor:pointer;flex-shrink:0;">⬇ PDF</button>
       </div>
       ${booby.length>=2?boobyRows:'<div style="padding:10px;font-size:13px;color:var(--text3);">ต้องมีผู้เล่นอย่างน้อย 2 คน</div>'}
     </div>`;
