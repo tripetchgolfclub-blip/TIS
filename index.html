@@ -542,6 +542,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="lbRefreshIndicator">🔄 60s</span>
           <button class="btn-sm" onclick="openAwardsModal()" style="background:var(--accent2);color:#fff;border-color:var(--accent2);">🏅 รางวัล</button>
           <button class="btn-sm" onclick="exportLbPDF()" style="background:var(--red);color:#fff;border-color:var(--red);">📄 PDF</button>
+          <button class="btn-sm" onclick="shareLbLine()" style="background:#06c755;color:#fff;border-color:#06c755;">📤 LINE</button>
           <button class="btn-sm" onclick="loadLeaderboard()">🔄 รีเฟรช</button>
         </div>
       </div>
@@ -1350,28 +1351,38 @@ function renderAdminList(players=[],scores=[]) {
             statusHtml=`<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span>${tags}</div>`;
           }
         }
-        return `<div class="player-item" style="${isWD?'opacity:.6;':''}">
-          <div class="pi-group">${g}</div>
-          <div class="pi-info">
-            <div class="pi-name">${p.name}${p.dept?` <span style="font-size:11px;font-weight:400;color:var(--text3);">${p.dept}</span>`:''}
+        return `<div class="player-item" style="flex-direction:column;align-items:stretch;gap:6px;${isWD?'opacity:.65;':''}">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <div class="pi-group" style="flex-shrink:0;">${g}</div>
+            <div class="pi-info" style="flex:1;min-width:0;">
+              <div class="pi-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}${p.dept?` <span style="font-size:11px;font-weight:400;color:var(--text3);">${p.dept}</span>`:''}
+              </div>
+              <div class="pi-email" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.email}</div>
             </div>
-            <div class="pi-email">${p.email}</div>
+            <div style="display:flex;gap:5px;flex-shrink:0;align-items:center;">
+              <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}','${p.dept||''}')" style="color:var(--accent2);border-color:var(--accent2);padding:5px 9px;" title="แก้ไขสกอร์">✏️</button>
+              <button class="btn-danger" onclick="removePlayer('${p.email}')" style="padding:5px 9px;">×</button>
+            </div>
           </div>
-          ${statusHtml}
-          <div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
-            ${sc?`
-              <button class="btn-sm" onclick="toggleFlag('${p.email}','wd',${isWD},'${p.name.replace(/'/g,"\\'")}')" 
-                style="color:${isWD?'var(--accent2)':'var(--red)'};border-color:${isWD?'var(--accent2)':'var(--red)'};"
-                title="${isWD?'คืนสถานะ':'ถอนตัว (WD)'}">${isWD?'↩WD':'WD'}</button>
-              <button class="btn-sm" onclick="toggleFlag('${p.email}','lgg',${isLGG},'${p.name.replace(/'/g,"\\'")}')" 
-                style="color:${isLGG?'var(--accent2)':'var(--bogey)'};border-color:${isLGG?'var(--accent2)':'var(--bogey)'};"
-                title="${isLGG?'ยกเลิก Low Gross Winner':'มาร์ค Low Gross Winner'}">LG${isLGG?'✓':'?'}</button>
-              <button class="btn-sm" onclick="toggleFlag('${p.email}','lno',${isLNO},'${p.name.replace(/'/g,"\\'")}')" 
-                style="color:${isLNO?'var(--accent2)':'#6a5acd'};border-color:${isLNO?'var(--accent2)':'#6a5acd'};"
-                title="${isLNO?'ยกเลิก Low Net Overall Winner':'มาร์ค Low Net Overall Winner'}">LN${isLNO?'✓':'?'}</button>
-            `:''}
-            <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}','${p.dept||''}')" style="color:var(--accent2);border-color:var(--accent2);">✏️</button>
-            <button class="btn-danger" onclick="removePlayer('${p.email}')">×</button>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
+            ${statusHtml}
+            ${sc?`<div style="display:flex;gap:4px;margin-left:auto;flex-shrink:0;">
+              <button onclick="toggleFlag('${p.email}','wd',${isWD},'${p.name.replace(/'/g,"\\'")}')"
+                title="${isWD?'คืนสถานะปกติ':'ถอนตัวออก (WD)'}"
+                style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
+                  background:${isWD?'#c94a2a':'transparent'};color:${isWD?'#fff':'var(--red)'};border-color:${isWD?'#c94a2a':'var(--red)'};">
+                ${isWD?'↩ WD':'WD'}</button>
+              <button onclick="toggleFlag('${p.email}','lgg',${isLGG},'${p.name.replace(/'/g,"\\'")}')"
+                title="${isLGG?'ยกเลิก Low Gross Winner':'มาร์ค Low Gross Winner'}"
+                style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
+                  background:${isLGG?'#1a4a2a':'transparent'};color:${isLGG?'#fff':'var(--bogey)'};border-color:${isLGG?'#1a4a2a':'var(--bogey)'};">
+                LG${isLGG?'✓':''}</button>
+              <button onclick="toggleFlag('${p.email}','lno',${isLNO},'${p.name.replace(/'/g,"\\'")}')"
+                title="${isLNO?'ยกเลิก Low Net Overall Winner':'มาร์ค Low Net Overall Winner'}"
+                style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
+                  background:${isLNO?'#084298':'transparent'};color:${isLNO?'#fff':'#6a5acd'};border-color:${isLNO?'#084298':'#6a5acd'};">
+                LN${isLNO?'✓':''}</button>
+            </div>`:''}
           </div>
         </div>`;
       }).join('')}
@@ -2537,7 +2548,12 @@ function exportLbPDF() {
 
     // rank
     ctx.font='18px sans-serif'; ctx.textAlign='center';
-    const rankIcon = isBooby ? (i<2?'🐷':String(i+1)) : (medals[i]||String(i+1));
+    let rankIcon;
+    if(isBooby){
+      rankIcon = i<2 ? '🐷' : String(i+1);
+    } else {
+      rankIcon = i<3 ? medals[i] : String(i+1);
+    }
     ctx.fillText(rankIcon, 40, ry+ROW_H/2+6);
 
     // name + ฝ่าย
@@ -2582,6 +2598,114 @@ function exportLbPDF() {
     },'image/png');
   };
   if(logoImg.complete) doSave(); else logoImg.onload = doSave;
+}
+
+// ════════════════════════════════
+// SHARE Leaderboard to LINE
+// ════════════════════════════════
+async function shareLbLine() {
+  if (!lbData || !lbData.length) { toast('กรุณาโหลด Leaderboard ก่อนครับ','err'); return; }
+  toast('⏳ กำลังสร้างรูป...','ok');
+  const tourneyName = document.getElementById('lbTourneySelect')?.value || '';
+  const modeLabels = {
+    'lowgross':'🏌️ Low Gross','lownet':'🏆 Low Net Overall',
+    'A':'🟢 Flight A','B':'🔵 Flight B','C':'🟡 Flight C','booby':'🐷 Booby'
+  };
+  const mode = activeFlightFilter;
+  const modeLabel = modeLabels[mode] || mode;
+
+  let d = [...lbData];
+  const isBooby    = mode==='booby';
+  const isLowGross = mode==='lowgross';
+  const isLowNet   = mode==='lownet';
+  d = d.filter(r=>r.wd!==true);
+  if(isLowNet) d = d.filter(r=>r.lgg!==true);
+  if(!isBooby&&!isLowGross&&!isLowNet&&mode){
+    d = d.filter(r=>r.flight===mode).filter(r=>r.lgg!==true).filter(r=>r.lno!==true);
+  }
+  if(isBooby) d = d.filter(r=>r.lgg!==true && r.lno!==true);
+  if(isBooby)         d.sort(cmpBooby);
+  else if(isLowGross) d.sort(cmpGross);
+  else                d.sort(cmpNet);
+
+  const DPR=2, W=600, ROW_H=56, HEADER_H=110, FOOTER_H=44;
+  const H = HEADER_H + d.length*ROW_H + FOOTER_H + 24;
+  const canvas = document.createElement('canvas');
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  const ctx = canvas.getContext('2d'); ctx.scale(DPR,DPR);
+  const C = {bg:'#fffdf5',green:'#1a4a2a',text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',white:'#fff'};
+  const medals=['🥇','🥈','🥉'];
+
+  ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=C.green; roundRectPdf(ctx,0,0,W,HEADER_H,0); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='bold 22px "Cormorant Garamond",serif'; ctx.textAlign='center';
+  ctx.fillText('🏆 '+modeLabel, W/2, 46);
+  ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='12px "IBM Plex Mono",sans-serif';
+  ctx.fillText(tourneyName, W/2, 70);
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px "IBM Plex Mono",sans-serif';
+  ctx.fillText(new Date().toLocaleDateString('th-TH'), W/2, 90);
+
+  const thY = HEADER_H + 8;
+  ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,28,6); ctx.fill();
+  ctx.fillStyle=C.green; ctx.font='bold 10px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
+  ctx.fillText('อันดับ', 28, thY+18);
+  ctx.fillText('ผู้เล่น', 80, thY+18);
+  ctx.textAlign='right';
+  ctx.fillText("H'cap", W-100, thY+18);
+  ctx.fillText(isLowGross?'Gross':'Net', W-28, thY+18);
+
+  d.forEach((r,i)=>{
+    const ry = HEADER_H + 40 + i*ROW_H;
+    ctx.fillStyle = i%2===0 ? C.white : '#f4f2ee';
+    roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.fill();
+    ctx.strokeStyle=C.border; ctx.lineWidth=.4;
+    roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
+    ctx.font='18px sans-serif'; ctx.textAlign='center';
+    let rankIcon;
+    if(isBooby){ rankIcon = i<2 ? '🐷' : String(i+1); }
+    else { rankIcon = i<3 ? medals[i] : String(i+1); }
+    ctx.fillText(rankIcon, 40, ry+ROW_H/2+6);
+    ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(r.name, 62, ry+20);
+    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
+    ctx.fillText((r.dept||r.group||''), 62, ry+36);
+    ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(r.hcp), W-90, ry+ROW_H/2+5);
+    const val = isLowGross ? r.gross : r.net;
+    const scoreColor = isBooby ? '#c94a2a' : C.green;
+    ctx.fillStyle=scoreColor; ctx.font='bold 20px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(val), W-28, ry+ROW_H/2+7);
+  });
+
+  ctx.fillStyle=C.green; ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'), W/2, H-FOOTER_H+18);
+  ctx.fillText(tourneyName, W/2, H-FOOTER_H+34);
+
+  const logoImg = new Image(); logoImg.src = LOGO_SRC;
+  const doShare = () => {
+    try { ctx.drawImage(logoImg,20,H-FOOTER_H+8,28,28); } catch(e){}
+    canvas.toBlob(async blob=>{
+      const filename = `lb-${mode}-${tourneyName||'golf'}.png`;
+      const file = new File([blob], filename, {type:'image/png'});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        try {
+          await navigator.share({files:[file], title:'Leaderboard '+modeLabel+' · '+tourneyName});
+          toast('✅ แชร์ LINE แล้ว','ok');
+          return;
+        } catch(e) { if(e.name==='AbortError') return; }
+      }
+      // fallback: download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = url;
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      toast('บันทึกรูปแล้ว เปิด LINE แชร์รูปจากแกลเลอรี่ได้เลยครับ');
+    },'image/png');
+  };
+  if(logoImg.complete) doShare(); else logoImg.onload = doShare;
 }
 
 function exportSectionPDF(sectionTitle,btn){
