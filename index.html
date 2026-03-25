@@ -288,19 +288,6 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
 <div id="tabAdmin" class="hidden">
   <div class="main">
 
-    <!-- Script URL -->
-    <div class="card">
-      <div class="card-title">
-        🔗 เชื่อมต่อ Google Sheets
-        <button class="btn-sm" onclick="adminLogout()">ออก</button>
-      </div>
-      <div class="form-group">
-        <label>Apps Script URL</label>
-        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
-    </div>
-
     <!-- Tournament Selector -->
     <div class="tourney-selector" id="tourneySelectorCard">
       <div class="ts-header">
@@ -408,13 +395,26 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         1. เปิด Google Sheets → <code>Extensions</code> → <code>Apps Script</code><br>
         2. ลบ code เดิม → วาง code ด้านล่าง<br>
         3. <code>Deploy</code> → New deployment → Web app → Anyone → Deploy<br>
-        4. คัดลอก URL มาวางด้านบน
+        4. คัดลอก URL ที่ได้ มาวางในช่องด้านล่าง
       </p>
       <div class="code-wrap" onclick="selectCode()" title="คลิกเพื่อคัดลอก"><pre id="appsScriptCode"></pre></div>
       <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
         <button class="btn-sm" onclick="copyCode()">📋 คัดลอก Code</button>
         <span style="font-size:11px;color:var(--text3);">หรือ คลิกที่กล่อง → Ctrl+A → Ctrl+C</span>
       </div>
+    </div>
+
+    <!-- Script URL — วางหลัง Apps Script Code -->
+    <div class="card">
+      <div class="card-title">
+        🔗 เชื่อมต่อ Google Sheets
+        <button class="btn-sm" onclick="adminLogout()">ออก</button>
+      </div>
+      <div class="form-group">
+        <label>Apps Script URL</label>
+        <input type="text" id="adScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn-primary" onclick="saveScriptUrl()" style="margin-top:10px;">บันทึก URL</button>
     </div>
   </div>
 </div>
@@ -723,19 +723,20 @@ const APPS_SCRIPT_CODE = `function doGet(e) {
   try {
     if (e.parameter.payload) {
       var data = JSON.parse(decodeURIComponent(e.parameter.payload));
-      if (action==='saveTourney')       result = saveTourney(data);
-      else if (action==='addPlayer')    result = addPlayer(data);
-      else if (action==='bulkPlayers')  result = bulkPlayers(data);
-      else if (action==='removePlayer') result = removePlayer(data);
-      else if (action==='clearPlayers') result = clearPlayers(data);
-      else if (action==='submitScore')  result = submitScore(data);
+      if (action==='saveTourney')        result = saveTourney(data);
+      else if (action==='addPlayer')     result = addPlayer(data);
+      else if (action==='bulkPlayers')   result = bulkPlayers(data);
+      else if (action==='removePlayer')  result = removePlayer(data);
+      else if (action==='clearPlayers')  result = clearPlayers(data);
+      else if (action==='submitScore')   result = submitScore(data);
+      else if (action==='setPlayerFlag') result = setPlayerFlag(data);
       else result = {error:'unknown action: '+action};
     } else {
-      if (action==='getTourneyList')    result = getTourneyList();
-      else if (action==='getTourney')   result = getTourney(e.parameter.name);
-      else if (action==='getPlayers')   result = getPlayers(e.parameter.name);
-      else if (action==='getScores')    result = getScores(e.parameter.name);
-      else if (action==='findPlayer')   result = findPlayer(e.parameter.email);
+      if (action==='getTourneyList')   result = getTourneyList();
+      else if (action==='getTourney')  result = getTourney(e.parameter.name);
+      else if (action==='getPlayers')  result = getPlayers(e.parameter.name);
+      else if (action==='getScores')   result = getScores(e.parameter.name);
+      else if (action==='findPlayer')  result = findPlayer(e.parameter.email);
       else result = {error:'unknown action: '+action};
     }
   } catch(err) {
@@ -753,11 +754,53 @@ function fmtDate(d) {
   if (!d) return '';
   var dt = (d instanceof Date) ? d : new Date(d);
   if (isNaN(dt.getTime())) return String(d);
-  var y = dt.getFullYear();
-  var m = String(dt.getMonth()+1).padStart(2,'0');
-  var day = String(dt.getDate()).padStart(2,'0');
-  return y+'-'+m+'-'+day;
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
 }
+
+// ─────────────────────────────────────────────────
+// PlayerFlags sheet: TourneyName | Email | WD | LGG | LNO
+// flags แยกออกจาก Scores เพื่อแก้ไขได้โดยไม่ต้อง overwrite score
+// ─────────────────────────────────────────────────
+function getFlagsMap(tourneyName) {
+  var sh = getSheet('PlayerFlags');
+  if (sh.getLastRow() < 2) return {};
+  var rows = sh.getRange(2,1,sh.getLastRow()-1,5).getValues();
+  var map = {};
+  rows.filter(function(r){return r[0]===tourneyName;}).forEach(function(r){
+    map[r[1].toString().toLowerCase()] = {
+      wd:  r[2]===true,
+      lgg: r[3]===true,
+      lno: r[4]===true
+    };
+  });
+  return map;
+}
+
+function setPlayerFlag(data) {
+  var sh = getSheet('PlayerFlags');
+  if (sh.getLastRow()===0) {
+    sh.getRange(1,1,1,5).setValues([['TourneyName','Email','WD','LGG','LNO']])
+      .setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
+  }
+  var email = data.email.toString().toLowerCase();
+  var rows = sh.getLastRow()>1 ? sh.getRange(2,1,sh.getLastRow()-1,5).getValues() : [];
+  var found = -1;
+  for (var i=0;i<rows.length;i++) {
+    if (rows[i][0]===data.tourneyName && rows[i][1].toString().toLowerCase()===email) {
+      found = i+2; break;
+    }
+  }
+  var wd  = data.wd  === true;
+  var lgg = data.lgg === true;
+  var lno = data.lno === true;
+  if (found > 0) {
+    sh.getRange(found,3,1,3).setValues([[wd,lgg,lno]]);
+  } else {
+    sh.appendRow([data.tourneyName, data.email, wd, lgg, lno]);
+  }
+  return {ok:true};
+}
+
 function getTourneyList() {
   var sh = getSheet('Tournament');
   if (sh.getLastRow() < 2) return [];
@@ -826,7 +869,7 @@ function findPlayer(email) {
   var scSheet = getSheet('Scores');
   var scMap = {};
   if (scSheet.getLastRow()>1) {
-    var scRows = scSheet.getRange(2,1,scSheet.getLastRow()-1,11).getValues();
+    var scRows = scSheet.getRange(2,1,scSheet.getLastRow()-1,12).getValues();
     scRows.forEach(function(r){
       var key = r[0]+'|||'+r[2].toString().toLowerCase();
       scMap[key] = {hasScore:true,net:r[9],hcp:r[8],gross:r[6],confirmed:r[11]===true};
@@ -890,28 +933,43 @@ function clearPlayers(data) {
   var sc = getSheet('Scores');
   var scRows = sc.getDataRange().getValues();
   for(var i=scRows.length-1;i>=1;i--){ if(scRows[i][0]===data.tourneyName) sc.deleteRow(i+1); }
+  // ลบ flags ด้วย
+  var fl = getSheet('PlayerFlags');
+  if(fl.getLastRow()>1){
+    var flRows = fl.getRange(2,1,fl.getLastRow()-1,5).getValues();
+    for(var i=flRows.length-1;i>=0;i--){ if(flRows[i][0]===data.tourneyName) fl.deleteRow(i+2); }
+  }
   return {ok:true};
 }
 function getScores(tourneyName) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()<2) return [];
+  // โหลด flags จาก PlayerFlags sheet แล้ว join กับ Scores
+  var flagsMap = getFlagsMap(tourneyName);
   var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
   return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
-    return {tourneyName:r[0],name:r[1],email:r[2],group:r[3],dept:r[4]||'',flight:r[5],
-            gross:r[6],par:r[7],hcp:r[8],net:r[9],puttsTotal:r[10],confirmed:r[11]===true,lgg:r[12]===true,lno:r[13]===true,wd:r[14]===true,
-            scores:r.slice(15,33),pars:r.slice(33,51),putts:r.slice(51,69)};
+    var email = r[2].toString().toLowerCase();
+    var flags = flagsMap[email] || {wd:false, lgg:false, lno:false};
+    return {
+      tourneyName:r[0], name:r[1], email:r[2], group:r[3], dept:r[4]||'', flight:r[5],
+      gross:r[6], par:r[7], hcp:r[8], net:r[9], puttsTotal:r[10],
+      confirmed: r[11]===true,
+      wd:  flags.wd,
+      lgg: flags.lgg,
+      lno: flags.lno,
+      scores:r.slice(12,30), pars:r.slice(30,48), putts:r.slice(48,66)
+    };
   });
 }
 function submitScore(data) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()===0) {
-    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed','LGG','LNO','WD'];
+    var h=['TourneyName','Name','Email','Group','Dept','Flight','Gross','Par','Hcp','Net','TotalPutts','Confirmed'];
     for(var n=1;n<=18;n++) h.push('H'+n+'_Score');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Par');
     for(var n=1;n<=18;n++) h.push('H'+n+'_Putt');
     sh.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold').setBackground('#1a4a2a').setFontColor('white');
   }
-  // ถ้า confirmed แล้วห้าม overwrite (ยกเว้น Admin force)
   var rows = sh.getDataRange().getValues();
   for(var i=rows.length-1;i>=1;i--){
     if(rows[i][0]===data.tourneyName && rows[i][2].toLowerCase()===data.email.toLowerCase()){
@@ -920,15 +978,12 @@ function submitScore(data) {
     }
   }
   var confirmed = data.confirmed===true;
-  var lgg = data.lgg===true;
-  var lno = data.lno===true;
-  var wd = data.wd===true;
   var row=[data.tourneyName,data.name,data.email,data.group,data.dept||'',data.flight,
-           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed,lgg,lno,wd]
+           data.gross,data.par,data.hcp,data.net,data.puttsTotal,confirmed]
     .concat(data.scores).concat(data.pars).concat(data.putts);
   sh.appendRow(row);
   return {ok:true};
-}`;
+}`;;
 
 document.getElementById('appsScriptCode').textContent = APPS_SCRIPT_CODE;
 
@@ -1303,13 +1358,13 @@ function renderAdminList(players=[],scores=[]) {
           ${statusHtml}
           <div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
             ${sc?`
-              <button class="btn-sm" onclick="toggleFlag('${p.email}','wd',${isWD})"
+              <button class="btn-sm" onclick="toggleFlag('${p.email}','wd',${isWD},'${p.name.replace(/'/g,"\\'")}')" 
                 style="color:${isWD?'var(--accent2)':'var(--red)'};border-color:${isWD?'var(--accent2)':'var(--red)'};"
                 title="${isWD?'คืนสถานะ':'ถอนตัว (WD)'}">${isWD?'↩WD':'WD'}</button>
-              <button class="btn-sm" onclick="toggleFlag('${p.email}','lgg',${isLGG})"
+              <button class="btn-sm" onclick="toggleFlag('${p.email}','lgg',${isLGG},'${p.name.replace(/'/g,"\\'")}')" 
                 style="color:${isLGG?'var(--accent2)':'var(--bogey)'};border-color:${isLGG?'var(--accent2)':'var(--bogey)'};"
                 title="${isLGG?'ยกเลิก Low Gross Winner':'มาร์ค Low Gross Winner'}">LG${isLGG?'✓':'?'}</button>
-              <button class="btn-sm" onclick="toggleFlag('${p.email}','lno',${isLNO})"
+              <button class="btn-sm" onclick="toggleFlag('${p.email}','lno',${isLNO},'${p.name.replace(/'/g,"\\'")}')" 
                 style="color:${isLNO?'var(--accent2)':'#6a5acd'};border-color:${isLNO?'var(--accent2)':'#6a5acd'};"
                 title="${isLNO?'ยกเลิก Low Net Overall Winner':'มาร์ค Low Net Overall Winner'}">LN${isLNO?'✓':'?'}</button>
             `:''}
@@ -2158,31 +2213,34 @@ const BOOBY_IMG_SRC =  + BOOBY_SRC + r;
 // ════════════════════════════════
 // FLAG TOGGLE (WD / LGG / LNO)
 // ════════════════════════════════
-async function toggleFlag(email, flag, current) {
+async function toggleFlag(email, flag, current, playerName='') {
   if(!adminIn){toast('กรุณา Login Admin ก่อน','err');return;}
   if(!activeTourney){toast('กรุณาเลือกการแข่งขันก่อน','err');return;}
   const labels={'wd':'WD (ถอนตัว)','lgg':'Low Gross Winner','lno':'Low Net Overall Winner'};
   const action = current ? `ยกเลิก ${labels[flag]}` : `มาร์ค ${labels[flag]}`;
-  if(!confirm(`${action} สำหรับ ${email}?`)) return;
+  const displayName = playerName || email;
+  if(!confirm(`${action}\nผู้เล่น: ${displayName}?`)) return;
   loading(true, action+'...');
   try {
+    // โหลด flags ปัจจุบัน
     const allSc = await api('getScores',{name:activeTourney.tourneyName});
     const sc = allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
-    if(!sc){toast('ไม่พบสกอร์ของผู้เล่นนี้','err');loading(false);return;}
-    const payload = {
-      action:'submitScore', adminForce:true,
-      confirmed:sc.confirmed,
-      wd:  flag==='wd'  ? !current : (sc.wd===true),
-      lgg: flag==='lgg' ? !current : (sc.lgg===true),
-      lno: flag==='lno' ? !current : (sc.lno===true),
-      tourneyName:activeTourney.tourneyName,
-      name:sc.name, email:sc.email, group:sc.group, dept:sc.dept||'', flight:sc.flight,
-      gross:sc.gross, par:sc.par, hcp:sc.hcp, net:sc.net, puttsTotal:sc.puttsTotal,
-      scores:[...sc.scores], pars:[...sc.pars], putts:[...sc.putts]
-    };
-    await apiPost(payload);
+    await apiPost({
+      action: 'setPlayerFlag',
+      tourneyName: activeTourney.tourneyName,
+      email: email,
+      wd:  flag==='wd'  ? !current : (sc ? sc.wd===true  : false),
+      lgg: flag==='lgg' ? !current : (sc ? sc.lgg===true : false),
+      lno: flag==='lno' ? !current : (sc ? sc.lno===true : false),
+    });
     toast(`✅ ${action} แล้ว`,'ok');
+    // Refresh admin list + leaderboard data
     await loadPlayersToAdmin();
+    const lbName = document.getElementById('lbTourneySelect')?.value;
+    if(lbName===activeTourney.tourneyName){
+      lbData = await api('getScores',{name:lbName});
+      renderLb(lbData);
+    }
   } catch(e){ toast('❌ '+e.message,'err'); }
   loading(false);
 }
@@ -2229,23 +2287,33 @@ function getAwardsData(data){
   };
 }
 
-function openAwardsModal(){
-  const name=document.getElementById('lbTourneySelect')?.value||'—';
-  if(!lbData||!lbData.length){
-    if(scriptUrl&&name!=='—'){
-      loading(true,'โหลดข้อมูลรางวัล...');
-      api('getScores',{name}).then(s=>{lbData=s;loading(false);
-        document.getElementById('awardsModal').classList.remove('hidden');
-        document.getElementById('awardsModalTourney').textContent=name;
-        renderAwards(lbData);
-      }).catch(e=>{loading(false);toast('❌ '+e.message,'err');});
-      return;
-    }
-    toast('กรุณาเปิดหน้า Leaderboard และเลือกการแข่งขันก่อนครับ','err');return;
+async function openAwardsModal(){
+  const name = document.getElementById('lbTourneySelect')?.value || '';
+  const modal = document.getElementById('awardsModal');
+  const body  = document.getElementById('awardsModalBody');
+  const tEl   = document.getElementById('awardsModalTourney');
+
+  // เปิด modal ทันที แสดง spinner ใน body (ไม่ใช้ loading overlay)
+  modal.classList.remove('hidden');
+  tEl.textContent = name || '—';
+  body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:13px;">⏳ กำลังโหลดข้อมูลรางวัล...</div>';
+
+  if(!scriptUrl){
+    body.innerHTML='<div class="empty-msg">ยังไม่ได้ตั้งค่า Script URL</div>';
+    return;
   }
-  document.getElementById('awardsModal').classList.remove('hidden');
-  document.getElementById('awardsModalTourney').textContent=name;
-  renderAwards(lbData);
+  if(!name){
+    body.innerHTML='<div class="empty-msg">กรุณาเลือกการแข่งขันก่อนครับ</div>';
+    return;
+  }
+  try {
+    // โหลดใหม่เสมอเพื่อให้ flags ล่าสุด
+    lbData = await api('getScores',{name});
+    renderLb(lbData);
+    renderAwards(lbData);
+  } catch(e) {
+    body.innerHTML = `<div class="empty-msg" style="color:var(--red);">❌ ${e.message}</div>`;
+  }
 }
 function closeAwardsModal(){document.getElementById('awardsModal').classList.add('hidden');}
 
