@@ -2208,7 +2208,7 @@ if ('serviceWorker' in navigator) {
 // ════════════════════════════════
 // BOOBY IMAGE SRC
 // ════════════════════════════════
-const BOOBY_IMG_SRC =  + BOOBY_SRC + r;
+const BOOBY_IMG_SRC = LOGO_SRC; // ใช้โลโก้คลับแทน
 
 // ════════════════════════════════
 // FLAG TOGGLE (WD / LGG / LNO)
@@ -2274,12 +2274,13 @@ function stopLbAutoRefresh(){
 // AWARDS MODAL
 // ════════════════════════════════
 function getAwardsData(data){
-  const d=(data||[]).filter(r=>!r.wd);
-  const noLgg=d.filter(r=>!r.lgg);
-  const noLggLno=noLgg.filter(r=>!r.lno);
+  // กรองเงื่อนไขแต่ละระดับ
+  const d       = (data||[]).filter(r=>!r.wd);              // ทุกคน ยกเว้น WD
+  const noLgg   = d.filter(r=>r.lgg!==true);                // ตัด LG winner ออก
+  const noLggLno= noLgg.filter(r=>r.lno!==true);            // ตัด LN winner ออกด้วย
   return {
-    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
-    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
+    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,3),
+    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
     flightA:  [...noLggLno].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
     flightB:  [...noLggLno].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
     flightC:  [...noLggLno].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
