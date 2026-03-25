@@ -541,6 +541,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
           <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="lbRefreshIndicator">🔄 60s</span>
           <button class="btn-sm" onclick="openAwardsModal()" style="background:var(--accent2);color:#fff;border-color:var(--accent2);">🏅 รางวัล</button>
+          <button class="btn-sm" onclick="exportLbPDF()" style="background:var(--red);color:#fff;border-color:var(--red);">📄 PDF</button>
           <button class="btn-sm" onclick="loadLeaderboard()">🔄 รีเฟรช</button>
         </div>
       </div>
@@ -700,7 +701,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div style="font-size:11px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;margin-top:2px;" id="awardsModalTourney">—</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
-        <button onclick="exportAllAwardsPDF()" style="background:var(--red);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;white-space:nowrap;">📄 PDF รวม</button>
+        <button onclick="exportAllAwardsPDF()" style="background:var(--red);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-family:IBM Plex Mono,monospace;cursor:pointer;white-space:nowrap;">📄 PDF รวม</button>
+        <button onclick="shareAllAwardsPDF()" style="background:#06c755;color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-family:IBM Plex Mono,monospace;cursor:pointer;white-space:nowrap;">📤 แชร์ LINE</button>
         <button onclick="closeAwardsModal()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ ปิด</button>
       </div>
     </div>
@@ -2018,6 +2020,36 @@ function setFlight(el,flight){
 }
 function getPrizeTag(cls,label){return `<span class="prize-tag ${cls}">${label}</span>`;}
 
+// ════════════════════════════════
+// COUNT BACK & SORT HELPERS
+// ════════════════════════════════
+function countBack(a, b) {
+  const aScores = a.scores || [];
+  const bScores = b.scores || [];
+  const holes = Math.max(aScores.length, bScores.length) || 18;
+  for (let i = holes - 1; i >= Math.max(0, holes - 5); i--) {
+    const as = Number(aScores[i]) || 0;
+    const bs = Number(bScores[i]) || 0;
+    if (as !== bs) return as - bs;
+  }
+  return 0;
+}
+function cmpGross(a, b) {
+  if (a.gross !== b.gross) return a.gross - b.gross;
+  if (a.hcp !== b.hcp) return b.hcp - a.hcp;
+  return countBack(a, b);
+}
+function cmpNet(a, b) {
+  if (a.net !== b.net) return a.net - b.net;
+  if (a.hcp !== b.hcp) return a.hcp - b.hcp;
+  return countBack(a, b);
+}
+function cmpBooby(a, b) {
+  if (a.net !== b.net) return b.net - a.net;
+  if (a.hcp !== b.hcp) return b.hcp - a.hcp;
+  return countBack(a, b);
+}
+
 function renderLb(data){
   let d=[...(data||[])];
   const isBooby   = activeFlightFilter==='booby';
@@ -2040,9 +2072,9 @@ function renderLb(data){
 
   // Booby: ตัด LG และ LN ออก
   if(isBooby) d = d.filter(r=>r.lgg!==true && r.lno!==true);
-  if(isBooby)      d.sort((a,b)=>b.net-a.net||b.hcp-a.hcp);
-  else if(isLowGross) d.sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp);
-  else             d.sort((a,b)=>a.net-b.net||a.hcp-b.hcp);
+  if(isBooby)         d.sort(cmpBooby);
+  else if(isLowGross) d.sort(cmpGross);
+  else                d.sort(cmpNet);
 
   const podEl=document.getElementById('lbPodium'), tblEl=document.getElementById('lbTable');
   if(!d.length){podEl.innerHTML='';tblEl.innerHTML='<div class="empty-msg">ยังไม่มีสกอร์</div>';return;}
@@ -2279,12 +2311,12 @@ function getAwardsData(data){
   const noLgg=d.filter(r=>r.lgg!==true);
   const noLggLno=noLgg.filter(r=>r.lno!==true);
   return {
-    lowGross: [...d].sort((a,b)=>a.gross-b.gross||a.hcp-b.hcp).slice(0,1),
-    lowNet:   [...noLgg].sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,1),
-    flightA:  [...noLggLno].filter(r=>r.flight==='A').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightB:  [...noLggLno].filter(r=>r.flight==='B').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    flightC:  [...noLggLno].filter(r=>r.flight==='C').sort((a,b)=>a.net-b.net||a.hcp-b.hcp).slice(0,3),
-    booby:    [...noLggLno].sort((a,b)=>b.net-a.net||b.hcp-a.hcp).slice(0,2),
+    lowGross: [...d].sort(cmpGross).slice(0,1),
+    lowNet:   [...noLgg].sort(cmpNet).slice(0,1),
+    flightA:  [...noLggLno].filter(r=>r.flight==='A').sort(cmpNet).slice(0,3),
+    flightB:  [...noLggLno].filter(r=>r.flight==='B').sort(cmpNet).slice(0,3),
+    flightC:  [...noLggLno].filter(r=>r.flight==='C').sort(cmpNet).slice(0,3),
+    booby:    [...noLggLno].sort(cmpBooby).slice(0,2),
   };
 }
 
@@ -2410,6 +2442,148 @@ function getSectionConfig(sectionKey){
   return Object.entries(cfg).find(([k])=>sectionKey.includes(k))?.[1]||cfg['Low Gross'];
 }
 
+// ════════════════════════════════
+// SHARE Awards PDF to LINE
+// ════════════════════════════════
+async function shareAllAwardsPDF() {
+  const tourneyName = document.getElementById('awardsModalTourney').textContent || '';
+  toast('⏳ กำลังสร้าง PDF...','ok');
+  // ใช้ canvas เดิมจาก exportAllAwardsPDF แล้ว share
+  const canvas = await buildAllAwardsPDFCanvas();
+  if (!canvas) return;
+  canvas.toBlob(async blob => {
+    const file = new File([blob], `awards-${tourneyName||'golf'}.png`, {type:'image/png'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      try {
+        await navigator.share({files:[file], title:'สรุปรางวัล '+tourneyName});
+        return;
+      } catch(e) { if(e.name==='AbortError') return; }
+    }
+    // fallback: download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `awards-${tourneyName||'golf'}.png`;
+    link.href = url;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    toast('บันทึกรูปแล้ว เปิด LINE แล้วแชร์รูปจากแกลเลอรี่ได้เลยครับ');
+  }, 'image/png');
+}
+
+// ════════════════════════════════
+// EXPORT Leaderboard PDF
+// ════════════════════════════════
+function exportLbPDF() {
+  if (!lbData || !lbData.length) { toast('กรุณาโหลด Leaderboard ก่อนครับ','err'); return; }
+  const tourneyName = document.getElementById('lbTourneySelect')?.value || '';
+  const modeLabels = {
+    'lowgross':'🏌️ Low Gross','lownet':'🏆 Low Net Overall',
+    'A':'🟢 Flight A','B':'🔵 Flight B','C':'🟡 Flight C','booby':'🐷 Booby'
+  };
+  const mode = activeFlightFilter;
+  const modeLabel = modeLabels[mode] || mode;
+
+  // ใช้ข้อมูลที่กรองแล้วจาก renderLb (ดึงจากตาราง d ที่ render อยู่)
+  // สร้าง filtered data ใหม่โดยใช้ logic เดียวกับ renderLb
+  let d = [...lbData];
+  const isBooby    = mode==='booby';
+  const isLowGross = mode==='lowgross';
+  const isLowNet   = mode==='lownet';
+  d = d.filter(r=>r.wd!==true);
+  if(isLowNet) d = d.filter(r=>r.lgg!==true);
+  if(!isBooby&&!isLowGross&&!isLowNet&&mode){
+    d = d.filter(r=>r.flight===mode).filter(r=>r.lgg!==true).filter(r=>r.lno!==true);
+  }
+  if(isBooby) d = d.filter(r=>r.lgg!==true && r.lno!==true);
+  if(isBooby)         d.sort(cmpBooby);
+  else if(isLowGross) d.sort(cmpGross);
+  else                d.sort(cmpNet);
+
+  const DPR=2, W=600, ROW_H=56, HEADER_H=110, FOOTER_H=44;
+  const H = HEADER_H + d.length*ROW_H + FOOTER_H + 24;
+  const canvas = document.createElement('canvas');
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  const ctx = canvas.getContext('2d'); ctx.scale(DPR,DPR);
+  const C = {bg:'#fffdf5',green:'#1a4a2a',text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',white:'#fff'};
+  const medals=['🥇','🥈','🥉'];
+
+  ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
+  // Header
+  ctx.fillStyle=C.green; roundRectPdf(ctx,0,0,W,HEADER_H,0); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='bold 22px "Cormorant Garamond",serif'; ctx.textAlign='center';
+  ctx.fillText('🏆 '+modeLabel, W/2, 46);
+  ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='12px "IBM Plex Mono",sans-serif';
+  ctx.fillText(tourneyName, W/2, 70);
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px "IBM Plex Mono",sans-serif';
+  ctx.fillText(new Date().toLocaleDateString('th-TH'), W/2, 90);
+
+  // Table header
+  const thY = HEADER_H + 8;
+  ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,28,6); ctx.fill();
+  ctx.fillStyle=C.green; ctx.font='bold 10px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
+  ctx.fillText('อันดับ', 28, thY+18);
+  ctx.fillText('ผู้เล่น', 80, thY+18);
+  ctx.textAlign='right';
+  ctx.fillText("H'cap", W-100, thY+18);
+  ctx.fillText(isLowGross?'Gross':'Net', W-28, thY+18);
+
+  // Rows
+  d.forEach((r,i)=>{
+    const ry = HEADER_H + 40 + i*ROW_H;
+    ctx.fillStyle = i%2===0 ? C.white : '#f4f2ee';
+    roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.fill();
+    ctx.strokeStyle=C.border; ctx.lineWidth=.4;
+    roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
+
+    // rank
+    ctx.font='18px sans-serif'; ctx.textAlign='center';
+    const rankIcon = isBooby ? (i===0?'🐷':'🐷') : (medals[i]||String(i+1));
+    ctx.fillText(rankIcon, 40, ry+ROW_H/2+6);
+
+    // name + ฝ่าย
+    ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(r.name, 62, ry+20);
+    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
+    ctx.fillText((r.dept||r.group||''), 62, ry+36);
+
+    // hcp
+    ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(r.hcp), W-90, ry+ROW_H/2+5);
+
+    // score
+    const val = isLowGross ? r.gross : r.net;
+    const scoreColor = isBooby ? '#c94a2a' : C.green;
+    ctx.fillStyle=scoreColor; ctx.font='bold 20px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(val), W-28, ry+ROW_H/2+7);
+  });
+
+  // Footer
+  ctx.fillStyle=C.green; ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'), W/2, H-FOOTER_H+18);
+  ctx.fillText(tourneyName, W/2, H-FOOTER_H+34);
+
+  const logoImg = new Image(); logoImg.src = LOGO_SRC;
+  const doSave = () => {
+    try { ctx.drawImage(logoImg,20,H-FOOTER_H+8,28,28); } catch(e){}
+    canvas.toBlob(blob=>{
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `lb-${mode}-${tourneyName||'golf'}.png`;
+      link.href = url;
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      // ลอง share
+      const file = new File([blob], link.download, {type:'image/png'});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file], title:'Leaderboard '+modeLabel+' · '+tourneyName}).catch(()=>{});
+      }
+      toast('✅ บันทึกและแชร์ Leaderboard แล้ว','ok');
+    },'image/png');
+  };
+  if(logoImg.complete) doSave(); else logoImg.onload = doSave;
+}
+
 function exportSectionPDF(sectionTitle,btn){
   const tourneyName=document.getElementById('awardsModalTourney').textContent||'';
   const sec=getSectionConfig(sectionTitle);
@@ -2447,29 +2621,27 @@ function exportSectionPDF(sectionTitle,btn){
       grad.addColorStop(0,i===0?C.gold:i===1?'#8a9aaa':'#b08060');
       grad.addColorStop(1,i===0?'#a07820':i===1?'#607080':'#806040');
       ctx.fillStyle=grad;roundRectPdf(ctx,bx,by,BAR_W,barH,7);ctx.fill();
-      // icon
+      // ชื่อ + ฝ่าย เหนือแท่งกราฟ
+      const nm=p.name.length>13?p.name.slice(0,12)+'…':p.name;
+      const dept=p.dept||p.group||'';
+      ctx.fillStyle=C.text;ctx.font='bold 11px "Sarabun",sans-serif';ctx.textAlign='center';
+      ctx.fillText(nm,bx+BAR_W/2,by-22);
+      ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+      const deptShort=dept.length>10?dept.slice(0,9)+'…':dept;
+      ctx.fillText(deptShort,bx+BAR_W/2,by-10);
+      // icon บนแท่ง
       if(sec.isBooby){
         const bi=new Image();bi.src=BOOBY_IMG_SRC;
         try{ctx.drawImage(bi,bx+BAR_W/2-12,by+4,24,24);}catch(e){ctx.font='18px sans-serif';ctx.fillText('🐷',bx+BAR_W/2,by+26);}
       }else{
         ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText(medals[i]||'',bx+BAR_W/2,by+26);
       }
-      // score on bar
+      // score บนแท่ง
       ctx.fillStyle='#fff';ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
       ctx.fillText(String(sec.getVal(p)),bx+BAR_W/2,by+barH-10);
-      // name under bar
-      ctx.fillStyle=C.text;ctx.font='bold 12px "Sarabun",sans-serif';ctx.textAlign='center';
-      const nm=p.name.length>13?p.name.slice(0,12)+'…':p.name;
-      ctx.fillText(nm,bx+BAR_W/2,chartY+BAR_AREA_H+22);
-      // flight badge
-      const fbg={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'}[p.flight]||'#eee';
-      const ftc={'A':'#0a3622','B':'#084298','C':'#664d03'}[p.flight]||'#333';
-      ctx.fillStyle=fbg;roundRectPdf(ctx,bx+BAR_W/2-14,chartY+BAR_AREA_H+26,28,14,7);ctx.fill();
-      ctx.fillStyle=ftc;ctx.font='bold 8px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-      ctx.fillText(p.flight,bx+BAR_W/2,chartY+BAR_AREA_H+36);
-      // sub
+      // sub ใต้แท่ง
       ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
-      ctx.fillText(sec.getSub(p),bx+BAR_W/2,chartY+BAR_AREA_H+50);
+      ctx.fillText(sec.getSub(p),bx+BAR_W/2,chartY+BAR_AREA_H+22);
     });
   }
 
@@ -2545,7 +2717,99 @@ function exportSectionPDF(sectionTitle,btn){
 // ════════════════════════════════
 // PDF รวมทุกรางวัล (ไม่มีกราฟ)
 // ════════════════════════════════
-function exportAllAwardsPDF(){
+
+async function buildAllAwardsPDFCanvas(){
+  return new Promise(resolve=>{
+    const tourneyName=document.getElementById('awardsModalTourney').textContent||'';
+    const {lowGross,lowNet,flightA,flightB,flightC,booby}=getAwardsData(lbData);
+    const sections=[
+      {title:'🏌️ Low Gross',players:lowGross,getVal:p=>p.gross,getSub:p=>`Gross · H'cap ${p.hcp}`,color:'#1a4a2a',isBooby:false,prizeLabels:['🏆 Winner']},
+      {title:'🏆 Low Net Overall',players:lowNet,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#084298',isBooby:false,prizeLabels:['🏆 Winner']},
+      {title:'🟢 Flight A',players:flightA,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#0a5c2a',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+      {title:'🔵 Flight B',players:flightB,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#084298',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+      {title:'🟡 Flight C',players:flightC,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#664d03',isBooby:false,prizeLabels:['🏆 Winner','🥈 1st Runner-up','🥉 2nd Runner-up']},
+      {title:'🐷 Booby',players:booby,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#c94a2a',isBooby:true,prizeLabels:['🐷 Booby Maker','🐷 Booby']},
+    ];
+    const canvas=document.createElement('canvas');
+    const DPR=2,W=600,ROW_H=64,SEC_HEAD=44,PAD=16,HEADER_H=110,FOOTER_H=44;
+    const totalRows=sections.reduce((a,s)=>a+Math.max(s.players.length,1),0);
+    const H=HEADER_H+sections.length*(SEC_HEAD+PAD)+totalRows*ROW_H+FOOTER_H+32;
+    canvas.width=W*DPR;canvas.height=H*DPR;
+    const ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);
+    const C={bg:'#fffdf5',green:'#1a4a2a',text:'#1c1a17',text2:'#5a5248',text3:'#9e9488',border:'#d4c9b0',white:'#fff'};
+    const medals=['🥇','🥈','🥉'];
+    ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.green;roundRectPdf(ctx,0,0,W,HEADER_H,0);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 22px "Cormorant Garamond",serif';ctx.textAlign='center';
+    ctx.fillText('🏅 สรุปรางวัลการแข่งขัน',W/2,44);
+    ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='12px "IBM Plex Mono",sans-serif';
+    ctx.fillText(tourneyName,W/2,68);
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='10px "IBM Plex Mono",sans-serif';
+    ctx.fillText(new Date().toLocaleDateString('th-TH'),W/2,88);
+    let curY=HEADER_H+12;
+    sections.forEach(sec=>{
+      ctx.fillStyle=sec.color+'22';roundRectPdf(ctx,16,curY,W-32,SEC_HEAD-8,8);ctx.fill();
+      ctx.fillStyle=sec.color;ctx.font='bold 14px "Cormorant Garamond",serif';ctx.textAlign='left';
+      ctx.fillText(sec.title,28,curY+SEC_HEAD-18);
+      curY+=SEC_HEAD;
+      if(!sec.players.length){
+        ctx.fillStyle=C.text3;ctx.font='11px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+        ctx.fillText('ยังไม่มีผู้เล่น',32,curY+20);curY+=ROW_H;
+      }else{
+        sec.players.forEach((p,i)=>{
+          ctx.fillStyle=i%2===0?C.white:'#f4f2ee';
+          roundRectPdf(ctx,16,curY,W-32,ROW_H-6,7);ctx.fill();
+          ctx.strokeStyle=C.border;ctx.lineWidth=.4;
+          roundRectPdf(ctx,16,curY,W-32,ROW_H-6,7);ctx.stroke();
+          ctx.font='16px sans-serif';ctx.textAlign='left';
+          ctx.fillText(sec.isBooby?(i===0?'🐷':'🐷'):(medals[i]||String(i+1)),26,curY+28);
+          ctx.fillStyle=C.text;ctx.font='bold 13px "Sarabun",sans-serif';ctx.textAlign='left';
+          ctx.fillText(p.name,58,curY+22);
+          ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
+          ctx.fillText((p.dept||p.group||''),58,curY+38);
+          const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
+          if(pl){
+            const plc=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
+            const ptc=i===0?'#856404':i===1?'#0a5c2a':'#084298';
+            ctx.fillStyle=plc;roundRectPdf(ctx,58,curY+42,pl.length*6+8,12,4);ctx.fill();
+            ctx.fillStyle=ptc;ctx.font='bold 7px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
+            ctx.fillText(pl,62,curY+51);
+          }
+          ctx.fillStyle=sec.isBooby?'#c94a2a':sec.color;
+          ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='right';
+          ctx.fillText(String(sec.getVal(p)),W-28,curY+28);
+          ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
+          ctx.fillText(sec.getSub(p),W-28,curY+44);
+          curY+=ROW_H;
+        });
+      }
+    });
+    ctx.fillStyle=C.green;ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
+    ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='10px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+    ctx.fillText('TIS Golf Club · Tri Petch Group · '+new Date().toLocaleDateString('th-TH'),W/2,H-FOOTER_H+18);
+    ctx.fillText(tourneyName,W/2,H-FOOTER_H+34);
+    const logoImg=new Image();logoImg.src=LOGO_SRC;
+    const done=()=>{
+      try{ctx.drawImage(logoImg,20,H-FOOTER_H+8,28,28);}catch(e){}
+      resolve(canvas);
+    };
+    if(logoImg.complete)done();else logoImg.onload=done;
+  });
+}
+async function exportAllAwardsPDF(){
+  const canvas=await buildAllAwardsPDFCanvas();
+  if(!canvas)return;
+  const tourneyName=document.getElementById('awardsModalTourney').textContent||'';
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.download=`awards-all-${tourneyName||'golf'}.png`;
+    link.href=url;document.body.appendChild(link);link.click();document.body.removeChild(link);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('✅ บันทึก PDF รวมแล้ว','ok');
+  },'image/png');
+}
+function exportAllAwardsPDF_OLD(){
   const tourneyName=document.getElementById('awardsModalTourney').textContent||'';
   const {lowGross,lowNet,flightA,flightB,flightC,booby}=getAwardsData(lbData);
   const sections=[
