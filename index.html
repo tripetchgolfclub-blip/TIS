@@ -1469,7 +1469,7 @@ async function startScorecard() {
   const holes=t?.holes||18;
   const pars=(t?.pars&&t.pars.length)?t.pars.map(Number):(holes===9?DEF_PARS_9:DEF_PARS_18);
   const allSc=await api('getScores',{name:currentPlayer.tourneyName});
-  const exist=allSc.find(s=>s.email.toLowerCase()===currentPlayer.email.toLowerCase());
+  const exist=allSc.find(s=>s.email!=null&&s.email.toString().toLowerCase()===currentPlayer.email.toLowerCase());
   scoreState={
     scores:exist?exist.scores.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
     putts: exist?exist.putts.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
@@ -2402,7 +2402,7 @@ function renderAwards(data){
     const bStyles=['background:#fde8e3;color:#c94a2a;border:1px solid #f5c6bb;','background:#fff0e8;color:#e07a40;border:1px solid #f5d5bb;'];
     const bLabels=['🐷 Booby Maker','🐷 Booby'];
     return `<div class="award-row award-booby-${i+1}">
-      <div class="award-rank"><img src="${BOOBY_IMG_SRC}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;"></div>
+      <div class="award-rank" style="font-size:22px;">🐷</div>
       <div class="award-info">
         <div class="award-name">${p.name} <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
         <div class="award-meta"><span class="group-chip">${p.group||''}</span>${p.dept?' <span class="group-chip">'+p.dept+'</span>':''}</div>
@@ -2547,12 +2547,17 @@ function exportLbPDF() {
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
 
     // rank
-    ctx.font='18px sans-serif'; ctx.textAlign='center';
+    ctx.textAlign='center';
     let rankIcon;
     if(isBooby){
       rankIcon = i<2 ? '🐷' : String(i+1);
     } else {
       rankIcon = i<3 ? medals[i] : String(i+1);
+    }
+    if((isBooby && i>=2) || (!isBooby && i>=3)){
+      ctx.fillStyle=C.text3; ctx.font='bold 14px "IBM Plex Mono",sans-serif';
+    } else {
+      ctx.fillStyle=C.text; ctx.font='20px sans-serif';
     }
     ctx.fillText(rankIcon, 40, ry+ROW_H/2+6);
 
@@ -2589,12 +2594,7 @@ function exportLbPDF() {
       link.href = url;
       document.body.appendChild(link); link.click(); document.body.removeChild(link);
       setTimeout(()=>URL.revokeObjectURL(url),1000);
-      // ลอง share
-      const file = new File([blob], link.download, {type:'image/png'});
-      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-        navigator.share({files:[file], title:'Leaderboard '+modeLabel+' · '+tourneyName}).catch(()=>{});
-      }
-      toast('✅ บันทึกและแชร์ Leaderboard แล้ว','ok');
+      toast('✅ ดาวน์โหลด Leaderboard แล้ว','ok');
     },'image/png');
   };
   if(logoImg.complete) doSave(); else logoImg.onload = doSave;
@@ -2660,10 +2660,15 @@ async function shareLbLine() {
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.fill();
     ctx.strokeStyle=C.border; ctx.lineWidth=.4;
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
-    ctx.font='18px sans-serif'; ctx.textAlign='center';
+    ctx.textAlign='center';
     let rankIcon;
     if(isBooby){ rankIcon = i<2 ? '🐷' : String(i+1); }
     else { rankIcon = i<3 ? medals[i] : String(i+1); }
+    if((isBooby && i>=2) || (!isBooby && i>=3)){
+      ctx.fillStyle=C.text3; ctx.font='bold 14px "IBM Plex Mono",sans-serif';
+    } else {
+      ctx.fillStyle=C.text; ctx.font='20px sans-serif';
+    }
     ctx.fillText(rankIcon, 40, ry+ROW_H/2+6);
     ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
     ctx.fillText(r.name, 62, ry+20);
