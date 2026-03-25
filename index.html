@@ -758,16 +758,26 @@ function fmtDate(d) {
   if (isNaN(dt.getTime())) return String(d);
   return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
 }
+
+// ─────────────────────────────────────────────────
+// PlayerFlags sheet: TourneyName | Email | WD | LGG | LNO
+// flags แยกออกจาก Scores เพื่อแก้ไขได้โดยไม่ต้อง overwrite score
+// ─────────────────────────────────────────────────
 function getFlagsMap(tourneyName) {
   var sh = getSheet('PlayerFlags');
   if (sh.getLastRow() < 2) return {};
   var rows = sh.getRange(2,1,sh.getLastRow()-1,5).getValues();
   var map = {};
   rows.filter(function(r){return r[0]===tourneyName;}).forEach(function(r){
-    map[r[1].toString().toLowerCase()] = {wd:r[2]===true, lgg:r[3]===true, lno:r[4]===true};
+    map[r[1].toString().toLowerCase()] = {
+      wd:  r[2]===true,
+      lgg: r[3]===true,
+      lno: r[4]===true
+    };
   });
   return map;
 }
+
 function setPlayerFlag(data) {
   var sh = getSheet('PlayerFlags');
   if (sh.getLastRow()===0) {
@@ -792,6 +802,7 @@ function setPlayerFlag(data) {
   }
   return {ok:true};
 }
+
 function getTourneyList() {
   var sh = getSheet('Tournament');
   if (sh.getLastRow() < 2) return [];
@@ -924,6 +935,7 @@ function clearPlayers(data) {
   var sc = getSheet('Scores');
   var scRows = sc.getDataRange().getValues();
   for(var i=scRows.length-1;i>=1;i--){ if(scRows[i][0]===data.tourneyName) sc.deleteRow(i+1); }
+  // ลบ flags ด้วย
   var fl = getSheet('PlayerFlags');
   if(fl.getLastRow()>1){
     var flRows = fl.getRange(2,1,fl.getLastRow()-1,5).getValues();
@@ -934,6 +946,7 @@ function clearPlayers(data) {
 function getScores(tourneyName) {
   var sh = getSheet('Scores');
   if (sh.getLastRow()<2) return [];
+  // โหลด flags จาก PlayerFlags sheet แล้ว join กับ Scores
   var flagsMap = getFlagsMap(tourneyName);
   var rows = sh.getRange(2,1,sh.getLastRow()-1,sh.getLastColumn()).getValues();
   return rows.filter(function(r){return r[0]===tourneyName;}).map(function(r){
@@ -972,7 +985,7 @@ function submitScore(data) {
     .concat(data.scores).concat(data.pars).concat(data.putts);
   sh.appendRow(row);
   return {ok:true};
-}`;
+}`;;
 
 document.getElementById('appsScriptCode').textContent = APPS_SCRIPT_CODE;
 
@@ -1315,7 +1328,7 @@ function renderAdminList(players=[],scores=[]) {
   document.getElementById('playerCountBadge').textContent=players.length?players.length+' คน':'';
   if (!players.length){el.innerHTML='<div class="empty-msg">ยังไม่มีผู้เล่น</div>';return;}
   const scoreMap={};
-  scores.forEach(s=>{scoreMap[s.email.toLowerCase()]=s;});
+  scores.forEach(s=>{if(s&&s.email) scoreMap[s.email.toString().toLowerCase()]=s;});
   const groups=[...new Set(players.map(p=>p.group))];
   el.innerHTML=groups.map(g=>{
     const gp=players.filter(p=>p.group===g);
@@ -2037,6 +2050,16 @@ function cmpBooby(a, b) {
   return countBack(a, b);
 }
 
+function holesPlayed(r){
+  if(!r.scores) return 0;
+  return r.scores.filter(v=>v!==null&&v!==''&&Number(v)>0).length;
+}
+function holesStr(r, total){
+  const played = holesPlayed(r);
+  const tot = total || (r.pars?r.pars.filter(v=>v>0).length:18) || 18;
+  return played+'/'+tot;
+}
+
 function renderLb(data){
   let d=[...(data||[])];
   const isBooby   = activeFlightFilter==='booby';
@@ -2085,7 +2108,7 @@ function renderLb(data){
     return `<div class="pod">
       <div class="pod-name">${p.name}</div>
       <div class="pod-net" style="color:${medalColors[rank]}">${mainVal(p)}</div>
-      <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>Gross ${p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
+      <div class="pod-sub">${mainLabel} · H'cap ${p.hcp}<br>${isLowGross?'Net '+p.net:'Gross '+p.gross} · <span class="flight-badge fb-${p.flight}">${p.flight}</span></div>
       <div class="pod-block ${podCls[podIdx]}">${podMedals[rank]}</div>
     </div>`;}).join('')}</div>`;
 
@@ -2110,7 +2133,7 @@ function renderLb(data){
 
   if(isLowNet){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">⛳</th><th style="text-align:center;">รางวัล</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
@@ -2123,6 +2146,7 @@ function renderLb(data){
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
+          <td style="text-align:center;font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);">${holesStr(r)}</td>
           <td style="text-align:center;">${prizeLabel('lownet',i)}</td>
         </tr>`;}).join('')}</tbody></table>`;
     return;
@@ -2130,7 +2154,7 @@ function renderLb(data){
 
   if(isBooby){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">⛳</th><th style="text-align:center;">รางวัล</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         return `<tr class="${i<2?'rank-'+(i+1):''}">
@@ -2142,6 +2166,7 @@ function renderLb(data){
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
+          <td style="text-align:center;font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);">${holesStr(r)}</td>
           <td style="text-align:center;">${prizeLabel('booby',i)}</td>
         </tr>`;}).join('')}</tbody></table>`;
     return;
@@ -2149,7 +2174,7 @@ function renderLb(data){
 
   // Low Gross / Flight A/B/C
   tblEl.innerHTML=`<table class="lb-table">
-    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">⛳</th><th style="text-align:center;">รางวัล</th></tr></thead>
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
       return `<tr class="${i<3?'rank-'+(i+1):''}">
@@ -2161,6 +2186,7 @@ function renderLb(data){
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
         <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
+        <td style="text-align:center;font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);">${holesStr(r)}</td>
         <td style="text-align:center;">${prizeLabel(isLowGross?'gross':'flight',i)}</td>
       </tr>`;}).join('')}</tbody></table>`;
 }
@@ -2486,7 +2512,7 @@ function exportLbPDF() {
   else if(isLowGross) d.sort(cmpGross);
   else                d.sort(cmpNet);
 
-  const DPR=2, W=600, ROW_H=56, HEADER_H=110, FOOTER_H=44;
+  const DPR=2, W=600, ROW_H=68, HEADER_H=110, FOOTER_H=44;
   const H = HEADER_H + d.length*ROW_H + FOOTER_H + 24;
   const canvas = document.createElement('canvas');
   canvas.width=W*DPR; canvas.height=H*DPR;
@@ -2527,21 +2553,35 @@ function exportLbPDF() {
     const rankIcon = isBooby ? (i===0?'🐷':'🐷') : (medals[i]||String(i+1));
     ctx.fillText(rankIcon, 40, ry+ROW_H/2+6);
 
-    // name + ฝ่าย
+    // name
     ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
-    ctx.fillText(r.name, 62, ry+20);
-    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif';
-    ctx.fillText((r.dept||r.group||''), 62, ry+36);
-
+    ctx.fillText(r.name, 62, ry+18);
+    // group + dept + flight badge
+    const fbg2={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'}[r.flight]||'#eee';
+    const ftc2={'A':'#0a3622','B':'#084298','C':'#664d03'}[r.flight]||'#333';
+    const infoTxt=(r.group||'')+(r.dept?' · '+r.dept:'');
+    ctx.fillStyle=C.text3; ctx.font='9px "IBM Plex Mono",sans-serif';
+    ctx.fillText(infoTxt, 62, ry+32);
+    // flight badge
+    ctx.fillStyle=fbg2; roundRectPdf(ctx,62+(ctx.measureText(infoTxt).width)+4,ry+22,20,11,4); ctx.fill();
+    ctx.fillStyle=ftc2; ctx.font='bold 7px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(r.flight||'', 66+(ctx.measureText(infoTxt).width)+4, ry+30);
+    // holes played
+    const hp2 = (r.scores||[]).filter(v=>v!==null&&v!==''&&Number(v)>0).length;
+    const tot2 = (r.pars||[]).filter(v=>v>0).length||18;
+    ctx.fillStyle=C.text3; ctx.font='9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
+    ctx.fillText('⛳ '+hp2+'/'+tot2, 62, ry+44);
+    // gross (small, right side top)
+    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText('Gross '+r.gross, W-28, ry+18);
     // hcp
-    ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-    ctx.fillText(String(r.hcp), W-90, ry+ROW_H/2+5);
-
-    // score
+    ctx.fillStyle=C.text2; ctx.font='11px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText("H'cap "+r.hcp, W-28, ry+32);
+    // net/gross score (big)
     const val = isLowGross ? r.gross : r.net;
     const scoreColor = isBooby ? '#c94a2a' : C.green;
-    ctx.fillStyle=scoreColor; ctx.font='bold 20px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-    ctx.fillText(String(val), W-28, ry+ROW_H/2+7);
+    ctx.fillStyle=scoreColor; ctx.font='bold 18px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(val), W-28, ry+50);
   });
 
   // Footer
