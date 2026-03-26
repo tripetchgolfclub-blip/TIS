@@ -135,7 +135,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sub-row.total-row span:first-child{color:rgba(255,255,255,.5);}
 .c-empty{color:var(--border2);}.c-eagle{color:var(--eagle);}.c-birdie{color:var(--birdie);}
 .c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}.c-triple{color:var(--triple);}
-.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--double);font-weight:600;}
+.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--triple);font-weight:700;}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg);}
 .leg{display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);}
 .leg-dot{width:6px;height:6px;border-radius:50%;}
@@ -361,7 +361,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div class="form-group"><label>ฝ่าย</label><input type="text" id="adDept" placeholder="เช่น ฝ่าย IT"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Gmail</label><input type="email" id="adEmail" placeholder="player@gmail.com"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="adEmail" placeholder="เช่น name@gmail.com / name@company.co.th"></div>
         <div class="form-group"><label>กลุ่มออกรอบ</label><input type="text" id="adGroup" placeholder="เช่น กลุ่ม 1"></div>
       </div>
       <div class="form-row">
@@ -370,8 +370,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         </div>
       </div>
       <div class="divider"></div>
-      <div class="section-label">Bulk Import — ชื่อ, ฝ่าย, Gmail, กลุ่ม (ทีละบรรทัด)</div>
-      <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,ฝ่าย IT,somchai@gmail.com,กลุ่ม 1&#10;สมหญิง รักดี,ฝ่ายการตลาด,somying@gmail.com,กลุ่ม 2"></textarea>
+      <div class="section-label">Bulk Import — ชื่อ, ฝ่าย, Email, กลุ่ม (ทีละบรรทัด)</div>
+      <textarea id="bulkInput" rows="3" placeholder="สมชาย ใจดี,ฝ่าย IT,somchai@company.co.th,กลุ่ม 1&#10;สมหญิง รักดี,ฝ่ายการตลาด,somying@hotmail.com,กลุ่ม 2"></textarea>
       <button class="btn-sm" onclick="bulkImport()" style="margin-top:6px;">📋 Import</button>
     </div>
 
@@ -577,7 +577,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Eagle / Birdie / Par</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--par-col);">0</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Bogey (+1)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--bogey);">1</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Double Bogey (+2)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
-          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--triple);">3</td></tr>
         </tbody>
       </table>
       <div style="font-size:13px;color:var(--text2);line-height:1.9;background:rgba(184,146,42,.08);border-radius:8px;padding:11px 13px;">
@@ -1254,8 +1254,8 @@ async function addPlayer() {
   const dept=document.getElementById('adDept').value.trim();
   const email=document.getElementById('adEmail').value.trim().toLowerCase();
   const group=document.getElementById('adGroup').value.trim()||'กลุ่ม 1';
-  if (!name||!email){toast('กรุณากรอกชื่อและ Gmail','err');return;}
-  if (!email.includes('@')){toast('Gmail ไม่ถูกต้อง','err');return;}
+  if (!name||!email){toast('กรุณากรอกชื่อและ Email','err');return;}
+  if (!email.includes('@')){toast('รูปแบบ Email ไม่ถูกต้อง','err');return;}
   loading(true,'กำลังเพิ่ม...');
   try {
     await apiPost({action:'addPlayer',tourneyName:activeTourney.tourneyName,name,email,dept,group});
@@ -1264,7 +1264,7 @@ async function addPlayer() {
     document.getElementById('adDept').value='';
     await loadPlayersToAdmin();
     toast('✅ เพิ่มผู้เล่นแล้ว','ok');
-  } catch(e){toast(e.message==='duplicate'?'Gmail นี้มีอยู่แล้ว':'❌ '+e.message,'err');}
+  } catch(e){toast(e.message==='duplicate'?'Email นี้มีอยู่แล้ว':'❌ '+e.message,'err');}
   loading(false);
 }
 
@@ -2522,33 +2522,21 @@ function _buildLbCanvas(d, mode, tourneyName) {
   ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px "IBM Plex Mono",sans-serif';
   ctx.fillText(new Date().toLocaleDateString('th-TH'), W/2, 90);
 
-  // ── Column layout ──
-  // # | ผู้เล่น | ⛳ | Gross | H'cap | Net/Gross | รางวัล
-  // RANK(16-52) | NAME(52-280) | HOLES(280-326) | GROSS(326-390) | HCP(390-438) | SCORE(438-498) | PRIZE(498-end)
-  const COL = {
-    RANK_CX : 34,          // center of rank col
-    NAME_X  : 54,          // left edge of name col
-    HOLES_CX: 303,         // center of ⛳ col
-    GROSS_CX: 358,         // center of Gross col
-    HCP_CX  : 414,         // center of H'cap col
-    SCORE_CX: 468,         // center of Net/Gross score col
-    PRIZE_X : 500,         // left edge of prize col
-  };
-
   // Table header row
   const thY = HEADER_H + 8;
   ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,26,6); ctx.fill();
-  ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-  ctx.fillText('#',        COL.RANK_CX,  thY+17);
+  ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif';
+  // col positions: prize(16-70) | rank(70-106) | name(106-320) | gross(320-400) | hcp(400-462) | net(462-end)
+  const COL = {PRIZE_X:20, RANK_X:88, NAME_X:110, GROSS_X:332, HCP_X:422, NET_X:W-22};
   ctx.textAlign='left';
-  ctx.fillText('ผู้เล่น',  COL.NAME_X,   thY+17);
+  ctx.fillText('รางวัล', COL.PRIZE_X, thY+17);
+  ctx.fillText('#', COL.RANK_X-10, thY+17);
+  ctx.fillText('ผู้เล่น', COL.NAME_X, thY+17);
   ctx.textAlign='center';
-  ctx.fillText('⛳',       COL.HOLES_CX, thY+17);
-  ctx.fillText('Gross',    COL.GROSS_CX, thY+17);
-  ctx.fillText("H'cap",   COL.HCP_CX,   thY+17);
-  ctx.fillText(isLowGross?'Gross':'Net', COL.SCORE_CX, thY+17);
-  ctx.textAlign='left';
-  ctx.fillText('รางวัล',   COL.PRIZE_X,  thY+17);
+  ctx.fillText('Gross', COL.GROSS_X+30, thY+17);
+  ctx.fillText("H'cap", COL.HCP_X+20, thY+17);
+  ctx.textAlign='right';
+  ctx.fillText(isLowGross?'Gross':'Net', COL.NET_X, thY+17);
 
   // Rows
   d.forEach((r,i)=>{
@@ -2558,69 +2546,66 @@ function _buildLbCanvas(d, mode, tourneyName) {
     ctx.strokeStyle=C.border; ctx.lineWidth=.4;
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
 
-    // ── rank icon (centered) ──
+    // ── รางวัล (ซ้ายสุด) ──
+    const pl = prizes[i] || '';
+    if(pl){
+      const plBg = i===0?'#fff3cd': isBooby?(i===1?'#fff0e8':'#f5f5f5'): (i===1?'#d1e7dd':'#e8f0ff');
+      const plTc = i===0?'#856404': isBooby?(i===1?'#c94a2a':'#666'): (i===1?'#0a5c2a':'#084298');
+      const plW = Math.min(84, pl.replace(/[^\x00-\x7F]/g,'  ').length*6+10);
+      ctx.fillStyle=plBg; roundRectPdf(ctx,COL.PRIZE_X,ry+8,plW,44,6); ctx.fill();
+      ctx.fillStyle=plTc; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+      // Split prize label onto 2 lines if needed
+      const plParts = pl.split(' ');
+      const plLine1 = plParts.slice(0,2).join(' ');
+      const plLine2 = plParts.slice(2).join(' ');
+      ctx.fillText(plLine1, COL.PRIZE_X+plW/2, ry+26);
+      if(plLine2) ctx.fillText(plLine2, COL.PRIZE_X+plW/2, ry+38);
+    }
+
+    // ── rank icon ──
     ctx.textAlign='center';
     let rankIcon = isBooby ? (i<2?'🐷':String(i+1)) : (i<3?medals[i]:String(i+1));
     if((isBooby&&i>=2)||(!isBooby&&i>=3)){
       ctx.fillStyle=C.text3; ctx.font='bold 13px "IBM Plex Mono",sans-serif';
     } else {
-      ctx.fillStyle=C.text; ctx.font='20px sans-serif';
+      ctx.fillStyle=C.text; ctx.font='18px sans-serif';
     }
-    ctx.fillText(rankIcon, COL.RANK_CX, ry+ROW_H/2+6);
+    ctx.fillText(rankIcon, COL.RANK_X, ry+ROW_H/2+5);
 
-    // ── ชื่อ + flight badge + dept/group ──
+    // ── ชื่อ + flight badge ──
     ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
     ctx.fillText(r.name, COL.NAME_X, ry+22);
     const nmW = ctx.measureText(r.name).width;
+    // flight badge after name
     const fl = r.flight||'';
     if(fl){
-      ctx.fillStyle=fbg[fl]||'#eee'; roundRectPdf(ctx,COL.NAME_X+nmW+4,ry+10,20,13,5); ctx.fill();
+      ctx.fillStyle=fbg[fl]||'#eee'; roundRectPdf(ctx,COL.NAME_X+nmW+5,ry+10,20,13,5); ctx.fill();
       ctx.fillStyle=ftc[fl]||'#333'; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
-      ctx.fillText(fl, COL.NAME_X+nmW+9, ry+21);
+      ctx.fillText(fl, COL.NAME_X+nmW+10, ry+21);
     }
+    // dept + group ข้างล่าง
     const deptGroup = [r.dept, r.group].filter(Boolean).join(' · ');
     ctx.fillStyle=C.text3; ctx.font='9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
     ctx.fillText(deptGroup, COL.NAME_X, ry+38);
 
-    // ── ⛳ หลุมที่ส่งสกอร์ ──
-    const played = (r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
-    const totalH  = (r.scores||[]).length || 18;
-    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(`${played}/${totalH}`, COL.HOLES_CX, ry+ROW_H/2+4);
-
-    // ── Gross + diff (center col) ──
+    // ── Gross + diff ──
     const diff = r.gross - (r.par||72);
     const diffStr = diff===0?'E':diff>0?'+'+diff:String(diff);
     const diffCol = diff<=-2?'#1a6b9a':diff===-1?'#c94a2a':diff===0?'#2c6e3f':diff===1?'#b8922a':'#8a3a1a';
     ctx.fillStyle=C.text2; ctx.font='bold 15px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(r.gross), COL.GROSS_CX, ry+26);
+    ctx.fillText(String(r.gross), COL.GROSS_X+30, ry+26);
     ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif';
-    ctx.fillText(diffStr, COL.GROSS_CX, ry+40);
+    ctx.fillText(diffStr, COL.GROSS_X+30, ry+40);
 
     // ── H'cap ──
     ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(r.hcp), COL.HCP_CX, ry+ROW_H/2+5);
+    ctx.fillText(String(r.hcp), COL.HCP_X+20, ry+ROW_H/2+5);
 
-    // ── Net / Gross score ──
+    // ── Net / Gross score (main) ──
     const val = isLowGross ? r.gross : r.net;
     const scoreColor = isBooby ? '#c94a2a' : C.green;
-    ctx.fillStyle=scoreColor; ctx.font='bold 22px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(val), COL.SCORE_CX, ry+ROW_H/2+8);
-
-    // ── รางวัล (คอลัมสุดท้าย) ──
-    const pl = prizes[i] || '';
-    if(pl){
-      const plBg = i===0?'#fff3cd': isBooby?(i===1?'#fff0e8':'#f5f5f5'): (i===1?'#d1e7dd':'#e8f0ff');
-      const plTc = i===0?'#856404': isBooby?(i===1?'#c94a2a':'#666'): (i===1?'#0a5c2a':'#084298');
-      const plW = Math.min(90, pl.replace(/[^\x00-\x7F]/g,'  ').length*6+10);
-      ctx.fillStyle=plBg; roundRectPdf(ctx,COL.PRIZE_X,ry+10,plW,42,6); ctx.fill();
-      ctx.fillStyle=plTc; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-      const plParts = pl.split(' ');
-      const plLine1 = plParts.slice(0,2).join(' ');
-      const plLine2 = plParts.slice(2).join(' ');
-      ctx.fillText(plLine1, COL.PRIZE_X+plW/2, ry+27);
-      if(plLine2) ctx.fillText(plLine2, COL.PRIZE_X+plW/2, ry+39);
-    }
+    ctx.fillStyle=scoreColor; ctx.font='bold 22px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+    ctx.fillText(String(val), COL.NET_X, ry+ROW_H/2+8);
   });
 
   // Footer
