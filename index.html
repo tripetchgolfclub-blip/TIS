@@ -358,6 +358,28 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <span id="currentTourneyTag" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);"></span>
       </div>
 
+      <!-- Member search autocomplete -->
+      <div style="margin-bottom:14px;position:relative;">
+        <label style="display:block;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">
+          🔍 ค้นหาจาก Members (พิมพ์ชื่อ / Email)
+        </label>
+        <div style="position:relative;">
+          <input type="text" id="memberSearch" placeholder="พิมพ์ชื่อหรือ Email เพื่อค้นหาสมาชิก..."
+            oninput="filterMemberDropdown()" onfocus="filterMemberDropdown()" autocomplete="off"
+            style="padding-right:36px;">
+          <span style="position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none;">▾</span>
+        </div>
+        <div id="memberDropdown" style="display:none;position:absolute;left:0;right:0;z-index:100;
+          background:var(--surface);border:1px solid var(--border);border-radius:8px;
+          box-shadow:0 6px 24px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;margin-top:4px;">
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;white-space:nowrap;">หรือกรอกเอง</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
 
       <div class="form-row">
         <div class="form-group"><label>ชื่อผู้เล่น</label><input type="text" id="adName" placeholder="ชื่อ-นามสกุล"></div>
@@ -1079,6 +1101,7 @@ let lbData = [];
 let activeFlightFilter = 'lowgross';
 let adminEditPlayer = null;
 let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
+let memberCache = []; // cache สมาชิกจาก Members sheet
 
 // ════════════════════════════════
 // INIT
@@ -1087,8 +1110,80 @@ let adminEditState = { scores:[], putts:[], pars:[], holes:18 };
   document.getElementById('adDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('adScriptUrl').value = scriptUrl;
   renderParTable();
-
+  // ปิด dropdown เมื่อคลิกนอก
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#memberSearch') && !e.target.closest('#memberDropdown')) {
+      hideMemberDropdown();
+    }
+  });
 })();
+
+// ════════════════════════════════
+// MEMBER CACHE & DROPDOWN
+// ════════════════════════════════
+async function loadMemberCache() {
+  if (!scriptUrl) return;
+  try {
+    memberCache = await api('getMembers');
+  } catch(e) { memberCache = []; }
+}
+
+function filterMemberDropdown() {
+  const q = (document.getElementById('memberSearch').value || '').toLowerCase().trim();
+  const dd = document.getElementById('memberDropdown');
+  if (!memberCache.length && scriptUrl) {
+    loadMemberCache().then(() => filterMemberDropdown());
+    return;
+  }
+  const list = q
+    ? memberCache.filter(m =>
+        (m.name||'').toLowerCase().includes(q) ||
+        (m.email||'').toLowerCase().includes(q) ||
+        (m.dept||'').toLowerCase().includes(q))
+    : memberCache.slice(0, 30);
+
+  if (!list.length) { hideMemberDropdown(); return; }
+
+  dd.innerHTML = list.map(m => {
+    const initial = (m.name||'?')[0];
+    const photoHtml = m.photo
+      ? `<img src="${m.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+      : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">${initial}</div>`;
+    return `<div onclick="selectMemberFromDropdown('${m.id}')"
+      style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;"
+      onmouseenter="this.style.background='#f0faf4'" onmouseleave="this.style.background=''">
+      ${photoHtml}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
+        <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:1px;">
+          ${m.dept?`<span style="margin-right:6px;">🏢 ${m.dept}</span>`:''}
+          <span>✉ ${m.email||'—'}</span>
+        </div>
+      </div>
+      <span style="font-size:11px;color:var(--accent2);flex-shrink:0;">เลือก ›</span>
+    </div>`;
+  }).join('');
+
+  dd.style.display = 'block';
+}
+
+function selectMemberFromDropdown(id) {
+  const m = memberCache.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('adName').value  = m.name || '';
+  document.getElementById('adDept').value  = m.dept || '';
+  document.getElementById('adEmail').value = m.email || '';
+  document.getElementById('memberSearch').value = m.name + (m.dept ? ' · '+m.dept : '');
+  hideMemberDropdown();
+  // focus กลุ่มออกรอบ
+  document.getElementById('adGroup').focus();
+  toast(`✅ เลือก ${m.name} แล้ว — กรอกกลุ่มออกรอบ`, 'ok');
+}
+
+function hideMemberDropdown() {
+  const dd = document.getElementById('memberDropdown');
+  if (dd) dd.style.display = 'none';
+}
 
 // ════════════════════════════════
 // API
@@ -1105,12 +1200,8 @@ async function api(action, params={}) {
 }
 async function apiPost(body) {
   if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
-  const r = await fetch(scriptUrl, {
-    method: 'POST',
-    redirect: 'follow',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  const payload = encodeURIComponent(JSON.stringify(body));
+  const r = await fetch(scriptUrl+'?action='+body.action+'&payload='+payload, {redirect:'follow'});
   const text = await r.text();
   let json;
   try { json = JSON.parse(text); } catch(e) { throw new Error('Parse error: '+text.slice(0,100)); }
@@ -1155,7 +1246,7 @@ function doLogin() {
     document.getElementById('loginErr').classList.remove('show');
     document.getElementById('adminPw').value = '';
     switchTab('admin');
-    if (scriptUrl) { loadTourneyList(); }
+    if (scriptUrl) { loadTourneyList(); loadMemberCache(); }
   } else {
     document.getElementById('loginErr').classList.add('show');
     const pw = document.getElementById('adminPw');
@@ -1174,7 +1265,7 @@ function saveScriptUrl() {
   scriptUrl = url;
   localStorage.setItem('golf_scriptUrl', url);
   toast('✅ บันทึก URL แล้ว','ok');
-  if (adminIn) { loadTourneyList(); }
+  if (adminIn) { loadTourneyList(); loadMemberCache(); }
 }
 
 // ════════════════════════════════
