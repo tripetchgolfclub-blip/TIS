@@ -95,8 +95,15 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 .hidden{display:none!important;}
 .empty-msg{padding:28px;text-align:center;color:var(--text3);font-size:13px;font-family:'IBM Plex Mono',monospace;}
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.stat-item{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 10px;text-align:center;}
-.stat-val{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;color:var(--accent2);line-height:1;}
+.stat-item{border:1px solid var(--border);border-radius:9px;padding:14px 10px;text-align:center;transition:transform .15s;}
+.stat-item:hover{transform:translateY(-2px);}
+.stat-item.s1{background:linear-gradient(135deg,#eef6ff,#dbeafe);border-color:#bfdbfe;}
+.stat-item.s2{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#bbf7d0;}
+.stat-item.s3{background:linear-gradient(135deg,#fdf4ff,#f3e8ff);border-color:#e9d5ff;}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;line-height:1;}
+.stat-item.s1 .stat-val{color:#1d4ed8;}
+.stat-item.s2 .stat-val{color:#15803d;}
+.stat-item.s3 .stat-val{color:#7e22ce;}
 .stat-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-top:4px;}
 .search-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
 .search-row input{flex:1;min-width:160px;}
@@ -309,9 +316,9 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 
   <!-- Stats -->
   <div class="stats-bar">
-    <div class="stat-item"><div class="stat-val" id="statTotal">—</div><div class="stat-label">สมาชิก</div></div>
-    <div class="stat-item"><div class="stat-val" id="statDepts">—</div><div class="stat-label">ฝ่าย</div></div>
-    <div class="stat-item"><div class="stat-val" id="statNew">—</div><div class="stat-label">ล่าสุด 30 วัน</div></div>
+    <div class="stat-item s1"><div class="stat-val" id="statTotal">—</div><div class="stat-label">สมาชิก</div></div>
+    <div class="stat-item s2"><div class="stat-val" id="statDepts">—</div><div class="stat-label">ฝ่าย</div></div>
+    <div class="stat-item s3"><div class="stat-val" id="statNew">—</div><div class="stat-label">สมาชิกแข่งขัน</div></div>
   </div>
 
   <!-- Award Sync Panel -->
@@ -533,6 +540,8 @@ async function refreshMembers(){
     toast('✅ โหลดแล้ว '+members.length+' คน','ok');
   } catch(e){ toast('❌ '+e.message,'err'); }
   loading(false);
+  // ถ้า awards โหลดมาก่อน members → render ซ้ำเพื่อแสดงรางวัล
+  if(Object.keys(awardsMap).length) renderMembers();
 }
 
 // ── LOAD TOURNEY LIST for award selector ──
@@ -548,9 +557,15 @@ async function loadTourneyList(){
       sel.appendChild(opt);
     });
     document.getElementById('btnLoadAwards').disabled = false;
-    // Auto-select the latest tournament (first in list, already sorted desc by date)
+    // Auto-select ล่าสุด (list เรียงจากใหม่ไปเก่าอยู่แล้ว)
     if(list && list.length > 0){
       sel.value = list[0].tourneyName;
+      // รอให้ members โหลดเสร็จก่อน (poll สั้นๆ)
+      const waitMembers = () => new Promise(res => {
+        const check = () => members.length > 0 ? res() : setTimeout(check, 200);
+        check();
+      });
+      await waitMembers();
       await loadAwards();
     }
   } catch(e){ /* silent */ }
@@ -559,7 +574,7 @@ async function loadTourneyList(){
 // ── FLIGHT HELPER ──
 function getFlightByHcp(hcp){
   if(hcp === '' || hcp === null || hcp === undefined) return null;
-  const h = parseFloat(hcp);
+  const h = parseFloat(String(hcp).replace(',','.'));
   if(isNaN(h)) return null;
   if(h <= 12) return 'A';
   if(h <= 24) return 'B';
@@ -573,10 +588,15 @@ async function loadAwards(){
   loading(true, 'กำลังโหลดสกอร์...');
   try {
     const scores = await api('getScores', {name: tourneyName});
+    if(!scores || scores.length === 0){
+      toast('⚠️ ยังไม่มีสกอร์ใน Tournament นี้','err');
+      loading(false); return;
+    }
     awardsMap = computeAwards(scores, tourneyName);
+    renderStats();
     renderMembers();
     const total = Object.values(awardsMap).reduce((s,a)=>s+a.length,0);
-    toast(`🏆 ประทับรางวัล ${total} รายการแล้ว`,'ok');
+    toast(`🏆 สกอร์ ${scores.length} คน · ประทับรางวัล ${total} รายการ`,'ok');
   } catch(e){ toast('❌ '+e.message,'err'); }
   loading(false);
 }
@@ -591,53 +611,58 @@ function clearAwards(){
 function computeAwards(scores, tourneyName){
   const map = {};
   const addAward = (email, award) => {
-    const key = (email||'').toLowerCase();
+    const key = (email||'').toLowerCase().trim();
     if(!key) return;
     if(!map[key]) map[key] = [];
-    map[key].push(award);
+    if(!map[key].find(a=>a.type===award.type && a.flight===award.flight))
+      map[key].push(award);
   };
 
-  // Filter out WD players and players without scores
-  const valid = scores.filter(s => !s.wd && s.confirmed);
+  // ไม่ filter confirmed — ใช้เฉพาะ net มีค่า และไม่ WD
+  const valid = scores.filter(s => !s.wd && s.net !== '' && s.net !== null && s.net !== undefined);
 
-  // Group by flight
+  // เซ็ต emails ที่เข้าแข่ง (ทุกคนที่มีสกอร์ รวม WD ด้วยเพื่อนับผู้เข้าร่วม)
+  lastTourneyEmails = new Set(scores.map(s=>(s.email||'').toLowerCase().trim()).filter(Boolean));
+
+  // Group by flight — fallback จาก hcp ถ้า flight ว่าง
   const flights = {};
   valid.forEach(s => {
-    const f = (s.flight||'').toUpperCase();
+    let f = (s.flight||'').toString().trim().toUpperCase();
+    if(!f){
+      const h = parseFloat(s.hcp);
+      if(!isNaN(h)) f = h<=12?'A': h<=24?'B':'C';
+      else f = 'A';
+    }
     if(!flights[f]) flights[f] = [];
-    flights[f].push(s);
+    flights[f].push({...s, _flight: f});
   });
 
-  // Per-flight net ranking: winner, 1st runner-up, 2nd runner-up
-  // Also booby (highest net = worst) and booby marker (second worst net)
+  // Per-flight ranking
   Object.entries(flights).forEach(([flight, players])=>{
     if(!players.length) return;
-    const sorted = [...players].sort((a,b)=>{
-      const an = parseFloat(a.net); const bn = parseFloat(b.net);
-      if(isNaN(an) && isNaN(bn)) return 0;
-      if(isNaN(an)) return 1; if(isNaN(bn)) return -1;
-      return an - bn; // lower net = better
-    });
-    const worst = [...players].sort((a,b)=>{
-      const an = parseFloat(a.net); const bn = parseFloat(b.net);
-      if(isNaN(an) && isNaN(bn)) return 0;
-      if(isNaN(an)) return -1; if(isNaN(bn)) return 1;
-      return bn - an; // higher net = worse
-    });
 
-    if(sorted[0]) addAward(sorted[0].email, {type:'winner', flight, tourney:tourneyName});
-    if(sorted[1]) addAward(sorted[1].email, {type:'runner1', flight, tourney:tourneyName});
-    if(sorted[2]) addAward(sorted[2].email, {type:'runner2', flight, tourney:tourneyName});
-    if(worst[0]) addAward(worst[0].email, {type:'booby_winner', flight, tourney:tourneyName});
-    if(worst[1]) addAward(worst[1].email, {type:'booby_marker', flight, tourney:tourneyName});
+    const byNet = [...players].sort((a,b)=>parseFloat(a.net)-parseFloat(b.net));
+    const byNetWorst = [...byNet].reverse();
+
+    if(byNet[0]) addAward(byNet[0].email, {type:'winner',  flight, tourney:tourneyName});
+    if(byNet[1]) addAward(byNet[1].email, {type:'runner1', flight, tourney:tourneyName});
+    if(byNet[2]) addAward(byNet[2].email, {type:'runner2', flight, tourney:tourneyName});
+
+    const boobyPool = byNetWorst.filter(p => {
+      const key = (p.email||'').toLowerCase();
+      const existing = map[key]||[];
+      return !existing.find(a=>a.type==='winner'||a.type==='runner1'||a.type==='runner2');
+    });
+    if(boobyPool[0]) addAward(boobyPool[0].email, {type:'booby_winner', flight, tourney:tourneyName});
+    if(boobyPool[1]) addAward(boobyPool[1].email, {type:'booby_marker', flight, tourney:tourneyName});
   });
 
-  // Overall Low Gross (lowest gross score among all players)
-  const allGross = valid.filter(s=>!isNaN(parseFloat(s.gross))).sort((a,b)=>parseFloat(a.gross)-parseFloat(b.gross));
+  const allGross = valid.filter(s=>s.gross!==''&&!isNaN(parseFloat(s.gross)))
+    .sort((a,b)=>parseFloat(a.gross)-parseFloat(b.gross));
   if(allGross[0]) addAward(allGross[0].email, {type:'low_gross', flight:'Overall', tourney:tourneyName});
 
-  // Overall Low Net (lowest net score among all players)
-  const allNet = valid.filter(s=>!isNaN(parseFloat(s.net))).sort((a,b)=>parseFloat(a.net)-parseFloat(b.net));
+  const allNet = valid.filter(s=>!isNaN(parseFloat(s.net)))
+    .sort((a,b)=>parseFloat(a.net)-parseFloat(b.net));
   if(allNet[0]) addAward(allNet[0].email, {type:'low_net', flight:'Overall', tourney:tourneyName});
 
   return map;
@@ -703,13 +728,18 @@ function flightBadge(hcp){
 }
 
 // ── STATS ──
+// lastTourneyEmails = set of emails ที่มีสกอร์ใน tournament ล่าสุด (เซ็ตโดย computeAwards)
+let lastTourneyEmails = new Set();
+
 function renderStats(){
   const depts = [...new Set(members.map(m=>m.dept).filter(Boolean))];
   document.getElementById('statTotal').textContent = members.length;
   document.getElementById('statDepts').textContent = depts.length;
-  const now = Date.now();
-  const recent = members.filter(m=>m.createdAt && (now-new Date(m.createdAt).getTime())<30*24*3600*1000).length;
-  document.getElementById('statNew').textContent = recent;
+  // นับสมาชิก (ที่อยู่ใน members list) ที่เข้าแข่งใน tournament ล่าสุด
+  const played = lastTourneyEmails.size > 0
+    ? members.filter(m => lastTourneyEmails.has((m.email||'').toLowerCase())).length
+    : '—';
+  document.getElementById('statNew').textContent = played;
 }
 
 // ── DEPT CHIPS ──
