@@ -132,19 +132,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 
 <div class="main">
 
-  <!-- Setup Script URL -->
-  <div class="setup-banner" id="setupBanner">
-    <div class="setup-label">🔗 เชื่อมต่อ Google Sheets · ใช้ Apps Script URL เดียวกับ Tournaments</div>
-    <div id="urlInputRow" class="setup-row">
-      <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
-      <button class="btn-setup" onclick="connectSheet()">เชื่อมต่อ</button>
-    </div>
-    <div id="connectedRow" class="setup-connected hidden">
-      <span class="connected-pill" id="connectedPill">✓ เชื่อมต่อแล้ว</span>
-      <button class="btn-setup" style="padding:5px 12px;font-size:11px;" onclick="changeUrl()">เปลี่ยน URL</button>
-    </div>
-  </div>
-
   <!-- Stats -->
   <div class="stats-bar">
     <div class="stat-item"><div class="stat-val" id="statTotal">—</div><div class="stat-label">สมาชิก</div></div>
@@ -171,6 +158,19 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
     </div>
     <div class="member-grid" id="memberGrid">
       <div class="empty-msg" style="grid-column:1/-1;">เชื่อมต่อ Google Sheets ก่อน แล้วกด 🔄 รีเฟรช</div>
+    </div>
+  </div>
+
+  <!-- Setup Script URL (ท้ายสุด) -->
+  <div class="setup-banner" id="setupBanner" style="margin-top:8px;">
+    <div class="setup-label">🔗 เชื่อมต่อ Google Sheets · ใช้ Apps Script URL เดียวกับ Tournaments</div>
+    <div id="urlInputRow" class="setup-row">
+      <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+      <button class="btn-setup" onclick="connectSheet()">เชื่อมต่อ</button>
+    </div>
+    <div id="connectedRow" class="setup-connected hidden">
+      <span class="connected-pill" id="connectedPill">✓ เชื่อมต่อแล้ว</span>
+      <button class="btn-setup" style="padding:5px 12px;font-size:11px;" onclick="changeUrl()">เปลี่ยน URL</button>
     </div>
   </div>
 
@@ -241,7 +241,18 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 
 <script>
 const STORAGE_KEY = 'golf_scriptUrl';
-let scriptUrl = localStorage.getItem(STORAGE_KEY) || '';
+
+// อ่าน URL จาก query parameter ?su= ก่อน (กรณีส่ง link จาก home.html)
+// ถ้าไม่มีค่อยอ่านจาก localStorage
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const suParam = params.get('su');
+  if(suParam){
+    localStorage.setItem(STORAGE_KEY, suParam);
+  }
+})();
+
+let scriptUrl = localStorage.getItem(STORAGE_KEY) || 'https://script.google.com/macros/s/AKfycbyq716QpvLCMhiUuWsI0GiK00dZwVZWoQJs1NIrsgmwJyFoYcxeBRYRiEdLqKP2rh6H9A/exec';
 let members = [];
 let editingId = null;
 let deleteId = null;
@@ -251,10 +262,9 @@ let originalPhoto = null;
 
 // ── INIT ──
 ;(function(){
-  if(scriptUrl){
-    showConnected();
-    refreshMembers();
-  }
+  // URL พร้อมเสมอ (ฝังในโค้ด) → เชื่อมต่ออัตโนมัติ
+  showConnected();
+  refreshMembers();
   document.getElementById('memberModal').addEventListener('click', e=>{
     if(e.target === document.getElementById('memberModal')) closeModal();
   });
