@@ -451,11 +451,11 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
       <div class="center-box" style="max-width:420px;">
         <div class="box-icon"><img src="/TIS/icon-192.png" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>
         <div class="box-title">ยืนยันตัวตน</div>
-        <div class="box-sub">กรอก Gmail ที่ลงทะเบียนไว้กับผู้จัดการแข่งขัน</div>
-        <div class="err-box" id="gmailErr">ไม่พบ Gmail นี้ในรายชื่อผู้เล่น<br>กรุณาติดต่อผู้จัดการแข่งขัน</div>
+        <div class="box-sub">กรอก Email ที่ลงทะเบียนไว้กับผู้จัดการแข่งขัน</div>
+        <div class="err-box" id="gmailErr">ไม่พบ Email นี้ในรายชื่อผู้เล่น<br>กรุณาติดต่อผู้จัดการแข่งขัน</div>
         <div class="form-group" style="text-align:left;margin-bottom:12px;">
-          <label>Gmail ของคุณ</label>
-          <input type="email" id="playerEmail" placeholder="yourname@gmail.com" onkeydown="if(event.key==='Enter')verifyGmail()">
+          <label>Email ของคุณ</label>
+          <input type="email" id="playerEmail" placeholder="เช่น name@gmail.com / name@tripetch.co.th" onkeydown="if(event.key==='Enter')verifyGmail()">
         </div>
         <button class="btn-primary full" onclick="verifyGmail()">ค้นหาชื่อของฉัน →</button>
       </div>
@@ -602,7 +602,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Eagle / Birdie / Par</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--par-col);">0</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Bogey (+1)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--bogey);">1</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Double Bogey (+2)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
-          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--triple);">3</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--triple);">2</td></tr>
         </tbody>
       </table>
       <div style="font-size:13px;color:var(--text2);line-height:1.9;background:rgba(184,146,42,.08);border-radius:8px;padding:11px 13px;">
@@ -1503,7 +1503,7 @@ function renderAdminList(players=[],scores=[]) {
     return `<div style="margin-bottom:13px;">
       <div class="section-label">${g}</div>
       ${gp.map(p=>{
-        const sc=scoreMap[p.email.toLowerCase()];
+        const sc=scoreMap[(p.email||'').toLowerCase()];
         const flight=sc?calcFlight(sc.hcp):null;
         const isWD=sc&&sc.wd===true;
         const isLGG=sc&&sc.lgg===true;
@@ -2046,7 +2046,7 @@ async function adminEditScore(email,name,group,dept=''){
   loading(true,`โหลดสกอร์ของ ${name}...`);
   try{
     const allSc=await api('getScores',{name:activeTourney.tourneyName});
-    const exist=allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
+    const exist=allSc.find(s=>s.email&&s.email.toString().toLowerCase()===email.toLowerCase());
     const pars=(activeTourney.pars&&activeTourney.pars.length)?activeTourney.pars.map(Number):(activeTourney.holes===9?DEF_PARS_9:DEF_PARS_18);
     adminEditPlayer={name,email,group,dept};
     adminEditState={
@@ -2435,7 +2435,7 @@ async function toggleFlag(email, flag, current, playerName='') {
   try {
     // โหลด flags ปัจจุบัน
     const allSc = await api('getScores',{name:activeTourney.tourneyName});
-    const sc = allSc.find(s=>s.email.toLowerCase()===email.toLowerCase());
+    const sc = allSc.find(s=>s.email&&s.email.toString().toLowerCase()===email.toLowerCase());
     await apiPost({
       action: 'setPlayerFlag',
       tourneyName: activeTourney.tourneyName,
