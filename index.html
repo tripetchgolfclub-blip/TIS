@@ -2134,24 +2134,16 @@ function renderLb(data){
 
   if(isLowNet){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr>
-        <th style="text-align:center;">อันดับ</th>
-        <th>ผู้เล่น</th>
-        <th style="text-align:center;">⛳</th>
-        <th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th>
-      </tr></thead>
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
-        const played=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
-        const totalH = (r.scores||[]).length || 18;
         return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
-          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:36px;text-align:center;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
             <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
-          <td style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);text-align:center;white-space:nowrap;">${played}/${totalH}</td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
@@ -2162,23 +2154,15 @@ function renderLb(data){
 
   if(isBooby){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr>
-        <th style="text-align:center;">อันดับ</th>
-        <th>ผู้เล่น</th>
-        <th style="text-align:center;">⛳</th>
-        <th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th>
-      </tr></thead>
+      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
-        const played=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
-        const totalH = (r.scores||[]).length || 18;
         return `<tr class="${i<2?'rank-'+(i+1):''}">
-          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:36px;text-align:center;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
             <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
-          <td style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);text-align:center;white-space:nowrap;">${played}/${totalH}</td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
@@ -2189,23 +2173,15 @@ function renderLb(data){
 
   // Low Gross / Flight A/B/C
   tblEl.innerHTML=`<table class="lb-table">
-    <thead><tr>
-      <th style="text-align:center;">อันดับ</th>
-      <th>ผู้เล่น</th>
-      <th style="text-align:center;">⛳</th>
-      <th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th>
-    </tr></thead>
+    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
-      const played=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
-      const totalH = (r.scores||[]).length || 18;
       return `<tr class="${i<3?'rank-'+(i+1):''}">
-        <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:36px;text-align:center;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+        <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
         <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
           <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
             <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
           </div></td>
-        <td style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);text-align:center;white-space:nowrap;">${played}/${totalH}</td>
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
         <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
@@ -2546,24 +2522,33 @@ function _buildLbCanvas(d, mode, tourneyName) {
   ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px "IBM Plex Mono",sans-serif';
   ctx.fillText(new Date().toLocaleDateString('th-TH'), W/2, 90);
 
+  // ── Column layout ──
+  // # | ผู้เล่น | ⛳ | Gross | H'cap | Net/Gross | รางวัล
+  // RANK(16-52) | NAME(52-280) | HOLES(280-326) | GROSS(326-390) | HCP(390-438) | SCORE(438-498) | PRIZE(498-end)
+  const COL = {
+    RANK_CX : 34,          // center of rank col
+    NAME_X  : 54,          // left edge of name col
+    HOLES_CX: 303,         // center of ⛳ col
+    GROSS_CX: 358,         // center of Gross col
+    HCP_CX  : 414,         // center of H'cap col
+    SCORE_CX: 468,         // center of Net/Gross score col
+    PRIZE_X : 500,         // left edge of prize col
+  };
+
   // Table header row
   const thY = HEADER_H + 8;
   ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,26,6); ctx.fill();
-  ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif';
-  // col positions: prize(16-70) | rank(70-106) | name(106-300) | gross(300-390) | hcp(390-462) | net/score(462-end)
-  // Low Gross mode: hide middle Gross col (diff shown under main score)
-  const COL = {PRIZE_X:20, RANK_X:88, NAME_X:110, GROSS_X:320, HCP_X:412, NET_X:W-22};
+  ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('#',        COL.RANK_CX,  thY+17);
   ctx.textAlign='left';
-  ctx.fillText('รางวัล', COL.PRIZE_X, thY+17);
+  ctx.fillText('ผู้เล่น',  COL.NAME_X,   thY+17);
   ctx.textAlign='center';
-  ctx.fillText('#', COL.RANK_X, thY+17);
-  ctx.fillText('ผู้เล่น', COL.NAME_X+40, thY+17);
-  if(!isLowGross){
-    ctx.fillText('Gross', COL.GROSS_X+30, thY+17);
-  }
-  ctx.fillText("H'cap", COL.HCP_X+20, thY+17);
-  ctx.textAlign='right';
-  ctx.fillText(isLowGross?'Gross':'Net', COL.NET_X, thY+17);
+  ctx.fillText('⛳',       COL.HOLES_CX, thY+17);
+  ctx.fillText('Gross',    COL.GROSS_CX, thY+17);
+  ctx.fillText("H'cap",   COL.HCP_CX,   thY+17);
+  ctx.fillText(isLowGross?'Gross':'Net', COL.SCORE_CX, thY+17);
+  ctx.textAlign='left';
+  ctx.fillText('รางวัล',   COL.PRIZE_X,  thY+17);
 
   // Rows
   d.forEach((r,i)=>{
@@ -2573,22 +2558,7 @@ function _buildLbCanvas(d, mode, tourneyName) {
     ctx.strokeStyle=C.border; ctx.lineWidth=.4;
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
 
-    // ── รางวัล (ซ้ายสุด) ──
-    const pl = prizes[i] || '';
-    if(pl){
-      const plBg = i===0?'#fff3cd': isBooby?(i===1?'#fff0e8':'#f5f5f5'): (i===1?'#d1e7dd':'#e8f0ff');
-      const plTc = i===0?'#856404': isBooby?(i===1?'#c94a2a':'#666'): (i===1?'#0a5c2a':'#084298');
-      const plW = Math.min(84, pl.replace(/[^\x00-\x7F]/g,'  ').length*6+10);
-      ctx.fillStyle=plBg; roundRectPdf(ctx,COL.PRIZE_X,ry+8,plW,44,6); ctx.fill();
-      ctx.fillStyle=plTc; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-      const plParts = pl.split(' ');
-      const plLine1 = plParts.slice(0,2).join(' ');
-      const plLine2 = plParts.slice(2).join(' ');
-      ctx.fillText(plLine1, COL.PRIZE_X+plW/2, ry+26);
-      if(plLine2) ctx.fillText(plLine2, COL.PRIZE_X+plW/2, ry+38);
-    }
-
-    // ── rank icon (centered in rank col) ──
+    // ── rank icon (centered) ──
     ctx.textAlign='center';
     let rankIcon = isBooby ? (i<2?'🐷':String(i+1)) : (i<3?medals[i]:String(i+1));
     if((isBooby&&i>=2)||(!isBooby&&i>=3)){
@@ -2596,46 +2566,60 @@ function _buildLbCanvas(d, mode, tourneyName) {
     } else {
       ctx.fillStyle=C.text; ctx.font='20px sans-serif';
     }
-    ctx.fillText(rankIcon, COL.RANK_X, ry+ROW_H/2+6);
+    ctx.fillText(rankIcon, COL.RANK_CX, ry+ROW_H/2+6);
 
-    // ── ชื่อ + flight badge ──
+    // ── ชื่อ + flight badge + dept/group ──
     ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
     ctx.fillText(r.name, COL.NAME_X, ry+22);
     const nmW = ctx.measureText(r.name).width;
     const fl = r.flight||'';
     if(fl){
-      ctx.fillStyle=fbg[fl]||'#eee'; roundRectPdf(ctx,COL.NAME_X+nmW+5,ry+10,20,13,5); ctx.fill();
+      ctx.fillStyle=fbg[fl]||'#eee'; roundRectPdf(ctx,COL.NAME_X+nmW+4,ry+10,20,13,5); ctx.fill();
       ctx.fillStyle=ftc[fl]||'#333'; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
-      ctx.fillText(fl, COL.NAME_X+nmW+10, ry+21);
+      ctx.fillText(fl, COL.NAME_X+nmW+9, ry+21);
     }
     const deptGroup = [r.dept, r.group].filter(Boolean).join(' · ');
     ctx.fillStyle=C.text3; ctx.font='9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
     ctx.fillText(deptGroup, COL.NAME_X, ry+38);
 
-    // ── Gross + diff (middle col) — only for non-LowGross modes ──
+    // ── ⛳ หลุมที่ส่งสกอร์ ──
+    const played = (r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
+    const totalH  = (r.scores||[]).length || 18;
+    ctx.fillStyle=C.text3; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(`${played}/${totalH}`, COL.HOLES_CX, ry+ROW_H/2+4);
+
+    // ── Gross + diff (center col) ──
     const diff = r.gross - (r.par||72);
     const diffStr = diff===0?'E':diff>0?'+'+diff:String(diff);
     const diffCol = diff<=-2?'#1a6b9a':diff===-1?'#c94a2a':diff===0?'#2c6e3f':diff===1?'#b8922a':'#8a3a1a';
-    if(!isLowGross){
-      ctx.fillStyle=C.text2; ctx.font='bold 15px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-      ctx.fillText(String(r.gross), COL.GROSS_X+30, ry+26);
-      ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif';
-      ctx.fillText(diffStr, COL.GROSS_X+30, ry+40);
-    }
+    ctx.fillStyle=C.text2; ctx.font='bold 15px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(String(r.gross), COL.GROSS_CX, ry+26);
+    ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif';
+    ctx.fillText(diffStr, COL.GROSS_CX, ry+40);
 
     // ── H'cap ──
     ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(r.hcp), COL.HCP_X+20, ry+ROW_H/2+5);
+    ctx.fillText(String(r.hcp), COL.HCP_CX, ry+ROW_H/2+5);
 
-    // ── Net / Gross score (main right col) ──
+    // ── Net / Gross score ──
     const val = isLowGross ? r.gross : r.net;
     const scoreColor = isBooby ? '#c94a2a' : C.green;
-    ctx.fillStyle=scoreColor; ctx.font='bold 22px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-    ctx.fillText(String(val), COL.NET_X, ry+ROW_H/2+4);
-    // For Low Gross: show diff below the score
-    if(isLowGross){
-      ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-      ctx.fillText(diffStr, COL.NET_X, ry+ROW_H/2+18);
+    ctx.fillStyle=scoreColor; ctx.font='bold 22px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(String(val), COL.SCORE_CX, ry+ROW_H/2+8);
+
+    // ── รางวัล (คอลัมสุดท้าย) ──
+    const pl = prizes[i] || '';
+    if(pl){
+      const plBg = i===0?'#fff3cd': isBooby?(i===1?'#fff0e8':'#f5f5f5'): (i===1?'#d1e7dd':'#e8f0ff');
+      const plTc = i===0?'#856404': isBooby?(i===1?'#c94a2a':'#666'): (i===1?'#0a5c2a':'#084298');
+      const plW = Math.min(90, pl.replace(/[^\x00-\x7F]/g,'  ').length*6+10);
+      ctx.fillStyle=plBg; roundRectPdf(ctx,COL.PRIZE_X,ry+10,plW,42,6); ctx.fill();
+      ctx.fillStyle=plTc; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+      const plParts = pl.split(' ');
+      const plLine1 = plParts.slice(0,2).join(' ');
+      const plLine2 = plParts.slice(2).join(' ');
+      ctx.fillText(plLine1, COL.PRIZE_X+plW/2, ry+27);
+      if(plLine2) ctx.fillText(plLine2, COL.PRIZE_X+plW/2, ry+39);
     }
   });
 
