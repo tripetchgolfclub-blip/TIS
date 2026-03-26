@@ -1482,11 +1482,13 @@ async function loadPlayersToAdmin() {
   if (!activeTourney||!scriptUrl) return;
   loading(true,'โหลดรายชื่อ...');
   try {
-    const [players,scores]=await Promise.all([
+    const [rawPlayers,scores]=await Promise.all([
       api('getPlayers',{name:activeTourney.tourneyName}),
       api('getScores',{name:activeTourney.tourneyName})
     ]);
-    renderAdminList(players,scores);
+    // กรองแถวที่ name เป็น undefined หรือ header หลุดมา
+    const players=(Array.isArray(rawPlayers)?rawPlayers:[]).filter(p=>p&&p.name&&p.name!=='Name'&&p.name!=='name');
+    renderAdminList(players, Array.isArray(scores)?scores:[]);
   } catch(e){toast('❌ '+e.message,'err');}
   loading(false);
 }
@@ -1496,14 +1498,19 @@ function renderAdminList(players=[],scores=[]) {
   document.getElementById('playerCountBadge').textContent=players.length?players.length+' คน':'';
   if (!players.length){el.innerHTML='<div class="empty-msg">ยังไม่มีผู้เล่น</div>';return;}
   const scoreMap={};
-  scores.forEach(s=>{if(s&&s.email!=null) scoreMap[String(s.email).toLowerCase()]=s;});
-  const groups=[...new Set(players.map(p=>p.group))];
+  scores.forEach(s=>{if(s&&s.email!=null&&s.email!==undefined) scoreMap[String(s.email).toLowerCase()]=s;});
+  // group fallback ป้องกัน undefined
+  const groups=[...new Set(players.map(p=>(p.group||'ไม่ระบุกลุ่ม')))];
   el.innerHTML=groups.map(g=>{
-    const gp=players.filter(p=>p.group===g);
+    const gp=players.filter(p=>(p.group||'ไม่ระบุกลุ่ม')===g);
     return `<div style="margin-bottom:13px;">
       <div class="section-label">${g}</div>
       ${gp.map(p=>{
-        const sc=scoreMap[(p.email||'').toLowerCase()];
+        const pName  = p.name  || '—';
+        const pEmail = p.email || '';
+        const pDept  = p.dept  || '';
+        const pGroup = p.group || 'ไม่ระบุกลุ่ม';
+        const sc=pEmail?scoreMap[pEmail.toLowerCase()]:undefined;
         const flight=sc?calcFlight(sc.hcp):null;
         const isWD=sc&&sc.wd===true;
         const isLGG=sc&&sc.lgg===true;
@@ -1518,33 +1525,36 @@ function renderAdminList(players=[],scores=[]) {
             statusHtml=`<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span>${tags}</div>`;
           }
         }
+        const safeEmail=pEmail.replace(/'/g,"\'");
+        const safeName=pName.replace(/'/g,"\'");
+        const safeDept=pDept.replace(/'/g,"\'");
         return `<div class="player-item" style="flex-direction:column;align-items:stretch;gap:6px;${isWD?'opacity:.65;':''}">
           <div style="display:flex;align-items:center;gap:9px;">
-            <div class="pi-group" style="flex-shrink:0;">${g}</div>
+            <div class="pi-group" style="flex-shrink:0;">${pGroup}</div>
             <div class="pi-info" style="flex:1;min-width:0;">
-              <div class="pi-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}${p.dept?` <span style="font-size:11px;font-weight:400;color:var(--text3);">${p.dept}</span>`:''}
+              <div class="pi-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pName}${pDept?` <span style="font-size:11px;font-weight:400;color:var(--text3);">${pDept}</span>`:''}
               </div>
-              <div class="pi-email" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.email}</div>
+              <div class="pi-email" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pEmail||'—'}</div>
             </div>
             <div style="display:flex;gap:5px;flex-shrink:0;align-items:center;">
-              <button class="btn-sm" onclick="adminEditScore('${p.email}','${p.name}','${p.group}','${p.dept||''}')" style="color:var(--accent2);border-color:var(--accent2);padding:5px 9px;" title="แก้ไขสกอร์">✏️</button>
-              <button class="btn-danger" onclick="removePlayer('${p.email}')" style="padding:5px 9px;">×</button>
+              <button class="btn-sm" onclick="adminEditScore('${safeEmail}','${safeName}','${pGroup}','${safeDept}')" style="color:var(--accent2);border-color:var(--accent2);padding:5px 9px;" title="แก้ไขสกอร์">✏️</button>
+              <button class="btn-danger" onclick="removePlayer('${safeEmail}')" style="padding:5px 9px;">×</button>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
             ${statusHtml}
             ${sc?`<div style="display:flex;gap:4px;margin-left:auto;flex-shrink:0;">
-              <button onclick="toggleFlag('${p.email}','wd',${isWD},'${p.name.replace(/'/g,"\\'")}')"
+              <button onclick="toggleFlag('${safeEmail}','wd',${isWD},'${safeName}')"
                 title="${isWD?'คืนสถานะปกติ':'ถอนตัวออก (WD)'}"
                 style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
                   background:${isWD?'#c94a2a':'transparent'};color:${isWD?'#fff':'var(--red)'};border-color:${isWD?'#c94a2a':'var(--red)'};">
                 ${isWD?'↩ WD':'WD'}</button>
-              <button onclick="toggleFlag('${p.email}','lgg',${isLGG},'${p.name.replace(/'/g,"\\'")}')"
+              <button onclick="toggleFlag('${safeEmail}','lgg',${isLGG},'${safeName}')"
                 title="${isLGG?'ยกเลิก Low Gross Winner':'มาร์ค Low Gross Winner'}"
                 style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
                   background:${isLGG?'#1a4a2a':'transparent'};color:${isLGG?'#fff':'var(--bogey)'};border-color:${isLGG?'#1a4a2a':'var(--bogey)'};">
                 LG${isLGG?'✓':''}</button>
-              <button onclick="toggleFlag('${p.email}','lno',${isLNO},'${p.name.replace(/'/g,"\\'")}')"
+              <button onclick="toggleFlag('${safeEmail}','lno',${isLNO},'${safeName}')"
                 title="${isLNO?'ยกเลิก Low Net Overall Winner':'มาร์ค Low Net Overall Winner'}"
                 style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
                   background:${isLNO?'#084298':'transparent'};color:${isLNO?'#fff':'#6a5acd'};border-color:${isLNO?'#084298':'#6a5acd'};">
