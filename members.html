@@ -180,6 +180,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 .award-silver .mc-avatar{border-color:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.3);}
 .award-bronze .mc-avatar{border-color:#ea7c30;box-shadow:0 0 0 3px rgba(234,124,48,.25);}
 .award-booby .mc-avatar{border-color:#f9a8d4;box-shadow:0 0 0 3px rgba(249,168,212,.4);}
+.mc-body{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex:1;min-width:0;}
 .mc-info{flex:1;min-width:0;}
 .mc-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mc-dept{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -203,12 +204,62 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 .flight-badge.fb{background:rgba(134,239,172,.35);color:var(--flight-b-text);}
 .flight-badge.fc{background:rgba(216,180,254,.35);color:var(--flight-c-text);}
 
-/* ── Handicap pill ── */
-.hcp-pill{
-  display:inline-flex;align-items:center;gap:3px;
-  font-family:'IBM Plex Mono',monospace;font-size:10px;
-  color:var(--accent2);font-weight:600;margin-top:3px;
+/* ── Handicap circle ── */
+.hcp-circle{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  width:54px;
 }
+.hcp-ring{
+  width:50px;height:50px;
+  border-radius:50%;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  border:2.5px solid;
+  box-shadow:0 2px 10px rgba(0,0,0,.14);
+  transition:transform .2s, box-shadow .2s;
+}
+.member-card:hover .hcp-ring{transform:scale(1.1);box-shadow:0 4px 16px rgba(0,0,0,.18);}
+.hcp-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;line-height:1;
+}
+.hcp-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:7px;letter-spacing:.8px;text-transform:uppercase;
+  margin-top:2px;opacity:.75;
+}
+/* Flight A — blue */
+.hcp-a .hcp-ring{
+  background:linear-gradient(145deg,#dbeafe,#bfdbfe);
+  border-color:#3b82f6;
+}
+.hcp-a .hcp-num{color:#1d4ed8;}
+.hcp-a .hcp-lbl{color:#1d4ed8;}
+/* Flight B — green */
+.hcp-b .hcp-ring{
+  background:linear-gradient(145deg,#dcfce7,#bbf7d0);
+  border-color:#22c55e;
+}
+.hcp-b .hcp-num{color:#15803d;}
+.hcp-b .hcp-lbl{color:#15803d;}
+/* Flight C — purple */
+.hcp-c .hcp-ring{
+  background:linear-gradient(145deg,#f3e8ff,#e9d5ff);
+  border-color:#a855f7;
+}
+.hcp-c .hcp-num{color:#7e22ce;}
+.hcp-c .hcp-lbl{color:#7e22ce;}
+/* No flight — grey */
+.hcp-none .hcp-ring{
+  background:linear-gradient(145deg,#f1f5f9,#e2e8f0);
+  border-color:#94a3b8;
+}
+.hcp-none .hcp-num{color:#475569;}
+.hcp-none .hcp-lbl{color:#64748b;}
 
 /* ── Award stamps strip ── */
 .award-stamps{
@@ -787,9 +838,23 @@ function renderMembers(){
 
     const hcpVal = (m.handicap !== '' && m.handicap !== null && m.handicap !== undefined) ? m.handicap : null;
 
-    const hcpHtml = hcpVal !== null
-      ? `<div class="hcp-pill">⛳ H'cap ${hcpVal}</div>`
-      : '';
+    // ── H'cap Circle ──
+    let hcpCircleHtml = '';
+    if(hcpVal !== null){
+      const f = getFlightByHcp(hcpVal);
+      const flightKey = f ? f.toLowerCase() : 'none';
+      const hcpClass = `hcp-${flightKey}`;
+      const numStr = String(hcpVal);
+      // font size depends on digit count
+      const fontSize = numStr.length >= 3 ? '14px' : (numStr.length === 2 ? '17px' : '20px');
+      hcpCircleHtml = `
+        <div class="hcp-circle ${hcpClass}">
+          <div class="hcp-ring">
+            <span class="hcp-num" style="font-size:${fontSize}">${hcpVal}</span>
+            <span class="hcp-lbl">H'cap</span>
+          </div>
+        </div>`;
+    }
 
     const flightBadgeHtml = hcpVal !== null ? flightBadge(hcpVal) : '';
     const stampsHtml = buildStamps(awards);
@@ -799,12 +864,14 @@ function renderMembers(){
       ${bannerHtml}
       <div class="mc-top">
         <div class="mc-avatar">${av}</div>
-        <div class="mc-info">
-          <div class="mc-name" title="${esc(m.name)}">${m.name}</div>
-          ${m.dept?`<div class="mc-dept">🏢 ${m.dept}</div>`:''}
-          <div class="mc-email" title="${esc(m.email)}">✉ ${m.email||'—'}</div>
-          ${hcpHtml}
-          ${flightBadgeHtml}
+        <div class="mc-body">
+          <div class="mc-info">
+            <div class="mc-name" title="${esc(m.name)}">${m.name}</div>
+            ${m.dept?`<div class="mc-dept">🏢 ${m.dept}</div>`:''}
+            <div class="mc-email" title="${esc(m.email)}">✉ ${m.email||'—'}</div>
+            ${flightBadgeHtml}
+          </div>
+          ${hcpCircleHtml}
         </div>
       </div>
       ${stampsHtml}
