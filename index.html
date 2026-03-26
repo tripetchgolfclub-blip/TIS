@@ -1200,12 +1200,21 @@ async function api(action, params={}) {
 }
 async function apiPost(body) {
   if (!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
-  const r = await fetch(scriptUrl, {
-    method: 'POST',
-    redirect: 'follow',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  // strip photo field ออกก่อน encode เพื่อป้องกัน URL เกิน limit
+  const bodyClean = Object.assign({}, body);
+  if (bodyClean.photo) delete bodyClean.photo;
+  // ถ้ามี players array ให้ strip photo ออกจากแต่ละ player ด้วย
+  if (bodyClean.players && Array.isArray(bodyClean.players)) {
+    bodyClean.players = bodyClean.players.map(function(p) {
+      var pc = Object.assign({}, p);
+      if (pc.photo) delete pc.photo;
+      return pc;
+    });
+  }
+  const payload = encodeURIComponent(JSON.stringify(bodyClean));
+  const url = scriptUrl+'?action='+body.action+'&payload='+payload;
+  console.log('[apiPost] action='+body.action+' url_length='+url.length);
+  const r = await fetch(url, {redirect:'follow'});
   const text = await r.text();
   let json;
   try { json = JSON.parse(text); } catch(e) { throw new Error('Parse error: '+text.slice(0,100)); }
