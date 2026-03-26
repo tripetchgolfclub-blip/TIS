@@ -286,8 +286,13 @@ async function api(action, params={}) {
 }
 async function apiPost(body) {
   if(!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Script URL');
-  const payload = encodeURIComponent(JSON.stringify(body));
-  const r = await fetch(scriptUrl+'?action='+body.action+'&payload='+payload, {redirect:'follow'});
+  // ส่งเป็น JSON body (POST จริง) เพื่อรองรับ base64 รูปภาพที่ยาวมาก
+  const r = await fetch(scriptUrl, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+    redirect: 'follow'
+  });
   const text = await r.text();
   let json;
   try { json = JSON.parse(text); } catch(e){ throw new Error('Parse error: '+text.slice(0,100)); }
