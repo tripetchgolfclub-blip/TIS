@@ -135,7 +135,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sub-row.total-row span:first-child{color:rgba(255,255,255,.5);}
 .c-empty{color:var(--border2);}.c-eagle{color:var(--eagle);}.c-birdie{color:var(--birdie);}
 .c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}.c-triple{color:var(--triple);}
-.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--triple);font-weight:700;}
+.hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--double);font-weight:600;}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg);}
 .leg{display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);}
 .leg-dot{width:6px;height:6px;border-radius:50%;}
@@ -577,7 +577,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Eagle / Birdie / Par</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--par-col);">0</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Bogey (+1)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--bogey);">1</td></tr>
           <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Double Bogey (+2)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
-          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--triple);">3</td></tr>
+          <tr><td style="padding:8px 10px;border-top:1px solid rgba(184,146,42,.2);">Triple Bogey+ (≥+3)</td><td style="padding:8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--double);">2</td></tr>
         </tbody>
       </table>
       <div style="font-size:13px;color:var(--text2);line-height:1.9;background:rgba(184,146,42,.08);border-radius:8px;padding:11px 13px;">
@@ -2134,16 +2134,24 @@ function renderLb(data){
 
   if(isLowNet){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <thead><tr>
+        <th style="text-align:center;">อันดับ</th>
+        <th>ผู้เล่น</th>
+        <th style="text-align:center;">⛳</th>
+        <th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th>
+      </tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
         const bg=flightBg[r.flight]||'', bd=flightBorder[r.flight]||'var(--border)';
+        const played=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
+        const totalH = (r.scores||[]).length || 18;
         return `<tr class="${i<3?'rank-'+(i+1):''}" style="background:${bg};border-bottom:1px solid ${bd};">
-          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:36px;text-align:center;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fn-badge-${r.flight}">${r.flight}</span></div>
             <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);text-align:center;white-space:nowrap;">${played}/${totalH}</td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
@@ -2154,15 +2162,23 @@ function renderLb(data){
 
   if(isBooby){
     tblEl.innerHTML=`<table class="lb-table">
-      <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+      <thead><tr>
+        <th style="text-align:center;">อันดับ</th>
+        <th>ผู้เล่น</th>
+        <th style="text-align:center;">⛳</th>
+        <th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th>
+      </tr></thead>
       <tbody>${d.map((r,i)=>{
         const diff=r.gross-(r.par||72);
+        const played=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
+        const totalH = (r.scores||[]).length || 18;
         return `<tr class="${i<2?'rank-'+(i+1):''}">
-          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:36px;text-align:center;">${i<2?'<span style="font-size:19px;">🐷</span>':i+1}</td>
           <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
             <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
               <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
             </div></td>
+          <td style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);text-align:center;white-space:nowrap;">${played}/${totalH}</td>
           <td>${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
           <td>${r.hcp}</td>
           <td class="lb-net">${r.net}</td>
@@ -2173,15 +2189,23 @@ function renderLb(data){
 
   // Low Gross / Flight A/B/C
   tblEl.innerHTML=`<table class="lb-table">
-    <thead><tr><th>อันดับ</th><th>ผู้เล่น</th><th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th></tr></thead>
+    <thead><tr>
+      <th style="text-align:center;">อันดับ</th>
+      <th>ผู้เล่น</th>
+      <th style="text-align:center;">⛳</th>
+      <th>Gross</th><th>H'cap</th><th>Net</th><th style="text-align:center;">รางวัล</th>
+    </tr></thead>
     <tbody>${d.map((r,i)=>{
       const diff=r.gross-(r.par||72);
+      const played=(r.scores||[]).filter(v=>v!==''&&v!==null&&v!==undefined&&Number(v)>0).length;
+      const totalH = (r.scores||[]).length || 18;
       return `<tr class="${i<3?'rank-'+(i+1):''}">
-        <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:32px;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
+        <td style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--text3);width:36px;text-align:center;">${i<3?'<span style="font-size:15px;">'+medals[i]+'</span>':i+1}</td>
         <td><div style="font-weight:600;font-size:13px;">${r.name} <span class="flight-badge fb-${r.flight}">${r.flight}</span></div>
           <div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">
             <span class="group-chip">${r.group}</span>${r.dept?' <span class="group-chip">'+r.dept+'</span>':''}
           </div></td>
+        <td style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--text3);text-align:center;white-space:nowrap;">${played}/${totalH}</td>
         <td style="${isLowGross?'font-weight:600;color:var(--accent2);':''}">${r.gross}<br><span style="font-size:11px;color:${dColor(diff)}">${dStr(diff)}</span></td>
         <td>${r.hcp}</td>
         <td class="lb-net" style="${isLowGross?'color:var(--text2);font-size:14px;':''}">${r.net}</td>
@@ -2526,14 +2550,17 @@ function _buildLbCanvas(d, mode, tourneyName) {
   const thY = HEADER_H + 8;
   ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,26,6); ctx.fill();
   ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif';
-  // col positions: prize(16-70) | rank(70-106) | name(106-320) | gross(320-400) | hcp(400-462) | net(462-end)
-  const COL = {PRIZE_X:20, RANK_X:88, NAME_X:110, GROSS_X:332, HCP_X:422, NET_X:W-22};
+  // col positions: prize(16-70) | rank(70-106) | name(106-300) | gross(300-390) | hcp(390-462) | net/score(462-end)
+  // Low Gross mode: hide middle Gross col (diff shown under main score)
+  const COL = {PRIZE_X:20, RANK_X:88, NAME_X:110, GROSS_X:320, HCP_X:412, NET_X:W-22};
   ctx.textAlign='left';
   ctx.fillText('รางวัล', COL.PRIZE_X, thY+17);
-  ctx.fillText('#', COL.RANK_X-10, thY+17);
-  ctx.fillText('ผู้เล่น', COL.NAME_X, thY+17);
   ctx.textAlign='center';
-  ctx.fillText('Gross', COL.GROSS_X+30, thY+17);
+  ctx.fillText('#', COL.RANK_X, thY+17);
+  ctx.fillText('ผู้เล่น', COL.NAME_X+40, thY+17);
+  if(!isLowGross){
+    ctx.fillText('Gross', COL.GROSS_X+30, thY+17);
+  }
   ctx.fillText("H'cap", COL.HCP_X+20, thY+17);
   ctx.textAlign='right';
   ctx.fillText(isLowGross?'Gross':'Net', COL.NET_X, thY+17);
@@ -2554,7 +2581,6 @@ function _buildLbCanvas(d, mode, tourneyName) {
       const plW = Math.min(84, pl.replace(/[^\x00-\x7F]/g,'  ').length*6+10);
       ctx.fillStyle=plBg; roundRectPdf(ctx,COL.PRIZE_X,ry+8,plW,44,6); ctx.fill();
       ctx.fillStyle=plTc; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-      // Split prize label onto 2 lines if needed
       const plParts = pl.split(' ');
       const plLine1 = plParts.slice(0,2).join(' ');
       const plLine2 = plParts.slice(2).join(' ');
@@ -2562,50 +2588,55 @@ function _buildLbCanvas(d, mode, tourneyName) {
       if(plLine2) ctx.fillText(plLine2, COL.PRIZE_X+plW/2, ry+38);
     }
 
-    // ── rank icon ──
+    // ── rank icon (centered in rank col) ──
     ctx.textAlign='center';
     let rankIcon = isBooby ? (i<2?'🐷':String(i+1)) : (i<3?medals[i]:String(i+1));
     if((isBooby&&i>=2)||(!isBooby&&i>=3)){
       ctx.fillStyle=C.text3; ctx.font='bold 13px "IBM Plex Mono",sans-serif';
     } else {
-      ctx.fillStyle=C.text; ctx.font='18px sans-serif';
+      ctx.fillStyle=C.text; ctx.font='20px sans-serif';
     }
-    ctx.fillText(rankIcon, COL.RANK_X, ry+ROW_H/2+5);
+    ctx.fillText(rankIcon, COL.RANK_X, ry+ROW_H/2+6);
 
     // ── ชื่อ + flight badge ──
     ctx.fillStyle=C.text; ctx.font='bold 13px "Sarabun",sans-serif'; ctx.textAlign='left';
     ctx.fillText(r.name, COL.NAME_X, ry+22);
     const nmW = ctx.measureText(r.name).width;
-    // flight badge after name
     const fl = r.flight||'';
     if(fl){
       ctx.fillStyle=fbg[fl]||'#eee'; roundRectPdf(ctx,COL.NAME_X+nmW+5,ry+10,20,13,5); ctx.fill();
       ctx.fillStyle=ftc[fl]||'#333'; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
       ctx.fillText(fl, COL.NAME_X+nmW+10, ry+21);
     }
-    // dept + group ข้างล่าง
     const deptGroup = [r.dept, r.group].filter(Boolean).join(' · ');
     ctx.fillStyle=C.text3; ctx.font='9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
     ctx.fillText(deptGroup, COL.NAME_X, ry+38);
 
-    // ── Gross + diff ──
+    // ── Gross + diff (middle col) — only for non-LowGross modes ──
     const diff = r.gross - (r.par||72);
     const diffStr = diff===0?'E':diff>0?'+'+diff:String(diff);
     const diffCol = diff<=-2?'#1a6b9a':diff===-1?'#c94a2a':diff===0?'#2c6e3f':diff===1?'#b8922a':'#8a3a1a';
-    ctx.fillStyle=C.text2; ctx.font='bold 15px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(r.gross), COL.GROSS_X+30, ry+26);
-    ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif';
-    ctx.fillText(diffStr, COL.GROSS_X+30, ry+40);
+    if(!isLowGross){
+      ctx.fillStyle=C.text2; ctx.font='bold 15px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+      ctx.fillText(String(r.gross), COL.GROSS_X+30, ry+26);
+      ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif';
+      ctx.fillText(diffStr, COL.GROSS_X+30, ry+40);
+    }
 
     // ── H'cap ──
     ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
     ctx.fillText(String(r.hcp), COL.HCP_X+20, ry+ROW_H/2+5);
 
-    // ── Net / Gross score (main) ──
+    // ── Net / Gross score (main right col) ──
     const val = isLowGross ? r.gross : r.net;
     const scoreColor = isBooby ? '#c94a2a' : C.green;
     ctx.fillStyle=scoreColor; ctx.font='bold 22px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-    ctx.fillText(String(val), COL.NET_X, ry+ROW_H/2+8);
+    ctx.fillText(String(val), COL.NET_X, ry+ROW_H/2+4);
+    // For Low Gross: show diff below the score
+    if(isLowGross){
+      ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
+      ctx.fillText(diffStr, COL.NET_X, ry+ROW_H/2+18);
+    }
   });
 
   // Footer
