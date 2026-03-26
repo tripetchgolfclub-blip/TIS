@@ -18,6 +18,31 @@
   --gold:#b8922a;
   --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
   --shadow-lg:0 4px 20px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.07);
+
+  /* Flight colours */
+  --flight-a-bg:#eef6ff;
+  --flight-a-border:#93c5fd;
+  --flight-a-text:#1d4ed8;
+  --flight-b-bg:#f0fdf4;
+  --flight-b-border:#86efac;
+  --flight-b-text:#15803d;
+  --flight-c-bg:#faf5ff;
+  --flight-c-border:#d8b4fe;
+  --flight-c-text:#7e22ce;
+
+  /* Award colours */
+  --award-gold-bg:linear-gradient(135deg,#fefce8,#fef3c7);
+  --award-gold-border:#f59e0b;
+  --award-gold-text:#92400e;
+  --award-silver-bg:linear-gradient(135deg,#f8fafc,#f1f5f9);
+  --award-silver-border:#94a3b8;
+  --award-silver-text:#334155;
+  --award-bronze-bg:linear-gradient(135deg,#fff7ed,#fed7aa);
+  --award-bronze-border:#ea7c30;
+  --award-bronze-text:#7c2d12;
+  --award-booby-bg:linear-gradient(135deg,#fdf2f8,#fce7f3);
+  --award-booby-border:#f9a8d4;
+  --award-booby-text:#9d174d;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);font-family:'Sarabun',sans-serif;color:var(--text);min-height:100vh;}
@@ -66,6 +91,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes stampDrop{0%{transform:scale(2) rotate(-20deg);opacity:0;}60%{transform:scale(.9) rotate(4deg);opacity:1;}100%{transform:scale(1) rotate(0deg);opacity:1;}}
 .hidden{display:none!important;}
 .empty-msg{padding:28px;text-align:center;color:var(--text3);font-size:13px;font-family:'IBM Plex Mono',monospace;}
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
@@ -79,16 +105,165 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 .chip:hover{border-color:var(--accent);color:var(--accent);}
 .chip.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
 .member-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
-.member-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:15px;animation:fadeUp .2s ease;transition:all .15s;}
-.member-card:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(44,110,63,.08);}
-.mc-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;}
-.mc-avatar{width:50px;height:50px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;}
+
+/* ═══ MEMBER CARD BASE ═══ */
+.member-card{
+  position:relative;
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:14px 14px 11px;
+  animation:fadeUp .2s ease;
+  transition:all .2s;
+  overflow:hidden;
+  background:var(--surface);
+}
+.member-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1);}
+
+/* ── Flight themes ── */
+.member-card.flight-a{
+  background:var(--flight-a-bg);
+  border-color:var(--flight-a-border);
+}
+.member-card.flight-b{
+  background:var(--flight-b-bg);
+  border-color:var(--flight-b-border);
+}
+.member-card.flight-c{
+  background:var(--flight-c-bg);
+  border-color:var(--flight-c-border);
+}
+
+/* ── Award themes (override flight) ── */
+.member-card.award-gold{
+  background:var(--award-gold-bg);
+  border-color:var(--award-gold-border);
+  border-width:2px;
+  box-shadow:0 4px 20px rgba(245,158,11,.2);
+}
+.member-card.award-silver{
+  background:var(--award-silver-bg);
+  border-color:var(--award-silver-border);
+  border-width:2px;
+  box-shadow:0 4px 20px rgba(148,163,184,.25);
+}
+.member-card.award-bronze{
+  background:var(--award-bronze-bg);
+  border-color:var(--award-bronze-border);
+  border-width:2px;
+  box-shadow:0 4px 20px rgba(234,124,48,.2);
+}
+.member-card.award-booby{
+  background:var(--award-booby-bg);
+  border-color:var(--award-booby-border);
+  border-width:2px;
+  box-shadow:0 4px 20px rgba(249,168,212,.3);
+}
+.member-card.award-overall{
+  background:linear-gradient(135deg,#fffbeb,#fef3c7);
+  border-color:#d97706;
+  border-width:2px;
+  box-shadow:0 4px 20px rgba(217,119,6,.25);
+}
+
+/* ── Card top section ── */
+.mc-top{display:flex;gap:11px;align-items:flex-start;margin-bottom:9px;}
+.mc-avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#fff;position:relative;}
 .mc-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.award-gold .mc-avatar{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25);}
+.award-silver .mc-avatar{border-color:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.3);}
+.award-bronze .mc-avatar{border-color:#ea7c30;box-shadow:0 0 0 3px rgba(234,124,48,.25);}
+.award-booby .mc-avatar{border-color:#f9a8d4;box-shadow:0 0 0 3px rgba(249,168,212,.4);}
 .mc-info{flex:1;min-width:0;}
 .mc-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mc-dept{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mc-email{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.mc-actions{display:flex;gap:6px;justify-content:flex-end;}
+.mc-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:2px;}
+
+/* ── Flight badge ── */
+.flight-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:2px 7px;
+  border-radius:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.5px;
+  margin-top:4px;
+}
+.flight-badge.fa{background:rgba(147,197,253,.35);color:var(--flight-a-text);}
+.flight-badge.fb{background:rgba(134,239,172,.35);color:var(--flight-b-text);}
+.flight-badge.fc{background:rgba(216,180,254,.35);color:var(--flight-c-text);}
+
+/* ── Handicap pill ── */
+.hcp-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--accent2);font-weight:600;margin-top:3px;
+}
+
+/* ── Award stamps strip ── */
+.award-stamps{
+  display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;margin-bottom:2px;
+}
+.stamp{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 7px;border-radius:20px;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  font-weight:600;letter-spacing:.3px;
+  animation:stampDrop .4s cubic-bezier(.34,1.56,.64,1) both;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.stamp-gold{background:#fef3c7;color:#92400e;border-color:#fbbf24;}
+.stamp-silver{background:#f1f5f9;color:#334155;border-color:#94a3b8;}
+.stamp-bronze{background:#fed7aa;color:#7c2d12;border-color:#fb923c;}
+.stamp-booby{background:#fce7f3;color:#9d174d;border-color:#f9a8d4;}
+.stamp-overall{background:linear-gradient(90deg,#fef3c7,#fed7aa);color:#78350f;border-color:#f59e0b;}
+.stamp-lg{background:#dbeafe;color:#1e3a8a;border-color:#93c5fd;}
+
+/* ── Award banner at top of card ── */
+.award-banner{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:4px;
+  border-radius:10px 10px 0 0;
+}
+.award-gold .award-banner{background:linear-gradient(90deg,#f59e0b,#fbbf24,#f59e0b);}
+.award-silver .award-banner{background:linear-gradient(90deg,#94a3b8,#cbd5e1,#94a3b8);}
+.award-bronze .award-banner{background:linear-gradient(90deg,#ea7c30,#fb923c,#ea7c30);}
+.award-booby .award-banner{background:linear-gradient(90deg,#ec4899,#f9a8d4,#ec4899);}
+.award-overall .award-banner{background:linear-gradient(90deg,#d97706,#f59e0b,#fbbf24,#f59e0b,#d97706);}
+
+/* ── Award sync panel ── */
+.award-panel{
+  background:linear-gradient(135deg,#1a4a2a,#1e3a5f);
+  border-radius:12px;padding:16px 18px;margin-bottom:16px;
+}
+.award-panel-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.award-select-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.award-select-row select{flex:1;min-width:180px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 11px;border-radius:7px;font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer;}
+.award-select-row select option{background:#1a4a2a;color:#fff;}
+.btn-award{background:rgba(201,168,48,.25);border:1px solid rgba(201,168,48,.5);color:#fef3c7;padding:9px 14px;border-radius:7px;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:'Sarabun',sans-serif;}
+.btn-award:hover{background:rgba(201,168,48,.4);}
+.btn-award:disabled{opacity:.5;cursor:not-allowed;}
+.award-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.legend-item{display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,.7);}
+
+/* ── Award detail tooltip on hover ── */
+.stamp-tip{
+  position:relative;
+}
+.stamp-tip:hover::after{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100%+5px);left:50%;transform:translateX(-50%);
+  background:#1c1a17;color:#fff;padding:4px 8px;border-radius:5px;
+  font-size:10px;white-space:nowrap;z-index:10;pointer-events:none;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+/* ── Modals (unchanged) ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;}
 .modal-box{background:var(--surface);border-radius:16px;width:100%;max-width:460px;overflow:hidden;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;}
 .modal-head{background:var(--accent2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
@@ -139,6 +314,25 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
     <div class="stat-item"><div class="stat-val" id="statNew">—</div><div class="stat-label">ล่าสุด 30 วัน</div></div>
   </div>
 
+  <!-- Award Sync Panel -->
+  <div class="award-panel">
+    <div class="award-panel-title">🏆 ประทับรางวัลจากการแข่งขัน</div>
+    <div class="award-select-row">
+      <select id="awardTourneySelect">
+        <option value="">— เลือกการแข่งขัน —</option>
+      </select>
+      <button class="btn-award" onclick="loadAwards()" id="btnLoadAwards" disabled>🏅 แสดงรางวัล</button>
+      <button class="btn-award" onclick="clearAwards()" id="btnClearAwards" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);">✕ ล้างรางวัล</button>
+    </div>
+    <div class="award-legend">
+      <span class="legend-item">🥇 Winner (ทอง)</span>
+      <span class="legend-item">🥈 1st Runner-up (เงิน)</span>
+      <span class="legend-item">🥉 2nd Runner-up (ทองแดง)</span>
+      <span class="legend-item">🐷 Booby / Booby Maker (ชมพู)</span>
+      <span class="legend-item">⭐ Overall Low Gross / Low Net (ทอง)</span>
+    </div>
+  </div>
+
   <!-- Search + Add -->
   <div class="card" style="padding:14px 16px;">
     <div class="search-row">
@@ -154,14 +348,17 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
   <div class="card" style="padding:16px;">
     <div class="card-title">
       รายชื่อสมาชิก
-      <span id="memberCountBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);font-weight:400;"></span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="memberCountBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);font-weight:400;"></span>
+        <button class="btn-outline" onclick="syncHandicaps()" id="btnSyncHcp" style="font-size:12px;padding:5px 11px;" disabled>⛳ อัปเดต H'cap</button>
+      </div>
     </div>
     <div class="member-grid" id="memberGrid">
       <div class="empty-msg" style="grid-column:1/-1;">เชื่อมต่อ Google Sheets ก่อน แล้วกด 🔄 รีเฟรช</div>
     </div>
   </div>
 
-  <!-- Setup Script URL (ท้ายสุด) -->
+  <!-- Setup Script URL -->
   <div class="setup-banner" id="setupBanner" style="margin-top:8px;">
     <div class="setup-label">🔗 เชื่อมต่อ Google Sheets · ใช้ Apps Script URL เดียวกับ Tournaments</div>
     <div id="urlInputRow" class="setup-row">
@@ -242,14 +439,10 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
 <script>
 const STORAGE_KEY = 'golf_scriptUrl';
 
-// อ่าน URL จาก query parameter ?su= ก่อน (กรณีส่ง link จาก home.html)
-// ถ้าไม่มีค่อยอ่านจาก localStorage
 (function(){
   const params = new URLSearchParams(window.location.search);
   const suParam = params.get('su');
-  if(suParam){
-    localStorage.setItem(STORAGE_KEY, suParam);
-  }
+  if(suParam) localStorage.setItem(STORAGE_KEY, suParam);
 })();
 
 let scriptUrl = localStorage.getItem(STORAGE_KEY) || 'https://script.google.com/macros/s/AKfycbyq716QpvLCMhiUuWsI0GiK00dZwVZWoQJs1NIrsgmwJyFoYcxeBRYRiEdLqKP2rh6H9A/exec';
@@ -260,9 +453,12 @@ let deptFilter = '';
 let avatarDataUrl = null;
 let originalPhoto = null;
 
+// Key: email.toLowerCase() → array of award objects
+// award: { type:'winner'|'runner1'|'runner2'|'booby'|'booby_marker'|'low_gross'|'low_net', flight:'A'|'B'|'C'|'Overall', tourney }
+let awardsMap = {};
+
 // ── INIT ──
 ;(function(){
-  // URL พร้อมเสมอ (ฝังในโค้ด) → เชื่อมต่ออัตโนมัติ
   showConnected();
   refreshMembers();
   document.getElementById('memberModal').addEventListener('click', e=>{
@@ -286,7 +482,6 @@ async function api(action, params={}) {
 }
 async function apiPost(body) {
   if(!scriptUrl) throw new Error('ยังไม่ได้ตั้งค่า Script URL');
-  // ส่งเป็น JSON body (POST จริง) เพื่อรองรับ base64 รูปภาพที่ยาวมาก
   const r = await fetch(scriptUrl, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -320,6 +515,8 @@ function showConnected(){
   document.getElementById('urlInputRow').classList.add('hidden');
   document.getElementById('connectedRow').classList.remove('hidden');
   document.getElementById('btnAddMember').disabled = false;
+  document.getElementById('btnSyncHcp').disabled = false;
+  loadTourneyList();
 }
 function changeUrl(){
   document.getElementById('connectedRow').classList.add('hidden');
@@ -336,6 +533,173 @@ async function refreshMembers(){
     toast('✅ โหลดแล้ว '+members.length+' คน','ok');
   } catch(e){ toast('❌ '+e.message,'err'); }
   loading(false);
+}
+
+// ── LOAD TOURNEY LIST for award selector ──
+async function loadTourneyList(){
+  try {
+    const list = await api('getTourneyList');
+    const sel = document.getElementById('awardTourneySelect');
+    sel.innerHTML = '<option value="">— เลือกการแข่งขัน —</option>';
+    (list||[]).forEach(t=>{
+      const opt = document.createElement('option');
+      opt.value = t.tourneyName;
+      opt.textContent = `${t.tourneyName}${t.date?' · '+t.date:''}`;
+      sel.appendChild(opt);
+    });
+    document.getElementById('btnLoadAwards').disabled = false;
+    // Auto-select the latest tournament (first in list, already sorted desc by date)
+    if(list && list.length > 0){
+      sel.value = list[0].tourneyName;
+      await loadAwards();
+    }
+  } catch(e){ /* silent */ }
+}
+
+// ── FLIGHT HELPER ──
+function getFlightByHcp(hcp){
+  if(hcp === '' || hcp === null || hcp === undefined) return null;
+  const h = parseFloat(hcp);
+  if(isNaN(h)) return null;
+  if(h <= 12) return 'A';
+  if(h <= 24) return 'B';
+  return 'C';
+}
+
+// ── LOAD AWARDS from a tournament ──
+async function loadAwards(){
+  const tourneyName = document.getElementById('awardTourneySelect').value;
+  if(!tourneyName){ toast('กรุณาเลือกการแข่งขัน','err'); return; }
+  loading(true, 'กำลังโหลดสกอร์...');
+  try {
+    const scores = await api('getScores', {name: tourneyName});
+    awardsMap = computeAwards(scores, tourneyName);
+    renderMembers();
+    const total = Object.values(awardsMap).reduce((s,a)=>s+a.length,0);
+    toast(`🏆 ประทับรางวัล ${total} รายการแล้ว`,'ok');
+  } catch(e){ toast('❌ '+e.message,'err'); }
+  loading(false);
+}
+
+function clearAwards(){
+  awardsMap = {};
+  renderMembers();
+  toast('ล้างรางวัลแล้ว');
+}
+
+// ── COMPUTE AWARDS from scores array ──
+function computeAwards(scores, tourneyName){
+  const map = {};
+  const addAward = (email, award) => {
+    const key = (email||'').toLowerCase();
+    if(!key) return;
+    if(!map[key]) map[key] = [];
+    map[key].push(award);
+  };
+
+  // Filter out WD players and players without scores
+  const valid = scores.filter(s => !s.wd && s.confirmed);
+
+  // Group by flight
+  const flights = {};
+  valid.forEach(s => {
+    const f = (s.flight||'').toUpperCase();
+    if(!flights[f]) flights[f] = [];
+    flights[f].push(s);
+  });
+
+  // Per-flight net ranking: winner, 1st runner-up, 2nd runner-up
+  // Also booby (highest net = worst) and booby marker (second worst net)
+  Object.entries(flights).forEach(([flight, players])=>{
+    if(!players.length) return;
+    const sorted = [...players].sort((a,b)=>{
+      const an = parseFloat(a.net); const bn = parseFloat(b.net);
+      if(isNaN(an) && isNaN(bn)) return 0;
+      if(isNaN(an)) return 1; if(isNaN(bn)) return -1;
+      return an - bn; // lower net = better
+    });
+    const worst = [...players].sort((a,b)=>{
+      const an = parseFloat(a.net); const bn = parseFloat(b.net);
+      if(isNaN(an) && isNaN(bn)) return 0;
+      if(isNaN(an)) return -1; if(isNaN(bn)) return 1;
+      return bn - an; // higher net = worse
+    });
+
+    if(sorted[0]) addAward(sorted[0].email, {type:'winner', flight, tourney:tourneyName});
+    if(sorted[1]) addAward(sorted[1].email, {type:'runner1', flight, tourney:tourneyName});
+    if(sorted[2]) addAward(sorted[2].email, {type:'runner2', flight, tourney:tourneyName});
+    if(worst[0]) addAward(worst[0].email, {type:'booby_winner', flight, tourney:tourneyName});
+    if(worst[1]) addAward(worst[1].email, {type:'booby_marker', flight, tourney:tourneyName});
+  });
+
+  // Overall Low Gross (lowest gross score among all players)
+  const allGross = valid.filter(s=>!isNaN(parseFloat(s.gross))).sort((a,b)=>parseFloat(a.gross)-parseFloat(b.gross));
+  if(allGross[0]) addAward(allGross[0].email, {type:'low_gross', flight:'Overall', tourney:tourneyName});
+
+  // Overall Low Net (lowest net score among all players)
+  const allNet = valid.filter(s=>!isNaN(parseFloat(s.net))).sort((a,b)=>parseFloat(a.net)-parseFloat(b.net));
+  if(allNet[0]) addAward(allNet[0].email, {type:'low_net', flight:'Overall', tourney:tourneyName});
+
+  return map;
+}
+
+// ── DETERMINE card theme from awards ──
+function getCardTheme(awards){
+  if(!awards || !awards.length) return null;
+  // Priority: overall/winner > runner1 > runner2 > booby > booby_marker
+  const types = awards.map(a=>a.type);
+  if(types.includes('low_gross') || types.includes('low_net')) return 'award-overall';
+  if(types.includes('winner')) return 'award-gold';
+  if(types.includes('runner1')) return 'award-silver';
+  if(types.includes('runner2')) return 'award-bronze';
+  if(types.includes('booby_winner') || types.includes('booby_marker')) return 'award-booby';
+  return null;
+}
+
+// ── BUILD stamp HTML ──
+function buildStamps(awards){
+  if(!awards || !awards.length) return '';
+  return '<div class="award-stamps">' + awards.map(a=>{
+    const label = awardLabel(a);
+    const cls = awardStampClass(a);
+    const icon = awardIcon(a);
+    return `<span class="stamp ${cls} stamp-tip" data-tip="${label.full}">${icon} ${label.short}</span>`;
+  }).join('') + '</div>';
+}
+
+function awardLabel(a){
+  const fLabel = a.flight==='Overall' ? 'Overall' : `Flight ${a.flight}`;
+  const map = {
+    winner:      {short:`🥇 ${fLabel}`, full:`Winner · ${fLabel}`},
+    runner1:     {short:`🥈 ${fLabel}`, full:`1st Runner-up · ${fLabel}`},
+    runner2:     {short:`🥉 ${fLabel}`, full:`2nd Runner-up · ${fLabel}`},
+    booby_winner:{short:`🐷 Booby`,      full:`Booby Winner · ${fLabel}`},
+    booby_marker:{short:`🐷 Marker`,     full:`Booby Marker · ${fLabel}`},
+    low_gross:   {short:`⭐ Low Gross`,  full:`Overall Low Gross`},
+    low_net:     {short:`⭐ Low Net`,    full:`Overall Low Net`},
+  };
+  return map[a.type] || {short:a.type, full:a.type};
+}
+function awardIcon(a){
+  const icons = {winner:'🥇',runner1:'🥈',runner2:'🥉',booby_winner:'🐷',booby_marker:'🐷',low_gross:'⭐',low_net:'⭐'};
+  return icons[a.type]||'🏅';
+}
+function awardStampClass(a){
+  const cls = {winner:'stamp-gold',runner1:'stamp-silver',runner2:'stamp-bronze',booby_winner:'stamp-booby',booby_marker:'stamp-booby',low_gross:'stamp-overall',low_net:'stamp-overall'};
+  return cls[a.type]||'stamp-gold';
+}
+
+// ── FLIGHT badge HTML ──
+function flightBadge(hcp){
+  const f = getFlightByHcp(hcp);
+  if(!f) return '';
+  const map = {
+    A:{cls:'fa', emoji:'🅰️', label:'Flight A · H\'cap 0–12'},
+    B:{cls:'fb', emoji:'🅱️', label:'Flight B · H\'cap 13–24'},
+    C:{cls:'fc', emoji:'🇨', label:'Flight C · H\'cap 25+'},
+  };
+  const m = map[f];
+  return `<div class="flight-badge ${m.cls}" title="${m.label}">${m.emoji} Flight ${f}</div>`;
 }
 
 // ── STATS ──
@@ -378,24 +742,56 @@ function renderMembers(){
     grid.innerHTML=`<div class="empty-msg" style="grid-column:1/-1;">${q||deptFilter?'ไม่พบสมาชิก':'ยังไม่มีสมาชิก — กด <strong>+ เพิ่มสมาชิก</strong>'}</div>`;
     return;
   }
+
   grid.innerHTML = list.map(m=>{
+    const emailKey = (m.email||'').toLowerCase();
+    const awards = awardsMap[emailKey] || [];
+    const cardTheme = getCardTheme(awards);
+    const flightClass = getFlightClass(m.handicap);
+
+    // Card CSS class: award theme takes priority over flight
+    const cardClass = cardTheme ? cardTheme : flightClass;
+
     const init = (m.name||'?')[0];
     const av = m.photo ? `<img src="${m.photo}" alt="">` : init;
-    return `<div class="member-card">
+
+    const hcpVal = (m.handicap !== '' && m.handicap !== null && m.handicap !== undefined) ? m.handicap : null;
+
+    const hcpHtml = hcpVal !== null
+      ? `<div class="hcp-pill">⛳ H'cap ${hcpVal}</div>`
+      : '';
+
+    const flightBadgeHtml = hcpVal !== null ? flightBadge(hcpVal) : '';
+    const stampsHtml = buildStamps(awards);
+    const bannerHtml = cardTheme ? '<div class="award-banner"></div>' : '';
+
+    return `<div class="member-card ${cardClass}">
+      ${bannerHtml}
       <div class="mc-top">
         <div class="mc-avatar">${av}</div>
         <div class="mc-info">
           <div class="mc-name" title="${esc(m.name)}">${m.name}</div>
           ${m.dept?`<div class="mc-dept">🏢 ${m.dept}</div>`:''}
           <div class="mc-email" title="${esc(m.email)}">✉ ${m.email||'—'}</div>
+          ${hcpHtml}
+          ${flightBadgeHtml}
         </div>
       </div>
+      ${stampsHtml}
       <div class="mc-actions">
         <button class="btn-edit" onclick="openEditModal('${m.id}')">✏️ แก้ไข</button>
         <button class="btn-danger" onclick="openDeleteConfirm('${m.id}','${esc(m.name)}')">🗑️</button>
       </div>
     </div>`;
   }).join('');
+}
+
+function getFlightClass(hcp){
+  const f = getFlightByHcp(hcp);
+  if(f==='A') return 'flight-a';
+  if(f==='B') return 'flight-b';
+  if(f==='C') return 'flight-c';
+  return '';
 }
 
 // ── MODALS ──
@@ -508,6 +904,26 @@ function resetAvatarPreview(){
   document.getElementById('avatarPlaceholder').style.display='';
   document.getElementById('avatarInput').value='';
   document.getElementById('btnRemovePhoto').classList.add('hidden');
+}
+
+// ── SYNC HANDICAPS ──
+async function syncHandicaps(){
+  const btn = document.getElementById('btnSyncHcp');
+  btn.disabled = true; btn.textContent = '⏳ กำลังอัปเดต...';
+  loading(true, 'ดึง H\'cap จากผลแข่งขัน...');
+  try {
+    const res = await api('syncHandicaps');
+    if(res.updated && res.updated.length){
+      res.updated.forEach(u=>{
+        const m = members.find(x=>x.email.toLowerCase()===u.email.toLowerCase());
+        if(m) m.handicap = u.handicap;
+      });
+    }
+    renderStats(); renderMembers();
+    toast(`✅ อัปเดต H'cap ${res.count||0} คนแล้ว`,'ok');
+  } catch(e){ toast('❌ '+e.message,'err'); }
+  btn.disabled = false; btn.textContent = "⛳ อัปเดต H'cap";
+  loading(false);
 }
 
 // ── UTILS ──
