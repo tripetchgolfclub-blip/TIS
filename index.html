@@ -2774,17 +2774,19 @@ function _buildLbCanvas(d, mode, tourneyName) {
   const thY = HEADER_H + 8;
   ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,26,6); ctx.fill();
   ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif';
-  // col positions: prize(16-70) | rank(70-106) | name(106-320) | gross(320-400) | hcp(400-462) | net(462-end)
-  const COL = {PRIZE_X:20, RANK_X:88, NAME_X:110, GROSS_X:332, HCP_X:422, NET_X:W-22};
+  // col positions: rank(16-56) | name(56-290) | holes(290-350) | gross(350-420) | hcp(420-480) | net(480-530) | prize(530-end)
+  const COL = {RANK_X:36, NAME_X:58, HOLES_X:295, GROSS_X:348, HCP_X:418, NET_X:490, PRIZE_X:W-22};
+  ctx.textAlign='center';
+  ctx.fillText('#', COL.RANK_X, thY+17);
   ctx.textAlign='left';
-  ctx.fillText('รางวัล', COL.PRIZE_X, thY+17);
-  ctx.fillText('#', COL.RANK_X-10, thY+17);
   ctx.fillText('ผู้เล่น', COL.NAME_X, thY+17);
   ctx.textAlign='center';
-  ctx.fillText('Gross', COL.GROSS_X+30, thY+17);
-  ctx.fillText("H'cap", COL.HCP_X+20, thY+17);
+  ctx.fillText('⛳', COL.HOLES_X+18, thY+17);
+  ctx.fillText('Gross', COL.GROSS_X+18, thY+17);
+  ctx.fillText("H'cap", COL.HCP_X+18, thY+17);
+  ctx.fillText(isLowGross?'Gross':'Net', COL.NET_X+18, thY+17);
   ctx.textAlign='right';
-  ctx.fillText(isLowGross?'Gross':'Net', COL.NET_X, thY+17);
+  ctx.fillText('รางวัล', COL.PRIZE_X, thY+17);
 
   // Rows
   d.forEach((r,i)=>{
@@ -2793,22 +2795,6 @@ function _buildLbCanvas(d, mode, tourneyName) {
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.fill();
     ctx.strokeStyle=C.border; ctx.lineWidth=.4;
     roundRectPdf(ctx,16,ry,W-32,ROW_H-4,7); ctx.stroke();
-
-    // ── รางวัล (ซ้ายสุด) ──
-    const pl = prizes[i] || '';
-    if(pl){
-      const plBg = i===0?'#fff3cd': isBooby?(i===1?'#fff0e8':'#f5f5f5'): (i===1?'#d1e7dd':'#e8f0ff');
-      const plTc = i===0?'#856404': isBooby?(i===1?'#c94a2a':'#666'): (i===1?'#0a5c2a':'#084298');
-      const plW = Math.min(84, pl.replace(/[^\x00-\x7F]/g,'  ').length*6+10);
-      ctx.fillStyle=plBg; roundRectPdf(ctx,COL.PRIZE_X,ry+8,plW,44,6); ctx.fill();
-      ctx.fillStyle=plTc; ctx.font='bold 8px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-      // Split prize label onto 2 lines if needed
-      const plParts = pl.split(' ');
-      const plLine1 = plParts.slice(0,2).join(' ');
-      const plLine2 = plParts.slice(2).join(' ');
-      ctx.fillText(plLine1, COL.PRIZE_X+plW/2, ry+26);
-      if(plLine2) ctx.fillText(plLine2, COL.PRIZE_X+plW/2, ry+38);
-    }
 
     // ── rank icon ──
     ctx.textAlign='center';
@@ -2836,24 +2822,47 @@ function _buildLbCanvas(d, mode, tourneyName) {
     ctx.fillStyle=C.text3; ctx.font='9px "IBM Plex Mono",sans-serif'; ctx.textAlign='left';
     ctx.fillText(deptGroup, COL.NAME_X, ry+38);
 
+    // ── จำนวนหลุมที่ส่งสกอร์ ──
+    const holesScored = typeof r.holesPlayed === 'number' ? r.holesPlayed : (r.scores ? Object.values(r.scores).filter(s=>s>0).length : (r.gross > 0 ? 18 : 0));
+    const totalHoles = r.totalHoles || 18;
+    const holesStr = holesScored + '/' + totalHoles;
+    const holesColor = holesScored >= totalHoles ? '#2c6e3f' : '#b8922a';
+    ctx.fillStyle=holesColor; ctx.font='bold 11px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(holesStr, COL.HOLES_X+18, ry+ROW_H/2+5);
+
     // ── Gross + diff ──
     const diff = r.gross - (r.par||72);
     const diffStr = diff===0?'E':diff>0?'+'+diff:String(diff);
     const diffCol = diff<=-2?'#1a6b9a':diff===-1?'#c94a2a':diff===0?'#2c6e3f':diff===1?'#b8922a':'#8a3a1a';
-    ctx.fillStyle=C.text2; ctx.font='bold 15px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(r.gross), COL.GROSS_X+30, ry+26);
-    ctx.fillStyle=diffCol; ctx.font='10px "IBM Plex Mono",sans-serif';
-    ctx.fillText(diffStr, COL.GROSS_X+30, ry+40);
+    ctx.fillStyle=C.text2; ctx.font='bold 14px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(String(r.gross), COL.GROSS_X+18, ry+26);
+    ctx.fillStyle=diffCol; ctx.font='9px "IBM Plex Mono",sans-serif';
+    ctx.fillText(diffStr, COL.GROSS_X+18, ry+38);
 
     // ── H'cap ──
     ctx.fillStyle=C.text2; ctx.font='13px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
-    ctx.fillText(String(r.hcp), COL.HCP_X+20, ry+ROW_H/2+5);
+    ctx.fillText(String(r.hcp), COL.HCP_X+18, ry+ROW_H/2+5);
 
     // ── Net / Gross score (main) ──
     const val = isLowGross ? r.gross : r.net;
     const scoreColor = isBooby ? '#c94a2a' : C.green;
-    ctx.fillStyle=scoreColor; ctx.font='bold 22px "IBM Plex Mono",sans-serif'; ctx.textAlign='right';
-    ctx.fillText(String(val), COL.NET_X, ry+ROW_H/2+8);
+    ctx.fillStyle=scoreColor; ctx.font='bold 20px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(String(val), COL.NET_X+18, ry+ROW_H/2+8);
+
+    // ── รางวัล (ขวาสุด) ──
+    const pl = prizes[i] || '';
+    if(pl){
+      const plBg = i===0?'#fff3cd': isBooby?(i===1?'#fff0e8':'#f5f5f5'): (i===1?'#d1e7dd':'#e8f0ff');
+      const plTc = i===0?'#856404': isBooby?(i===1?'#c94a2a':'#666'): (i===1?'#0a5c2a':'#084298');
+      const plW = 72;
+      ctx.fillStyle=plBg; roundRectPdf(ctx,W-18-plW,ry+8,plW,ROW_H-20,6); ctx.fill();
+      ctx.fillStyle=plTc; ctx.font='bold 7px "IBM Plex Mono",sans-serif'; ctx.textAlign='center';
+      const plParts = pl.split(' ');
+      const plLine1 = plParts.slice(0,2).join(' ');
+      const plLine2 = plParts.slice(2).join(' ');
+      ctx.fillText(plLine1, W-18-plW/2, ry+24);
+      if(plLine2) ctx.fillText(plLine2, W-18-plW/2, ry+35);
+    }
   });
 
   // Footer
@@ -3014,8 +3023,10 @@ function exportSectionPDF(sectionTitle,btn){
       }
       ctx.fillStyle='#fff';ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
       ctx.fillText(String(sec.getVal(p)),bx+BAR_W/2,by+barH-10);
+      // ใต้แท่ง: Low Gross แสดง Net แทน ไม่ซ้ำ Gross
       ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
-      ctx.fillText(sec.getSub(p),bx+BAR_W/2,chartY+BAR_AREA_H+22);
+      const barSubLabel = isLowGross ? `Net ${p.net}` : sec.getSub(p);
+      ctx.fillText(barSubLabel,bx+BAR_W/2,chartY+BAR_AREA_H+22);
     });
   }
 
@@ -3025,7 +3036,7 @@ function exportSectionPDF(sectionTitle,btn){
   ctx.beginPath();ctx.moveTo(20,listY);ctx.lineTo(W-20,listY);ctx.stroke();
 
   // col positions (same as _buildLbCanvas)
-  const COL = {PRIZE_X:20, RANK_X:88, NAME_X:110, GROSS_X:332, HCP_X:422, NET_X:W-22};
+  const COL = {RANK_X:36, NAME_X:58, HOLES_X:295, GROSS_X:348, HCP_X:418, NET_X:490, PRIZE_X:W-22};
 
   // Player rows
   sec.players.forEach((p,i)=>{
@@ -3034,26 +3045,6 @@ function exportSectionPDF(sectionTitle,btn){
     roundRectPdf(ctx,18,ry,W-36,ROW_H-6,8);ctx.fill();
     ctx.strokeStyle=C.border;ctx.lineWidth=.5;
     roundRectPdf(ctx,18,ry,W-36,ROW_H-6,8);ctx.stroke();
-
-    // ── รางวัล (ซ้ายสุด) ──
-    const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
-    if(pl){
-      let plBg,plTc;
-      if(sec.isBooby){
-        plBg=i===0?'#fde8e3':'#fff0e8'; plTc=i===0?'#c94a2a':'#e07a40';
-      } else {
-        plBg=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
-        plTc=i===0?'#856404':i===1?'#0a5c2a':'#084298';
-      }
-      const plW=84;
-      ctx.fillStyle=plBg;roundRectPdf(ctx,COL.PRIZE_X,ry+8,plW,54,6);ctx.fill();
-      ctx.fillStyle=plTc;ctx.font='bold 8px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-      const plParts=pl.split(' ');
-      const plLine1=plParts.slice(0,2).join(' ');
-      const plLine2=plParts.slice(2).join(' ');
-      ctx.fillText(plLine1,COL.PRIZE_X+plW/2,ry+28);
-      if(plLine2) ctx.fillText(plLine2,COL.PRIZE_X+plW/2,ry+40);
-    }
 
     // ── rank icon ──
     if(sec.isBooby){
@@ -3084,31 +3075,57 @@ function exportSectionPDF(sectionTitle,btn){
     ctx.fillStyle=C.text3;ctx.font='10px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
     ctx.fillText(deptGroup,COL.NAME_X,ry+44);
 
+    // ── จำนวนหลุม (ส่งครบ 18/18 เสมอสำหรับผู้ที่ได้รางวัล) ──
+    const holesScored = typeof p.holesPlayed === 'number' ? p.holesPlayed : (p.scores ? Object.values(p.scores).filter(s=>s>0).length : 18);
+    const totalHoles = p.totalHoles || 18;
+    const holesStr = holesScored + '/' + totalHoles;
+    ctx.fillStyle='#2c6e3f';ctx.font='bold 12px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+    ctx.fillText(holesStr,COL.HOLES_X+18,ry+ROW_H/2+4);
+
     // ── Gross + diff (ยกเว้น Low Gross ให้ diff เพิ่มเติมแทน) ──
     const diff=p.gross-(p.par||72);
     const diffStr=diff===0?'E':diff>0?'+'+diff:String(diff);
     const diffCol=diff<=-2?'#1a6b9a':diff===-1?'#c94a2a':diff===0?'#2c6e3f':diff===1?'#b8922a':'#8a3a1a';
     if(!isLowGross){
       ctx.fillStyle=C.text2;ctx.font='bold 15px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-      ctx.fillText(String(p.gross),COL.GROSS_X+30,ry+28);
+      ctx.fillText(String(p.gross),COL.GROSS_X+18,ry+28);
       ctx.fillStyle=diffCol;ctx.font='10px "IBM Plex Mono",sans-serif';
-      ctx.fillText(diffStr,COL.GROSS_X+30,ry+42);
+      ctx.fillText(diffStr,COL.GROSS_X+18,ry+42);
     } else {
-      // Low Gross: แสดง diff เพิ่มเติมใต้ชื่อ
       ctx.fillStyle=diffCol;ctx.font='bold 10px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-      ctx.fillText(diffStr,COL.GROSS_X+30,ry+32);
+      ctx.fillText(diffStr,COL.GROSS_X+18,ry+32);
     }
 
     // ── H'cap ──
     ctx.fillStyle=C.text2;ctx.font='13px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-    ctx.fillText(String(p.hcp),COL.HCP_X+20,ry+32);
+    ctx.fillText(String(p.hcp),COL.HCP_X+18,ry+32);
 
     // ── score (right) ──
     ctx.fillStyle=sec.isBooby?'#c94a2a':sec.color;
-    ctx.font='bold 22px "IBM Plex Mono",sans-serif';ctx.textAlign='right';
-    ctx.fillText(String(sec.getVal(p)),COL.NET_X,ry+36);
+    ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+    ctx.fillText(String(sec.getVal(p)),COL.NET_X+18,ry+36);
     ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';
-    ctx.fillText(sec.getSub(p),COL.NET_X,ry+52);
+    ctx.fillText(sec.getSub(p),COL.NET_X+18,ry+52);
+
+    // ── รางวัล (ขวาสุด) ──
+    const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
+    if(pl){
+      let plBg,plTc;
+      if(sec.isBooby){
+        plBg=i===0?'#fde8e3':'#fff0e8'; plTc=i===0?'#c94a2a':'#e07a40';
+      } else {
+        plBg=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
+        plTc=i===0?'#856404':i===1?'#0a5c2a':'#084298';
+      }
+      const plW=72;
+      ctx.fillStyle=plBg;roundRectPdf(ctx,W-22-plW,ry+8,plW,ROW_H-20,6);ctx.fill();
+      ctx.fillStyle=plTc;ctx.font='bold 7px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+      const plParts=pl.split(' ');
+      const plLine1=plParts.slice(0,2).join(' ');
+      const plLine2=plParts.slice(2).join(' ');
+      ctx.fillText(plLine1,W-22-plW/2,ry+26);
+      if(plLine2) ctx.fillText(plLine2,W-22-plW/2,ry+38);
+    }
   });
 
   // Footer
@@ -3158,7 +3175,7 @@ async function buildAllAwardsPDFCanvas(){
     const fbg={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'};
     const ftc={'A':'#0a3622','B':'#084298','C':'#664d03'};
     // col positions for all-PDF (slightly tighter)
-    const COL={PRIZE_X:18,RANK_X:82,NAME_X:104,GROSS_X:318,HCP_X:406,NET_X:W-20};
+    const COL={RANK_X:34,NAME_X:56,HOLES_X:280,GROSS_X:330,HCP_X:398,NET_X:462,PRIZE_X:W-18};
 
     ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
     ctx.fillStyle=C.green;roundRectPdf(ctx,0,0,W,HEADER_H,0);ctx.fill();
@@ -3187,25 +3204,6 @@ async function buildAllAwardsPDFCanvas(){
           ctx.strokeStyle=C.border;ctx.lineWidth=.4;
           roundRectPdf(ctx,16,curY,W-32,ROW_H-6,7);ctx.stroke();
 
-          // ── รางวัล (ซ้ายสุด) ──
-          const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
-          if(pl){
-            let plBg,plTc;
-            if(sec.isBooby){
-              plBg=i===0?'#fde8e3':'#fff0e8';plTc=i===0?'#c94a2a':'#e07a40';
-            }else{
-              plBg=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
-              plTc=i===0?'#856404':i===1?'#0a5c2a':'#084298';
-            }
-            const plW=78;
-            ctx.fillStyle=plBg;roundRectPdf(ctx,COL.PRIZE_X,curY+6,plW,54,6);ctx.fill();
-            ctx.fillStyle=plTc;ctx.font='bold 7px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-            const plParts=pl.split(' ');
-            ctx.fillText(plParts.slice(0,2).join(' '),COL.PRIZE_X+plW/2,curY+26);
-            const plRest=plParts.slice(2).join(' ');
-            if(plRest) ctx.fillText(plRest,COL.PRIZE_X+plW/2,curY+37);
-          }
-
           // ── rank ──
           ctx.font='16px sans-serif';ctx.textAlign='center';
           ctx.fillText(sec.isBooby?(i<2?'🐷':String(i+1)):(medals[i]||String(i+1)),COL.RANK_X,curY+32);
@@ -3225,30 +3223,55 @@ async function buildAllAwardsPDFCanvas(){
           ctx.fillStyle=C.text3;ctx.font='9px "IBM Plex Mono",sans-serif';ctx.textAlign='left';
           ctx.fillText(deptGroup,COL.NAME_X,curY+40);
 
+          // ── จำนวนหลุม 18/18 ──
+          const holesScored = typeof p.holesPlayed === 'number' ? p.holesPlayed : 18;
+          const totalHoles = p.totalHoles || 18;
+          ctx.fillStyle='#2c6e3f';ctx.font='bold 10px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+          ctx.fillText(holesScored+'/'+totalHoles,COL.HOLES_X+16,curY+32);
+
           // ── Gross + diff ──
           const diff=p.gross-(p.par||72);
           const diffStr=diff===0?'E':diff>0?'+'+diff:String(diff);
           const diffCol=diff<=-2?'#1a6b9a':diff===-1?'#c94a2a':diff===0?'#2c6e3f':diff===1?'#b8922a':'#8a3a1a';
           if(!sec.isLowGross){
             ctx.fillStyle=C.text2;ctx.font='bold 13px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-            ctx.fillText(String(p.gross),COL.GROSS_X+28,curY+26);
+            ctx.fillText(String(p.gross),COL.GROSS_X+16,curY+26);
             ctx.fillStyle=diffCol;ctx.font='9px "IBM Plex Mono",sans-serif';
-            ctx.fillText(diffStr,COL.GROSS_X+28,curY+38);
+            ctx.fillText(diffStr,COL.GROSS_X+16,curY+38);
           }else{
             ctx.fillStyle=diffCol;ctx.font='bold 9px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-            ctx.fillText(diffStr,COL.GROSS_X+28,curY+30);
+            ctx.fillText(diffStr,COL.GROSS_X+16,curY+30);
           }
 
           // ── H'cap ──
           ctx.fillStyle=C.text2;ctx.font='12px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
-          ctx.fillText(String(p.hcp),COL.HCP_X+18,curY+30);
+          ctx.fillText(String(p.hcp),COL.HCP_X+16,curY+30);
 
           // ── score (right) ──
           ctx.fillStyle=sec.isBooby?'#c94a2a':sec.color;
-          ctx.font='bold 20px "IBM Plex Mono",sans-serif';ctx.textAlign='right';
-          ctx.fillText(String(sec.getVal(p)),COL.NET_X,curY+32);
+          ctx.font='bold 18px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+          ctx.fillText(String(sec.getVal(p)),COL.NET_X+16,curY+32);
           ctx.fillStyle=C.text3;ctx.font='8px "IBM Plex Mono",sans-serif';
-          ctx.fillText(sec.getSub(p),COL.NET_X,curY+46);
+          ctx.fillText(sec.getSub(p),COL.NET_X+16,curY+46);
+
+          // ── รางวัล (ขวาสุด) ──
+          const pl=(sec.prizeLabels&&sec.prizeLabels[i])||'';
+          if(pl){
+            let plBg,plTc;
+            if(sec.isBooby){
+              plBg=i===0?'#fde8e3':'#fff0e8';plTc=i===0?'#c94a2a':'#e07a40';
+            }else{
+              plBg=i===0?'#fff3cd':i===1?'#d1e7dd':'#e8f0ff';
+              plTc=i===0?'#856404':i===1?'#0a5c2a':'#084298';
+            }
+            const plW=64;
+            ctx.fillStyle=plBg;roundRectPdf(ctx,W-18-plW,curY+6,plW,ROW_H-18,6);ctx.fill();
+            ctx.fillStyle=plTc;ctx.font='bold 7px "IBM Plex Mono",sans-serif';ctx.textAlign='center';
+            const plParts=pl.split(' ');
+            ctx.fillText(plParts.slice(0,2).join(' '),W-18-plW/2,curY+26);
+            const plRest=plParts.slice(2).join(' ');
+            if(plRest) ctx.fillText(plRest,W-18-plW/2,curY+37);
+          }
 
           curY+=ROW_H;
         });
