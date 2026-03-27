@@ -2,7 +2,7 @@
   "name": "TIS Golf Club",
   "short_name": "TIS Golf",
   "description": "Tri Petch Group TIS Golf Club Scorecard System",
-  "start_url": "/TIS/",
+  "start_url": "/TIS/home.html",
   "scope": "/TIS/",
   "display": "standalone",
   "orientation": "portrait",
