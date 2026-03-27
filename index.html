@@ -492,9 +492,16 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div class="tb-meta" id="bnrMeta">—</div>
       </div>
       <div class="round-bar">
-        <div>
-          <div class="rb-player" id="rbName">—</div>
-          <div class="rb-meta" id="rbMeta">—</div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <div id="rbAvatarWrap" style="flex-shrink:0;display:none;">
+            <img id="rbAvatar" src="" alt=""
+              style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border2);"
+              onerror="document.getElementById('rbAvatarWrap').style.display='none'">
+          </div>
+          <div>
+            <div class="rb-player" id="rbName">—</div>
+            <div class="rb-meta" id="rbMeta">—</div>
+          </div>
         </div>
         <div class="rb-right">
           <div class="rb-gross" id="rbGross">0</div>
@@ -1792,6 +1799,16 @@ async function startScorecard() {
   document.getElementById('bnrMeta').textContent=(t?.course||'—')+' · '+fmtD(t?.date)+' · '+holes+' หลุม';
   document.getElementById('rbName').textContent=currentPlayer.name;
   document.getElementById('rbMeta').textContent='กลุ่ม: '+currentPlayer.group+(currentPlayer.dept?' · ฝ่าย: '+currentPlayer.dept:'');
+  // ── แสดงรูปโปรไฟล์จาก memberCache ──
+  const rbMember = memberCache.find(m => m && m.email && m.email.toLowerCase() === currentPlayer.email.toLowerCase());
+  const rbAvatarWrap = document.getElementById('rbAvatarWrap');
+  const rbAvatarImg  = document.getElementById('rbAvatar');
+  if (rbMember && rbMember.photo) {
+    rbAvatarImg.src = rbMember.photo;
+    rbAvatarWrap.style.display = 'block';
+  } else {
+    rbAvatarWrap.style.display = 'none';
+  }
   document.getElementById('gmailScreen').classList.add('hidden');
   document.getElementById('playerScorecard').classList.remove('hidden');
 
