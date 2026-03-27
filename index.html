@@ -1128,61 +1128,83 @@ async function loadMemberCache() {
   } catch(e) { memberCache = []; }
 }
 
+async function loadMemberCache() {
+  if (!scriptUrl) return;
+  try {
+    const raw = await api('getMembers');
+    memberCache = Array.isArray(raw) ? raw.filter(m => m && m.id && m.name) : [];
+  } catch(e) { memberCache = []; }
+}
+
+let _memberCacheLoading = false;
 function filterMemberDropdown() {
   const q = (document.getElementById('memberSearch').value || '').toLowerCase().trim();
   const dd = document.getElementById('memberDropdown');
   if (!memberCache.length && scriptUrl) {
-    loadMemberCache().then(() => filterMemberDropdown());
+    if (!_memberCacheLoading) {
+      _memberCacheLoading = true;
+      loadMemberCache()
+        .then(() => { _memberCacheLoading = false; filterMemberDropdown(); })
+        .catch(() => { _memberCacheLoading = false; });
+    }
     return;
   }
   const list = q
-    ? memberCache.filter(m =>
-        (m.name||'').toLowerCase().includes(q) ||
-        (m.email||'').toLowerCase().includes(q) ||
-        (m.dept||'').toLowerCase().includes(q))
+    ? memberCache.filter(m => m &&
+        ((m.name||'').toLowerCase().includes(q) ||
+         (m.email||'').toLowerCase().includes(q) ||
+         (m.dept||'').toLowerCase().includes(q)))
     : memberCache.slice(0, 30);
 
   if (!list.length) { hideMemberDropdown(); return; }
 
-  dd.innerHTML = list.map(m => {
+  dd._currentList = list;
+  dd.innerHTML = list.map((m, idx) => {
     const initial = (m.name||'?')[0];
     const photoHtml = m.photo
-      ? `<img src="${m.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+      ? `<img src="${m.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">`
       : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">${initial}</div>`;
-    return `<div onclick="selectMemberFromDropdown('${m.id}')"
+    return `<div data-member-idx="${idx}"
       style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;"
       onmouseenter="this.style.background='#f0faf4'" onmouseleave="this.style.background=''">
       ${photoHtml}
-      <div style="flex:1;min-width:0;">
+      <div style="flex:1;min-width:0;pointer-events:none;">
         <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
         <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:1px;">
           ${m.dept?`<span style="margin-right:6px;">🏢 ${m.dept}</span>`:''}
           <span>✉ ${m.email||'—'}</span>
         </div>
       </div>
-      <span style="font-size:11px;color:var(--accent2);flex-shrink:0;">เลือก ›</span>
+      <span style="font-size:11px;color:var(--accent2);flex-shrink:0;pointer-events:none;">เลือก ›</span>
     </div>`;
   }).join('');
+
+  dd.onclick = function(e) {
+    const item = e.target.closest('[data-member-idx]');
+    if (!item) return;
+    const idx = parseInt(item.getAttribute('data-member-idx'), 10);
+    const picked = dd._currentList && dd._currentList[idx];
+    if (picked) selectMemberFromDropdown(picked.id);
+  };
 
   dd.style.display = 'block';
 }
 
 function selectMemberFromDropdown(id) {
-  const m = memberCache.find(x => x.id === id);
+  const m = memberCache.find(x => x && x.id === id);
   if (!m) return;
-  document.getElementById('adName').value  = m.name || '';
-  document.getElementById('adDept').value  = m.dept || '';
+  document.getElementById('adName').value  = m.name  || '';
+  document.getElementById('adDept').value  = m.dept  || '';
   document.getElementById('adEmail').value = m.email || '';
   document.getElementById('memberSearch').value = m.name + (m.dept ? ' · '+m.dept : '');
   hideMemberDropdown();
-  // focus กลุ่มออกรอบ
   document.getElementById('adGroup').focus();
   toast(`✅ เลือก ${m.name} แล้ว — กรอกกลุ่มออกรอบ`, 'ok');
 }
 
 function hideMemberDropdown() {
   const dd = document.getElementById('memberDropdown');
-  if (dd) dd.style.display = 'none';
+  if (dd) { dd.style.display = 'none'; dd.onclick = null; }
 }
 
 // ════════════════════════════════
@@ -1287,15 +1309,23 @@ async function loadTourneyList() {
 function renderTourneyList(list) {
   const el = document.getElementById('tsList');
   if (!list.length) { el.innerHTML = '<div class="ts-empty">ยังไม่มีการแข่งขัน</div>'; return; }
-  el.innerHTML = list.map(t => `
+  el._tourneyList = list;
+  el.innerHTML = list.map((t, idx) => `
     <div class="ts-item ${activeTourney?.tourneyName===t.tourneyName?'active':''}"
-         onclick="selectTourney('${t.tourneyName.replace(/'/g,"\\'")}')">
-      <div style="flex:1;">
+         data-tourney-idx="${idx}">
+      <div style="flex:1;pointer-events:none;">
         <div class="ts-item-name">${t.tourneyName}${activeTourney?.tourneyName===t.tourneyName?' <span style="font-size:10px;color:var(--accent2);">✓</span>':''}</div>
         <div class="ts-item-meta">${t.course||'—'} · ${fmtD(t.date)}</div>
       </div>
-      <span style="color:var(--text3);font-size:16px;">›</span>
+      <span style="color:var(--text3);font-size:16px;pointer-events:none;">›</span>
     </div>`).join('');
+  el.onclick = function(e) {
+    const item = e.target.closest('[data-tourney-idx]');
+    if (!item) return;
+    const idx = parseInt(item.getAttribute('data-tourney-idx'), 10);
+    const t = el._tourneyList && el._tourneyList[idx];
+    if (t) selectTourney(t.tourneyName);
+  };
 }
 
 function filterTourneyList() {
@@ -1508,8 +1538,12 @@ function renderAdminList(players=[],scores=[]) {
   if (!players.length){el.innerHTML='<div class="empty-msg">ยังไม่มีผู้เล่น</div>';return;}
   const scoreMap={};
   scores.forEach(s=>{if(s&&s.email!=null&&s.email!==undefined) scoreMap[String(s.email).toLowerCase()]=s;});
-  // group fallback ป้องกัน undefined
   const groups=[...new Set(players.map(p=>(p.group||'ไม่ระบุกลุ่ม')))];
+
+  // เก็บ player data ไว้ใน map สำหรับ event delegation — ไม่ต้องฝัง data ใน onclick string
+  el._playerMap = {};
+  players.forEach(p => { if(p.email) el._playerMap[p.email.toLowerCase()] = p; });
+
   el.innerHTML=groups.map(g=>{
     const gp=players.filter(p=>(p.group||'ไม่ระบุกลุ่ม')===g);
     return `<div style="margin-bottom:13px;">
@@ -1534,9 +1568,8 @@ function renderAdminList(players=[],scores=[]) {
             statusHtml=`<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span>${tags}</div>`;
           }
         }
-        const safeEmail=pEmail.replace(/'/g,"\'");
-        const safeName=pName.replace(/'/g,"\'");
-        const safeDept=pDept.replace(/'/g,"\'");
+        // ใช้ data-* แทน inline onclick — ปลอดภัยกับทุก special chars ใน email/ชื่อ
+        const emailAttr = pEmail; // ใช้เป็น key ใน _playerMap
         return `<div class="player-item" style="flex-direction:column;align-items:stretch;gap:6px;${isWD?'opacity:.65;':''}">
           <div style="display:flex;align-items:center;gap:9px;">
             <div class="pi-group" style="flex-shrink:0;">${pGroup}</div>
@@ -1546,24 +1579,24 @@ function renderAdminList(players=[],scores=[]) {
               <div class="pi-email" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pEmail||'—'}</div>
             </div>
             <div style="display:flex;gap:5px;flex-shrink:0;align-items:center;">
-              <button class="btn-sm" onclick="adminEditScore('${safeEmail}','${safeName}','${pGroup}','${safeDept}')" style="color:var(--accent2);border-color:var(--accent2);padding:5px 9px;" title="แก้ไขสกอร์">✏️</button>
-              <button class="btn-danger" onclick="removePlayer('${safeEmail}')" style="padding:5px 9px;">×</button>
+              <button class="btn-sm" data-action="edit" data-email="${emailAttr}" style="color:var(--accent2);border-color:var(--accent2);padding:5px 9px;" title="แก้ไขสกอร์">✏️</button>
+              <button class="btn-danger" data-action="remove" data-email="${emailAttr}" style="padding:5px 9px;">×</button>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
             ${statusHtml}
             ${sc?`<div style="display:flex;gap:4px;margin-left:auto;flex-shrink:0;">
-              <button onclick="toggleFlag('${safeEmail}','wd',${isWD},'${safeName}')"
+              <button data-action="flag" data-email="${emailAttr}" data-flag="wd" data-cur="${isWD}"
                 title="${isWD?'คืนสถานะปกติ':'ถอนตัวออก (WD)'}"
                 style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
                   background:${isWD?'#c94a2a':'transparent'};color:${isWD?'#fff':'var(--red)'};border-color:${isWD?'#c94a2a':'var(--red)'};">
                 ${isWD?'↩ WD':'WD'}</button>
-              <button onclick="toggleFlag('${safeEmail}','lgg',${isLGG},'${safeName}')"
+              <button data-action="flag" data-email="${emailAttr}" data-flag="lgg" data-cur="${isLGG}"
                 title="${isLGG?'ยกเลิก Low Gross Winner':'มาร์ค Low Gross Winner'}"
                 style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
                   background:${isLGG?'#1a4a2a':'transparent'};color:${isLGG?'#fff':'var(--bogey)'};border-color:${isLGG?'#1a4a2a':'var(--bogey)'};">
                 LG${isLGG?'✓':''}</button>
-              <button onclick="toggleFlag('${safeEmail}','lno',${isLNO},'${safeName}')"
+              <button data-action="flag" data-email="${emailAttr}" data-flag="lno" data-cur="${isLNO}"
                 title="${isLNO?'ยกเลิก Low Net Overall Winner':'มาร์ค Low Net Overall Winner'}"
                 style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:4px 9px;border-radius:5px;border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .12s;
                   background:${isLNO?'#084298':'transparent'};color:${isLNO?'#fff':'#6a5acd'};border-color:${isLNO?'#084298':'#6a5acd'};">
@@ -1574,6 +1607,25 @@ function renderAdminList(players=[],scores=[]) {
       }).join('')}
     </div>`;
   }).join('');
+
+  // event delegation ครอบคลุมทุกปุ่มใน adminPlayerList
+  el.onclick = function(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const email  = btn.getAttribute('data-email') || '';
+    const p = el._playerMap[email.toLowerCase()] || {};
+    const name  = p.name  || '';
+    const group = p.group || '';
+    const dept  = p.dept  || '';
+    if (action === 'edit')   adminEditScore(email, name, group, dept);
+    else if (action === 'remove') removePlayer(email);
+    else if (action === 'flag') {
+      const flag = btn.getAttribute('data-flag');
+      const cur  = btn.getAttribute('data-cur') === 'true';
+      toggleFlag(email, flag, cur, name);
+    }
+  };
 }
 
 // ════════════════════════════════
@@ -1602,22 +1654,32 @@ async function verifyGmail() {
 function showTourneyPicker(name,email,list) {
   document.getElementById('ptPlayerName').textContent=name;
   document.getElementById('ptPlayerEmail').textContent=email;
-  document.getElementById('ptTourneyList').innerHTML=list.map(t=>`
-    <div class="pt-item ${t.hasScore?'has-score':'no-score'}"
-         onclick="selectPlayerTourney('${t.tourneyName.replace(/'/g,"\\'")}','${name.replace(/'/g,"\\'")}','${email}','${(t.dept||'').replace(/'/g,"\\'")}','${(t.group||'').replace(/'/g,"\\'")}')">
-      <div style="flex:1;">
+  const listEl = document.getElementById('ptTourneyList');
+  listEl._list = list;
+  listEl._name = name;
+  listEl._email = email;
+  listEl.innerHTML=list.map((t,idx)=>`
+    <div class="pt-item ${t.hasScore?'has-score':'no-score'}" data-pt-idx="${idx}">
+      <div style="flex:1;pointer-events:none;">
         <div class="pt-tourney-name">${t.tourneyName}</div>
         <div class="pt-tourney-meta">${t.course||'—'} · ${fmtD(t.date)}</div>
       </div>
-      <div class="pt-score-badge">
+      <div class="pt-score-badge" style="pointer-events:none;">
         ${t.hasScore
           ?`<div class="pt-score-val">Net ${t.net}</div>
             <div class="pt-score-sub">Gross ${t.gross} · H'cap ${t.hcp}</div>
             <div class="pt-score-sub" style="color:var(--accent2);">✓ มีสกอร์แล้ว</div>`
           :`<div style="font-size:11px;color:var(--text3);font-family:IBM Plex Mono,monospace;">ยังไม่มีสกอร์</div>`}
       </div>
-      <div style="color:var(--accent2);font-size:18px;">›</div>
+      <div style="color:var(--accent2);font-size:18px;pointer-events:none;">›</div>
     </div>`).join('');
+  listEl.onclick = function(e) {
+    const item = e.target.closest('[data-pt-idx]');
+    if (!item) return;
+    const idx = parseInt(item.getAttribute('data-pt-idx'), 10);
+    const t = listEl._list && listEl._list[idx];
+    if (t) selectPlayerTourney(t.tourneyName, listEl._name, listEl._email, t.dept||'', t.group||'');
+  };
   document.getElementById('gmailScreen').classList.add('hidden');
   document.getElementById('playerTourneyScreen').classList.remove('hidden');
 }
