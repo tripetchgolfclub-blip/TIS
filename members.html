@@ -840,7 +840,21 @@ function renderMembers(){
     const cardClass = cardTheme ? cardTheme : flightClass;
 
     const init = (m.name||'?')[0];
-    const av = m.photo ? `<img src="${m.photo}" alt="">` : init;
+    // Convert Google Drive uc?export=view URL → thumbnail URL (ที่ยังใช้งานได้)
+    function driveThumb(url, size){
+      if(!url) return url;
+      // รูปแบบ: https://drive.google.com/uc?export=view&id=FILE_ID
+      const m1 = url.match(/[?&]id=([^&]+)/);
+      if(m1) return `https://drive.google.com/thumbnail?id=${m1[1]}&sz=w${size}`;
+      // รูปแบบ: https://drive.google.com/file/d/FILE_ID/view
+      const m2 = url.match(/\/d\/([^/]+)\//);
+      if(m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w${size}`;
+      return url;
+    }
+    const photoUrl = m.photo ? driveThumb(m.photo, 200) : null;
+    const av = photoUrl
+      ? `<img src="${photoUrl}" alt="" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='');this.parentNode.dataset.noPhoto='1';this.parentNode.textContent='${init.replace(/'/g,"\\'")}'">`
+      : init;
 
     const hcpVal = (m.handicap !== '' && m.handicap !== null && m.handicap !== undefined) ? m.handicap : null;
 
@@ -924,7 +938,13 @@ function openEditModal(id){
   document.getElementById('mEmail').value=m.email||'';
   if(m.photo){
     document.getElementById('avatarPlaceholder').style.display='none';
-    const img=document.getElementById('avatarImg'); img.src=m.photo; img.style.display='block';
+    const img=document.getElementById('avatarImg');
+    // แปลง Drive URL เป็น thumbnail URL สำหรับ preview
+    const m1=m.photo.match(/[?&]id=([^&]+)/);
+    const m2=m.photo.match(/\/d\/([^/]+)\//);
+    const fid=m1?m1[1]:m2?m2[1]:null;
+    img.src= fid ? `https://drive.google.com/thumbnail?id=${fid}&sz=w200` : m.photo;
+    img.style.display='block';
     document.getElementById('btnRemovePhoto').classList.remove('hidden');
   } else { resetAvatarPreview(); }
   document.getElementById('memberModal').classList.remove('hidden');
