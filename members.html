@@ -928,19 +928,46 @@ async function saveMember(){
   if(!email){ shakeEl('mEmail'); toast('กรุณากรอก Email','err'); return; }
   const btn=document.getElementById('btnSaveMember');
   btn.disabled=true; btn.textContent='⏳ กำลังบันทึก...';
-  loading(true, editingId?'อัพเดตข้อมูล...':'เพิ่มสมาชิก...');
-  const photo = avatarDataUrl !== null ? avatarDataUrl : (originalPhoto||'');
+
   try {
     if(editingId){
-      await apiPost({action:'updateMember', id:editingId, name, dept, email, photo});
+      // ── แก้ไขข้อมูล ──
+      loading(true,'อัพเดตข้อมูล...');
+      // 1) บันทึกข้อมูลสมาชิกก่อน ไม่ส่ง photo ไปด้วย
+      await apiPost({action:'updateMember', id:editingId, name, dept, email});
+
+      // 2) อัปโหลดรูปไป Drive แยกต่างหาก (ถ้ามีการเปลี่ยนแปลง)
+      let finalPhoto = originalPhoto || '';
+      if(avatarDataUrl !== null){
+        loading(true,'กำลังอัปโหลดรูปไป Drive...');
+        const uploaded = await uploadPhotoIfNeeded(editingId, email);
+        if(uploaded !== null) finalPhoto = uploaded;
+      }
+
+      // 3) อัปเดต local state
       const idx=members.findIndex(m=>m.id===editingId);
-      if(idx>=0) members[idx]={...members[idx],name,dept,email,photo};
+      if(idx>=0) members[idx]={...members[idx], name, dept, email, photo:finalPhoto};
       toast('✅ อัพเดตข้อมูลแล้ว','ok');
+
     } else {
-      const res=await apiPost({action:'saveMember', name, dept, email, photo});
-      members.unshift({id:res.id||Date.now().toString(),name,dept,email,photo,createdAt:new Date().toISOString()});
+      // ── เพิ่มสมาชิกใหม่ ──
+      loading(true,'เพิ่มสมาชิก...');
+      // 1) สร้างสมาชิกก่อน ยังไม่มีรูป
+      const res=await apiPost({action:'saveMember', name, dept, email, photo:''});
+      const newId = res.id || Date.now().toString();
+
+      // 2) อัปโหลดรูปไป Drive (ถ้ามีเลือกรูปไว้)
+      let finalPhoto = '';
+      if(avatarDataUrl){
+        loading(true,'กำลังอัปโหลดรูปไป Drive...');
+        finalPhoto = await uploadPhotoIfNeeded(newId, email) ?? '';
+      }
+
+      // 3) อัปเดต local state
+      members.unshift({id:newId, name, dept, email, photo:finalPhoto, createdAt:new Date().toISOString()});
       toast('✅ เพิ่มสมาชิกแล้ว','ok');
     }
+
     closeModal(); renderStats(); renderDeptChips(); renderMembers();
   } catch(e){
     toast(e.message.includes('duplicate')?'Email นี้มีอยู่แล้วในระบบ':'❌ '+e.message,'err');
@@ -970,20 +997,25 @@ async function confirmDelete(){
 }
 
 // ── AVATAR ──
+// avatarDataUrl = null  → ไม่มีการเปลี่ยนแปลง (ใช้รูปเดิม)
+// avatarDataUrl = ''    → ผู้ใช้กดลบรูป
+// avatarDataUrl = 'data:image/jpeg;base64,...' → มีรูปใหม่รอ upload
 function handleAvatarChange(e){
   const file=e.target.files[0]; if(!file) return;
-  if(file.size>2*1024*1024){ toast('รูปใหญ่เกิน 2MB','err'); return; }
+  if(file.size>5*1024*1024){ toast('รูปใหญ่เกิน 5MB','err'); return; }
   const reader=new FileReader();
   reader.onload=ev=>{
     const img=new Image();
     img.onload=()=>{
-      const MAX=120;
+      // resize ให้ไม่เกิน 600px (เหมาะสำหรับ Drive)
+      const MAX=600;
       const canvas=document.createElement('canvas');
       let w=img.width,h=img.height;
       if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
       canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      avatarDataUrl=canvas.toDataURL('image/jpeg',0.65);
+      avatarDataUrl=canvas.toDataURL('image/jpeg',0.80);
+      // แสดง preview เท่านั้น — ไม่ส่ง base64 ไป Sheet โดยตรง
       const pi=document.getElementById('avatarImg'); pi.src=avatarDataUrl; pi.style.display='block';
       document.getElementById('avatarPlaceholder').style.display='none';
       document.getElementById('btnRemovePhoto').classList.remove('hidden');
@@ -1000,6 +1032,22 @@ function resetAvatarPreview(){
   document.getElementById('avatarPlaceholder').style.display='';
   document.getElementById('avatarInput').value='';
   document.getElementById('btnRemovePhoto').classList.add('hidden');
+}
+
+// ── UPLOAD รูปไป Google Drive แยกต่างหาก ──
+// คืนค่า Drive URL ใหม่, '' ถ้าลบรูป, หรือ null ถ้าไม่มีการเปลี่ยนแปลง
+async function uploadPhotoIfNeeded(memberId, email){
+  if(avatarDataUrl === null) return null;   // ไม่มีการเปลี่ยนแปลง
+  if(avatarDataUrl === ''){                  // ผู้ใช้กดลบรูป
+    await apiPost({action:'savePhoto', id:memberId, email, base64:'', mimeType:'image/jpeg'});
+    return '';
+  }
+  // มีรูปใหม่ — แยก base64 ออกจาก dataUrl
+  const [header, base64] = avatarDataUrl.split(',');
+  const mimeType = (header.match(/:(.*?);/)||[])[1] || 'image/jpeg';
+  const res = await apiPost({action:'savePhoto', id:memberId, email, base64, mimeType});
+  if(!res.ok) throw new Error(res.error || 'อัปโหลดรูปไม่สำเร็จ');
+  return res.url;
 }
 
 // ── SYNC HANDICAPS ──
