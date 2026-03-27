@@ -1565,7 +1565,10 @@ function renderAdminList(players=[],scores=[]) {
             let tags='';
             if(isLGG) tags+=`<span class="prize-tag prize-winner" style="font-size:9px;margin-left:3px;">LG🏆</span>`;
             if(isLNO) tags+=`<span class="prize-tag prize-winner" style="font-size:9px;margin-left:3px;background:#e8f0ff;color:#084298;border-color:#a3b8f0;">LN🏆</span>`;
-            statusHtml=`<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span>${tags}</div>`;
+            const totalHoles = activeTourney.holes||18;
+            const playedHoles = Array.isArray(sc.scores) ? sc.scores.filter(h=>h!==''&&h!==null&&h!==undefined&&h!==0).length : 0;
+            const holesHtml = `<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:${playedHoles>=totalHoles?'var(--accent2)":'var(--gold)'};margin-left:5px;">⛳ ${playedHoles}/${totalHoles}</span>`;
+            statusHtml=`<div class="pi-status done">Net ${sc.net} · H'cap ${sc.hcp} <span class="flight-badge fb-${flight}">${flight}</span>${tags}${holesHtml}</div>`;
           }
         }
         // ใช้ data-* แทน inline onclick — ปลอดภัยกับทุก special chars ใน email/ชื่อ
