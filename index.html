@@ -103,6 +103,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tb-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:2px;}
 .tb-meta{font-size:12px;color:rgba(255,255,255,.7);font-family:'IBM Plex Mono',monospace;}
 .round-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 17px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
+.rb-left{display:flex;align-items:center;gap:12px;}
+.rb-avatar{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;}
+.rb-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
 .rb-player{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--accent2);}
 .rb-meta{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
 .rb-right{text-align:right;}
@@ -492,12 +495,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <div class="tb-meta" id="bnrMeta">—</div>
       </div>
       <div class="round-bar">
-        <div style="display:flex;align-items:center;gap:11px;">
-          <div id="rbAvatarWrap" style="flex-shrink:0;display:none;">
-            <img id="rbAvatar" src="" alt=""
-              style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border2);"
-              onerror="document.getElementById('rbAvatarWrap').style.display='none'">
-          </div>
+        <div class="rb-left">
+          <div class="rb-avatar" id="rbAvatar"></div>
           <div>
             <div class="rb-player" id="rbName">—</div>
             <div class="rb-meta" id="rbMeta">—</div>
@@ -521,7 +520,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
           <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
           <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double→+2</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+2</div>
         </div>
       </div>
       </div>
@@ -666,7 +665,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
           <div class="leg"><div class="leg-dot" style="background:var(--par-col)"></div>Par→0</div>
           <div class="leg"><div class="leg-dot" style="background:var(--bogey)"></div>Bogey→+1</div>
           <div class="leg"><div class="leg-dot" style="background:var(--double)"></div>Double→+2</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+3</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--triple)"></div>Triple+→+2</div>
         </div>
       </div>
       </div>
@@ -1692,22 +1691,23 @@ async function verifyGmail() {
     document.getElementById('gmailErr').classList.remove('show');
     if (res.list.length===1) {
       const p=res.list[0];
-      currentPlayer={name:p.name,email:p.email,dept:p.dept,group:p.group,tourneyName:p.tourneyName};
+      currentPlayer={name:p.name,email:p.email,dept:p.dept,group:p.group,tourneyName:p.tourneyName,photo:res.photo||''};
       await startScorecard();
     } else {
-      showTourneyPicker(res.name,email,res.list);
+      showTourneyPicker(res.name,email,res.list,res.photo||'');
     }
   } catch(e){toast('❌ '+e.message,'err');}
   loading(false);
 }
 
-function showTourneyPicker(name,email,list) {
+function showTourneyPicker(name,email,list,photo) {
   document.getElementById('ptPlayerName').textContent=name;
   document.getElementById('ptPlayerEmail').textContent=email;
   const listEl = document.getElementById('ptTourneyList');
   listEl._list = list;
   listEl._name = name;
   listEl._email = email;
+  listEl._photo = photo||'';
   listEl.innerHTML=list.map((t,idx)=>`
     <div class="pt-item ${t.hasScore?'has-score':'no-score'}" data-pt-idx="${idx}">
       <div style="flex:1;pointer-events:none;">
@@ -1728,14 +1728,14 @@ function showTourneyPicker(name,email,list) {
     if (!item) return;
     const idx = parseInt(item.getAttribute('data-pt-idx'), 10);
     const t = listEl._list && listEl._list[idx];
-    if (t) selectPlayerTourney(t.tourneyName, listEl._name, listEl._email, t.dept||'', t.group||'');
+    if (t) selectPlayerTourney(t.tourneyName, listEl._name, listEl._email, t.dept||'', t.group||'', listEl._photo||'');
   };
   document.getElementById('gmailScreen').classList.add('hidden');
   document.getElementById('playerTourneyScreen').classList.remove('hidden');
 }
 
-async function selectPlayerTourney(tourneyName,name,email,dept,group) {
-  currentPlayer={name,email,dept,group,tourneyName};
+async function selectPlayerTourney(tourneyName,name,email,dept,group,photo) {
+  currentPlayer={name,email,dept,group,tourneyName,photo:photo||''};
   document.getElementById('playerTourneyScreen').classList.add('hidden');
   loading(true,'กำลังโหลดสกอร์...');
   await startScorecard();
@@ -1799,16 +1799,11 @@ async function startScorecard() {
   document.getElementById('bnrMeta').textContent=(t?.course||'—')+' · '+fmtD(t?.date)+' · '+holes+' หลุม';
   document.getElementById('rbName').textContent=currentPlayer.name;
   document.getElementById('rbMeta').textContent='กลุ่ม: '+currentPlayer.group+(currentPlayer.dept?' · ฝ่าย: '+currentPlayer.dept:'');
-  // ── แสดงรูปโปรไฟล์จาก memberCache ──
-  const rbMember = memberCache.find(m => m && m.email && m.email.toLowerCase() === currentPlayer.email.toLowerCase());
-  const rbAvatarWrap = document.getElementById('rbAvatarWrap');
-  const rbAvatarImg  = document.getElementById('rbAvatar');
-  if (rbMember && rbMember.photo) {
-    rbAvatarImg.src = rbMember.photo;
-    rbAvatarWrap.style.display = 'block';
-  } else {
-    rbAvatarWrap.style.display = 'none';
-  }
+  const rbAv=document.getElementById('rbAvatar');
+  const rbInit=(currentPlayer.name||'?')[0];
+  rbAv.innerHTML=currentPlayer.photo
+    ?`<img src="${currentPlayer.photo}" alt="" onerror="this.style.display='none';this.parentNode.textContent='${rbInit}';">`
+    :rbInit;
   document.getElementById('gmailScreen').classList.add('hidden');
   document.getElementById('playerScorecard').classList.remove('hidden');
 
