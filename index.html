@@ -134,6 +134,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .sub-row.total-row span{color:rgba(255,255,255,.85);border-right-color:rgba(255,255,255,.1);}
 .sub-row.total-row span:first-child{color:rgba(255,255,255,.5);}
 .c-empty{color:var(--border2);}.c-eagle{color:var(--eagle);}.c-birdie{color:var(--birdie);}
+.hole-row.saved-hole{background:#f0faf4;}
+.hole-row.draft-hole{background:#fffbf0;}
+.sc-val.saved-score{border-bottom:2px solid var(--accent);border-radius:1px;}
+.sc-val.draft-score{position:relative;}
+.sc-val.draft-score::after{content:'';position:absolute;top:1px;right:-3px;width:5px;height:5px;background:var(--gold);border-radius:50%;}
 .c-par{color:var(--par-col);}.c-bogey{color:var(--bogey);}.c-double{color:var(--double);}.c-triple{color:var(--triple);}
 .hcp0{color:var(--par-col);}.hcp1{color:var(--bogey);font-weight:500;}.hcp2{color:var(--double);font-weight:600;}.hcp3{color:var(--triple);font-weight:700;}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg);}
@@ -535,7 +540,12 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'I
         <button class="btn-send" id="btnSaveTemp" onclick="saveTempScore()" style="background:#5a7a9a;">
           💾 ส่งสกอร์ชั่วคราว
         </button>
-        <div id="tempSavedNote" class="hidden" style="background:#e8f5ed;border:1px solid #a3cfbb;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#1a4a2a;display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;gap:12px;align-items:center;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;margin-bottom:8px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);">
+  <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:14px;background:#f0faf4;border:1px solid var(--accent);border-radius:2px;"></span> บันทึกแล้ว</span>
+  <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:14px;background:#fffbf0;border:1px solid var(--gold);border-radius:2px;"></span> ยังไม่บันทึก</span>
+  <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:14px;background:var(--bg);border:1px solid var(--border);border-radius:2px;"></span> ยังไม่กรอก</span>
+</div>
+<div id="tempSavedNote" class="hidden" style="background:#e8f5ed;border:1px solid #a3cfbb;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#1a4a2a;display:flex;align-items:center;gap:8px;">
           <span>✓</span><span>บันทึกชั่วคราวแล้ว — ยังแก้ไขได้</span>
         </div>
         <button class="btn-send" id="btnReview" onclick="reviewScore()">🔍 ตรวจสอบและยืนยันสกอร์</button>
@@ -1094,6 +1104,36 @@ const DEF_PARS_9  = [4,4,3,5,4,3,4,5,4];
 let adminIn = false;
 let scriptUrl = localStorage.getItem('golf_scriptUrl') || 'https://script.google.com/macros/s/AKfycbyq716QpvLCMhiUuWsI0GiK00dZwVZWoQJs1NIrsgmwJyFoYcxeBRYRiEdLqKP2rh6H9A/exec';
 let currentPlayer = null;
+
+// ── localStorage auto-save helpers ──
+function lsKey() {
+  if (!currentPlayer) return null;
+  return 'scoredraft_' + currentPlayer.tourneyName + '_' + currentPlayer.email.toLowerCase();
+}
+function lsSave() {
+  const key = lsKey();
+  if (!key || !scoreState) return;
+  try {
+    localStorage.setItem(key, JSON.stringify({
+      scores: scoreState.scores,
+      putts:  scoreState.putts,
+      ts:     Date.now()
+    }));
+  } catch(e) {}
+}
+function lsLoad() {
+  const key = lsKey();
+  if (!key) return null;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+function lsClear() {
+  const key = lsKey();
+  if (!key) return;
+  try { localStorage.removeItem(key); } catch(e) {}
+}
 let scoreState = { scores:[], putts:[], pars:[], holes:18 };
 let tourneyList = [];
 let activeTourney = null;
@@ -1721,11 +1761,33 @@ async function startScorecard() {
   const pars=(t?.pars&&t.pars.length)?t.pars.map(Number):(holes===9?DEF_PARS_9:DEF_PARS_18);
   const allSc=await api('getScores',{name:currentPlayer.tourneyName});
   const exist=allSc.find(s=>s.email!=null&&s.email.toString().toLowerCase()===currentPlayer.email.toLowerCase());
+  // เก็บ index หลุมที่ถูก save ลง Sheet แล้ว (จาก exist)
+  const savedSet = new Set();
+  if (exist) {
+    exist.scores.forEach(function(v,i){ if(v!==''&&v!==null&&v!==undefined) savedSet.add(i); });
+  }
   scoreState={
     scores:exist?exist.scores.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
     putts: exist?exist.putts.map(v=>v===''?null:Number(v)):Array(holes).fill(null),
-    pars:[...pars],holes,locked:false
+    pars:[...pars],holes,locked:false,
+    savedSet:savedSet
   };
+  // restore จาก localStorage ถ้ามีและใหม่กว่าข้อมูลใน Sheet (เฉพาะกรณียังไม่ confirmed)
+  if (!exist?.confirmed) {
+    const draft = lsLoad();
+    if (draft && Array.isArray(draft.scores) && draft.scores.length === holes) {
+      const sheetTs = exist ? 0 : -1; // ถ้ายังไม่มีข้อมูลใน sheet ให้ใช้ draft เสมอ
+      const draftHasMore = draft.scores.filter(v=>v!==null).length >
+                           scoreState.scores.filter(v=>v!==null).length;
+      if (sheetTs === -1 || draftHasMore) {
+        scoreState.scores = draft.scores.map(v=>v===null?null:Number(v));
+        scoreState.putts  = Array.isArray(draft.putts) && draft.putts.length===holes
+                            ? draft.putts.map(v=>v===null?null:Number(v))
+                            : scoreState.putts;
+        toast('📋 โหลดข้อมูลที่คีย์ค้างไว้','ok');
+      }
+    }
+  }
   document.getElementById('bnrTitle').textContent=t?.tourneyName||'—';
   document.getElementById('bnrMeta').textContent=(t?.course||'—')+' · '+fmtD(t?.date)+' · '+holes+' หลุม';
   document.getElementById('rbName').textContent=currentPlayer.name;
@@ -1776,11 +1838,14 @@ function renderCard(){
 }
 function mkRow(i){
   const {scores,pars,putts}=scoreState,el=document.createElement('div');
-  el.className='hole-row';
+  const isSaved = scoreState.savedSet && scoreState.savedSet.has(i) && scores[i]!==null;
+  const isDraft = !isSaved && scores[i]!==null;
+  el.className='hole-row' + (isSaved?' saved-hole':isDraft?' draft-hole':'');
   const s=scores[i],par=pars[i],p=putts[i],df=s!==null?s-par:null,hcp=holeHcp(s,par);
   const sCls=clsCls(df),hCls=hcp===null?'c-empty':hcp===0?'hcp0':hcp===1?'hcp1':hcp===2?'hcp2':'hcp3';
+  const scoreExtraCls=isSaved?' saved-score':isDraft?' draft-score':'';
   el.innerHTML=`<div class="h-num">${i+1}</div><div class="h-par-cell">${par}</div>
-    <div class="h-score"><button class="sc-btn" onclick="adj('s',${i},-1)">−</button><span class="sc-val ${sCls}">${s!==null?s:'—'}</span><button class="sc-btn" onclick="adj('s',${i},1)">+</button></div>
+    <div class="h-score"><button class="sc-btn" onclick="adj('s',${i},-1)">−</button><span class="sc-val ${sCls}${scoreExtraCls}" style="position:relative;">${s!==null?s:'—'}</span><button class="sc-btn" onclick="adj('s',${i},1)">+</button></div>
     <div class="h-diff ${sCls}">${df!==null?dStr(df):'—'}</div>
     <div class="h-hcp ${hCls}">${hcp===null?'—':hcp===0?'·':hcp}</div>
     <div class="h-putt"><button class="putt-btn" onclick="adj('p',${i},-1)">−</button><span class="putt-val">${p!==null?p:'—'}</span><button class="putt-btn" onclick="adj('p',${i},1)">+</button></div>`;
@@ -1802,6 +1867,7 @@ function adj(type,i,d){
   if(type==='s')scoreState.scores[i]=Math.max(1,(scoreState.scores[i]??scoreState.pars[i])+d);
   else scoreState.putts[i]=Math.max(0,(scoreState.putts[i]??0)+d);
   renderCard();updateSummary();
+  lsSave();
 }
 
 async function saveTempScore() {
@@ -1817,6 +1883,12 @@ async function saveTempScore() {
       gross,par:parSum,hcp,net,puttsTotal:puttsT,
       scores:[...scoreState.scores],pars:[...scoreState.pars],putts:[...scoreState.putts]});
     document.getElementById('tempSavedNote').classList.remove('hidden');
+    lsClear();
+    // update savedSet — หลุมที่มีสกอร์ทั้งหมดถือว่า saved แล้ว
+    if (scoreState.savedSet) {
+      scoreState.scores.forEach(function(v,i){ if(v!==null) scoreState.savedSet.add(i); });
+    }
+    renderCard();
     toast('💾 บันทึกชั่วคราวแล้ว — ยังแก้ไขได้','ok');
   }catch(e){toast('❌ '+e.message,'err');}
   btn.disabled=false;btn.innerHTML='💾 ส่งสกอร์ชั่วคราว';
@@ -1921,6 +1993,7 @@ async function confirmAndSubmit() {
     document.getElementById('scConfirmSection').classList.add('hidden');
     document.getElementById('scShareSection').classList.remove('hidden');
     // ล็อกสกอร์การ์ดด้านหลัง
+    lsClear();
     lockScorecard();
     toast('✅ ยืนยันสกอร์เรียบร้อยแล้ว!','ok');
   } catch(e) {
