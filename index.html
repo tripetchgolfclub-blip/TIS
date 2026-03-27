@@ -1124,86 +1124,65 @@ let memberCache = []; // cache สมาชิกจาก Members sheet
 async function loadMemberCache() {
   if (!scriptUrl) return;
   try {
-    const raw = await api('getMembers');
-    // กรอง null/undefined ออก และตรวจสอบว่าเป็น array จริง
-    memberCache = Array.isArray(raw) ? raw.filter(m => m && m.id && m.name) : [];
+    memberCache = await api('getMembers');
   } catch(e) { memberCache = []; }
 }
 
-let _memberCacheLoading = false;
 function filterMemberDropdown() {
   const q = (document.getElementById('memberSearch').value || '').toLowerCase().trim();
   const dd = document.getElementById('memberDropdown');
-  // ถ้า cache ว่างและยังไม่ได้กำลังโหลด → โหลดครั้งเดียว แล้วค่อย render ซ้ำ
   if (!memberCache.length && scriptUrl) {
-    if (!_memberCacheLoading) {
-      _memberCacheLoading = true;
-      loadMemberCache()
-        .then(() => { _memberCacheLoading = false; filterMemberDropdown(); })
-        .catch(() => { _memberCacheLoading = false; });
-    }
+    loadMemberCache().then(() => filterMemberDropdown());
     return;
   }
-  // safe filter — m ต้องไม่ใช่ null/undefined
   const list = q
-    ? memberCache.filter(m => m &&
-        ((m.name||'').toLowerCase().includes(q) ||
-         (m.email||'').toLowerCase().includes(q) ||
-         (m.dept||'').toLowerCase().includes(q)))
+    ? memberCache.filter(m =>
+        (m.name||'').toLowerCase().includes(q) ||
+        (m.email||'').toLowerCase().includes(q) ||
+        (m.dept||'').toLowerCase().includes(q))
     : memberCache.slice(0, 30);
 
   if (!list.length) { hideMemberDropdown(); return; }
 
-  // ใช้ data-member-idx + event delegation แทน inline onclick
-  // เพื่อหลีกเลี่ยง string-escape crash เมื่อ id มี special chars
-  dd.innerHTML = list.map((m, idx) => {
+  dd.innerHTML = list.map(m => {
     const initial = (m.name||'?')[0];
     const photoHtml = m.photo
-      ? `<img src="${m.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">`
+      ? `<img src="${m.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
       : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">${initial}</div>`;
-    return `<div data-member-idx="${idx}"
+    return `<div onclick="selectMemberFromDropdown('${m.id}')"
       style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;"
       onmouseenter="this.style.background='#f0faf4'" onmouseleave="this.style.background=''">
       ${photoHtml}
-      <div style="flex:1;min-width:0;pointer-events:none;">
+      <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
         <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:1px;">
           ${m.dept?`<span style="margin-right:6px;">🏢 ${m.dept}</span>`:''}
           <span>✉ ${m.email||'—'}</span>
         </div>
       </div>
-      <span style="font-size:11px;color:var(--accent2);flex-shrink:0;pointer-events:none;">เลือก ›</span>
+      <span style="font-size:11px;color:var(--accent2);flex-shrink:0;">เลือก ›</span>
     </div>`;
   }).join('');
-
-  // event delegation — คลิกที่ item ใดก็ได้ในหน้า dropdown
-  dd._currentList = list; // เก็บ list ปัจจุบันไว้อ้างอิง
-  dd.onclick = function(e) {
-    const item = e.target.closest('[data-member-idx]');
-    if (!item) return;
-    const idx = parseInt(item.getAttribute('data-member-idx'), 10);
-    const picked = dd._currentList && dd._currentList[idx];
-    if (picked) selectMemberFromDropdown(picked.id);
-  };
 
   dd.style.display = 'block';
 }
 
 function selectMemberFromDropdown(id) {
-  const m = memberCache.find(x => x && x.id === id);
+  const m = memberCache.find(x => x.id === id);
   if (!m) return;
-  document.getElementById('adName').value  = m.name  || '';
-  document.getElementById('adDept').value  = m.dept  || '';
+  document.getElementById('adName').value  = m.name || '';
+  document.getElementById('adDept').value  = m.dept || '';
   document.getElementById('adEmail').value = m.email || '';
   document.getElementById('memberSearch').value = m.name + (m.dept ? ' · '+m.dept : '');
   hideMemberDropdown();
+  // focus กลุ่มออกรอบ
   document.getElementById('adGroup').focus();
   toast(`✅ เลือก ${m.name} แล้ว — กรอกกลุ่มออกรอบ`, 'ok');
 }
 
 function hideMemberDropdown() {
   const dd = document.getElementById('memberDropdown');
-  if (dd) { dd.style.display = 'none'; dd.onclick = null; }
+  if (dd) dd.style.display = 'none';
 }
 
 // ════════════════════════════════
@@ -1215,8 +1194,8 @@ async function api(action, params={}) {
   const r = await fetch(scriptUrl+'?action='+action+qs, {redirect:'follow'});
   const text = await r.text();
   let json;
-  try { json = JSON.parse(text); } catch(e) { throw new Error('Parse error: '+text.slice(0,100)); }
-  if (json && json.error) throw new Error(json.error);
+  try { json = JSON.parse(text); } catch(e) { throw new Error('['+action+'] Parse error: '+text.slice(0,120)); }
+  if (json && json.error) throw new Error('['+action+'] '+json.error);
   return json;
 }
 async function apiPost(body) {
@@ -1450,9 +1429,6 @@ async function addPlayer() {
     document.getElementById('adName').value='';
     document.getElementById('adEmail').value='';
     document.getElementById('adDept').value='';
-    document.getElementById('adGroup').value='';
-    document.getElementById('memberSearch').value='';
-    hideMemberDropdown();
     await loadPlayersToAdmin();
     toast('✅ เพิ่มผู้เล่นแล้ว','ok');
   } catch(e){toast(e.message==='duplicate'?'Email นี้มีอยู่แล้ว':'❌ '+e.message,'err');}
@@ -1506,13 +1482,22 @@ async function loadPlayersToAdmin() {
   if (!activeTourney||!scriptUrl) return;
   loading(true,'โหลดรายชื่อ...');
   try {
-    const [rawPlayers,scores]=await Promise.all([
-      api('getPlayers',{name:activeTourney.tourneyName}),
-      api('getScores',{name:activeTourney.tourneyName})
-    ]);
-    // กรองแถวที่ name เป็น undefined หรือ header หลุดมา
-    const players=(Array.isArray(rawPlayers)?rawPlayers:[]).filter(p=>p&&p.name&&p.name!=='Name'&&p.name!=='name');
-    renderAdminList(players, Array.isArray(scores)?scores:[]);
+    // โหลด players ก่อนเสมอ — ถ้า getScores fail ก็ยังแสดงรายชื่อได้
+    const rawPlayers = await api('getPlayers',{name:activeTourney.tourneyName});
+    const players=(Array.isArray(rawPlayers)?rawPlayers:[])
+      .filter(p=>p&&p.name&&p.name!=='Name'&&p.name!=='name');
+
+    // โหลด scores แยก — ถ้าพัง แสดง players โดยไม่มี score info
+    let scores = [];
+    try {
+      const rawScores = await api('getScores',{name:activeTourney.tourneyName});
+      scores = Array.isArray(rawScores) ? rawScores : [];
+    } catch(se) {
+      console.warn('getScores failed:', se.message);
+      toast('⚠️ โหลดสกอร์ไม่ได้ (แสดงรายชื่อเฉพาะ)','');
+    }
+
+    renderAdminList(players, scores);
   } catch(e){toast('❌ '+e.message,'err');}
   loading(false);
 }
