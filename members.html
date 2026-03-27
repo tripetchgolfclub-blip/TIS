@@ -840,7 +840,9 @@ function renderMembers(){
     const cardClass = cardTheme ? cardTheme : flightClass;
 
     const init = (m.name||'?')[0];
-    const av = m.photo ? `<img src="${m.photo}" alt="">` : init;
+    const av = m.photo
+      ? `<img src="${m.photo}" alt="" onerror="this.style.display='none';this.parentNode.textContent='${init.replace(/'/g,"\\'")}';">`
+      : init;
 
     const hcpVal = (m.handicap !== '' && m.handicap !== null && m.handicap !== undefined) ? m.handicap : null;
 
