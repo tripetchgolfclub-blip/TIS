@@ -776,16 +776,27 @@ function renderStats(){
 // ── DEPT CHIPS ──
 function renderDeptChips(){
   const depts = [...new Set(members.map(m=>m.dept).filter(Boolean))].sort();
-  document.getElementById('deptChips').innerHTML =
-    `<span class="chip ${!deptFilter?'active':''}" onclick="setDeptFilter('',this)">ทั้งหมด</span>` +
-    depts.map(d=>`<span class="chip ${deptFilter===d?'active':''}" onclick="setDeptFilter('${esc(d)}',this)">${d}</span>`).join('');
+  const container = document.getElementById('deptChips');
+  container.innerHTML =
+    `<span class="chip ${!deptFilter?'active':''}" data-dept="">ทั้งหมด</span>` +
+    depts.map(d=>`<span class="chip ${deptFilter===d?'active':''}" data-dept="${esc(d)}">${d}</span>`).join('');
+  // event delegation — ปลอดภัยกว่า inline onclick ที่มี string interpolation
+  container.onclick = function(e) {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const dept = chip.getAttribute('data-dept');
+    deptFilter = dept;
+    container.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    renderMembers();
+  };
   const dl = document.getElementById('deptDatalist');
   if(dl) dl.innerHTML = depts.map(d=>`<option value="${esc(d)}">`).join('');
 }
 function setDeptFilter(dept, el){
   deptFilter = dept;
   document.querySelectorAll('.filter-chips .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
+  if(el) el.classList.add('active');
   renderMembers();
 }
 
@@ -839,7 +850,7 @@ function renderMembers(){
     const stampsHtml = buildStamps(awards);
     const bannerHtml = cardTheme ? '<div class="award-banner"></div>' : '';
 
-    return `<div class="member-card ${cardClass}">
+    return `<div class="member-card ${cardClass}" data-member-id="${esc(m.id)}">
       ${bannerHtml}
       <div class="mc-top">
         <div class="mc-avatar">${av}</div>
@@ -854,11 +865,21 @@ function renderMembers(){
       </div>
       ${stampsHtml}
       <div class="mc-actions">
-        <button class="btn-edit" onclick="openEditModal('${m.id}')">✏️ แก้ไข</button>
-        <button class="btn-danger" onclick="openDeleteConfirm('${m.id}','${esc(m.name)}')">🗑️</button>
+        <button class="btn-edit" data-action="edit" data-id="${esc(m.id)}">✏️ แก้ไข</button>
+        <button class="btn-danger" data-action="delete" data-id="${esc(m.id)}" data-name="${esc(m.name)}">🗑️</button>
       </div>
     </div>`;
   }).join('');
+
+  // event delegation สำหรับปุ่ม edit/delete — ปลอดภัยกว่า inline onclick
+  grid.onclick = function(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const id = btn.getAttribute('data-id');
+    if (action === 'edit') openEditModal(id);
+    else if (action === 'delete') openDeleteConfirm(id, btn.getAttribute('data-name'));
+  };
 }
 
 function getFlightClass(hcp){
