@@ -2826,7 +2826,7 @@ function _buildLbCanvas(d, mode, tourneyName) {
   };
   const prizes = prizeLabels[mode] || [];
 
-  const DPR=2, W=600, ROW_H=68, HEADER_H=110, FOOTER_H=44;
+  const DPR=2, W=720, ROW_H=68, HEADER_H=110, FOOTER_H=44;
   const H = HEADER_H + d.length*ROW_H + FOOTER_H + 36;
   const canvas = document.createElement('canvas');
   canvas.width=W*DPR; canvas.height=H*DPR;
@@ -2850,8 +2850,8 @@ function _buildLbCanvas(d, mode, tourneyName) {
   const thY = HEADER_H + 8;
   ctx.fillStyle=C.green+'33'; roundRectPdf(ctx,16,thY,W-32,26,6); ctx.fill();
   ctx.fillStyle=C.green; ctx.font='bold 9px "IBM Plex Mono",sans-serif';
-  // col positions: rank(16-56) | name(56-290) | holes(290-350) | gross(350-420) | hcp(420-480) | net(480-530) | prize(530-end)
-  const COL = {RANK_X:36, NAME_X:58, HOLES_X:295, GROSS_X:348, HCP_X:418, NET_X:490, PRIZE_X:W-22};
+  // col positions: rank | name | holes | gross | hcp | net | prize(ขวาสุด ไม่ทับ net)
+  const COL = {RANK_X:36, NAME_X:58, HOLES_X:355, GROSS_X:416, HCP_X:492, NET_X:558, PRIZE_X:W-22};
   ctx.textAlign='center';
   ctx.fillText('#', COL.RANK_X, thY+17);
   ctx.textAlign='left';
@@ -3042,7 +3042,7 @@ function exportSectionPDF(sectionTitle,btn){
   const sec=getSectionConfig(sectionTitle);
   const isLowGross = sectionTitle.toLowerCase().includes('gross');
   const canvas=document.createElement('canvas');
-  const DPR=2,W=600,ROW_H=80,HEADER_H=120,CHART_H=200,FOOTER_H=46;
+  const DPR=2,W=720,ROW_H=80,HEADER_H=120,CHART_H=200,FOOTER_H=46;
   const H=HEADER_H+CHART_H+(sec.players.length*ROW_H)+FOOTER_H+24;
   canvas.width=W*DPR;canvas.height=H*DPR;
   const ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);
@@ -3112,7 +3112,7 @@ function exportSectionPDF(sectionTitle,btn){
   ctx.beginPath();ctx.moveTo(20,listY);ctx.lineTo(W-20,listY);ctx.stroke();
 
   // col positions (same as _buildLbCanvas)
-  const COL = {RANK_X:36, NAME_X:58, HOLES_X:295, GROSS_X:348, HCP_X:418, NET_X:490, PRIZE_X:W-22};
+  const COL = {RANK_X:36, NAME_X:58, HOLES_X:355, GROSS_X:416, HCP_X:492, NET_X:558, PRIZE_X:W-22};
 
   // Player rows
   sec.players.forEach((p,i)=>{
@@ -3241,7 +3241,7 @@ async function buildAllAwardsPDFCanvas(){
       {title:'🐷 Booby',players:booby,getVal:p=>p.net,getSub:p=>`Net · H'cap ${p.hcp}`,color:'#c94a2a',isBooby:true,isLowGross:false,prizeLabels:['🐷 Booby Maker','🐷 Booby']},
     ];
     const canvas=document.createElement('canvas');
-    const DPR=2,W=600,ROW_H=72,SEC_HEAD=44,PAD=16,HEADER_H=110,FOOTER_H=44;
+    const DPR=2,W=720,ROW_H=72,SEC_HEAD=44,PAD=16,HEADER_H=110,FOOTER_H=44;
     const totalRows=sections.reduce((a,s)=>a+Math.max(s.players.length,1),0);
     const H=HEADER_H+sections.length*(SEC_HEAD+PAD)+totalRows*ROW_H+FOOTER_H+32;
     canvas.width=W*DPR;canvas.height=H*DPR;
@@ -3251,7 +3251,7 @@ async function buildAllAwardsPDFCanvas(){
     const fbg={'A':'#d1e7dd','B':'#cfe2ff','C':'#fff3cd'};
     const ftc={'A':'#0a3622','B':'#084298','C':'#664d03'};
     // col positions for all-PDF (slightly tighter)
-    const COL={RANK_X:34,NAME_X:56,HOLES_X:280,GROSS_X:330,HCP_X:398,NET_X:462,PRIZE_X:W-18};
+    const COL={RANK_X:34,NAME_X:56,HOLES_X:355,GROSS_X:416,HCP_X:492,NET_X:558,PRIZE_X:W-18};
 
     ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
     ctx.fillStyle=C.green;roundRectPdf(ctx,0,0,W,HEADER_H,0);ctx.fill();
