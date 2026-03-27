@@ -393,6 +393,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
       <div style="display:flex;align-items:center;gap:8px;">
         <span id="memberCountBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);font-weight:400;"></span>
         <button class="btn-outline" onclick="syncHandicaps()" id="btnSyncHcp" style="font-size:12px;padding:5px 11px;" disabled>⛳ อัปเดต H'cap</button>
+        <button class="btn-outline" onclick="confirmClearHandicaps()" id="btnClearHcp" style="font-size:12px;padding:5px 11px;border-color:#f5c6bb;color:var(--red);" disabled>✕ Clear H'cap</button>
       </div>
     </div>
     <div class="member-grid" id="memberGrid">
@@ -472,6 +473,19 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
     <div class="confirm-btns">
       <button class="btn-outline" onclick="closeConfirm()">ยกเลิก</button>
       <button style="background:var(--red);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;" onclick="confirmDelete()">ลบเลย</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM CLEAR HANDICAPS -->
+<div class="confirm-overlay hidden" id="clearHcpModal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🧹</div>
+    <div class="confirm-title">ล้าง H'cap ทั้งหมด?</div>
+    <div class="confirm-sub">H'cap ของสมาชิกทุกคนจะถูกล้างเป็นค่าว่าง<br>สามารถ sync ใหม่ได้ภายหลัง</div>
+    <div class="confirm-btns">
+      <button class="btn-outline" onclick="closeClearHcpModal()">ยกเลิก</button>
+      <button style="background:var(--red);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;" onclick="doClearHandicaps()">ล้างเลย</button>
     </div>
   </div>
 </div>
@@ -569,6 +583,7 @@ function showConnected(){
   document.getElementById('connectedRow').classList.remove('hidden');
   document.getElementById('btnAddMember').disabled = false;
   document.getElementById('btnSyncHcp').disabled = false;
+  document.getElementById('btnClearHcp').disabled = false;
   loadTourneyList();
 }
 function changeUrl(){
@@ -1113,6 +1128,28 @@ async function syncHandicaps(){
     toast(`✅ อัปเดต H'cap ${res.count||0} คนแล้ว`,'ok');
   } catch(e){ toast('❌ '+e.message,'err'); }
   btn.disabled = false; btn.textContent = "⛳ อัปเดต H'cap";
+  loading(false);
+}
+
+// ── CLEAR HANDICAPS ──
+function confirmClearHandicaps(){
+  document.getElementById('clearHcpModal').classList.remove('hidden');
+}
+function closeClearHcpModal(){
+  document.getElementById('clearHcpModal').classList.add('hidden');
+}
+async function doClearHandicaps(){
+  closeClearHcpModal();
+  const btn = document.getElementById('btnClearHcp');
+  btn.disabled = true; btn.textContent = '⏳ กำลังล้าง...';
+  loading(true, 'กำลังล้าง H\'cap...');
+  try {
+    const res = await api('clearHandicaps');
+    members.forEach(m => { m.handicap = ''; });
+    renderStats(); renderMembers();
+    toast(`✅ ล้าง H'cap ${res.count||0} คนแล้ว`,'ok');
+  } catch(e){ toast('❌ '+e.message,'err'); }
+  btn.disabled = false; btn.textContent = "✕ Clear H'cap";
   loading(false);
 }
 
