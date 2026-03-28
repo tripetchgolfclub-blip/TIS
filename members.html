@@ -429,12 +429,53 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(44
           <span id="avatarPlaceholder" style="font-size:30px;">📷</span>
           <img id="avatarImg" src="" style="display:none;">
         </div>
-        <div class="avatar-hint">คลิกเพื่ออัพโหลดรูปสมาชิก<br>(JPG/PNG ไม่เกิน 2MB)</div>
+        <div class="avatar-hint" id="avatarHint">คลิกที่รูปเพื่ออัพโหลด หรือเลือกด้านล่าง<br>(JPG/PNG ไม่เกิน 5MB)</div>
+        <!-- Photo action buttons -->
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:2px;">
+          <button type="button" onclick="document.getElementById('avatarInput').click()"
+            style="font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;font-family:'Sarabun',sans-serif;display:flex;align-items:center;gap:5px;">
+            🖼️ เลือกไฟล์
+          </button>
+          <button type="button" id="btnOpenCamera" onclick="openCamera()"
+            style="font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid var(--accent);background:#e8f5ed;color:var(--accent2);cursor:pointer;font-family:'Sarabun',sans-serif;display:flex;align-items:center;gap:5px;">
+            📸 ถ่ายรูป (กล้องหน้า)
+          </button>
+        </div>
         <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="handleAvatarChange(event)">
         <button type="button" id="btnRemovePhoto" onclick="removePhoto()" class="hidden"
-          style="font-size:11px;color:var(--red);border:none;background:none;cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:-4px;">
+          style="font-size:11px;color:var(--red);border:none;background:none;cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:2px;">
           × ลบรูป
         </button>
+      </div>
+
+      <!-- Camera Modal -->
+      <div id="cameraModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:#fff;">📸 ถ่ายรูปสมาชิก</div>
+        <!-- Live preview -->
+        <div style="position:relative;width:100%;max-width:360px;">
+          <video id="cameraVideo" autoplay playsinline muted
+            style="width:100%;border-radius:12px;border:2px solid rgba(255,255,255,.25);background:#000;display:block;"></video>
+          <!-- Face guide overlay -->
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+            <div style="width:150px;height:180px;border:2.5px dashed rgba(255,255,255,.45);border-radius:50%;"></div>
+          </div>
+        </div>
+        <canvas id="cameraCanvas" style="display:none;"></canvas>
+        <div style="font-size:12px;color:rgba(255,255,255,.55);font-family:'IBM Plex Mono',monospace;text-align:center;">จัดหน้าให้อยู่ในกรอบ แล้วกดถ่ายรูป</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+          <button type="button" onclick="capturePhoto()"
+            style="background:#2c6e3f;color:#fff;border:none;padding:11px 24px;border-radius:30px;font-size:15px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;box-shadow:0 4px 16px rgba(44,110,63,.5);">
+            📸 ถ่ายรูป
+          </button>
+          <button type="button" onclick="switchCamera()" id="btnSwitchCam"
+            style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);padding:11px 18px;border-radius:30px;font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;">
+            🔄 สลับกล้อง
+          </button>
+          <button type="button" onclick="closeCamera()"
+            style="background:rgba(255,0,0,.2);color:#fff;border:1px solid rgba(255,100,100,.3);padding:11px 18px;border-radius:30px;font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;">
+            ✕ ปิด
+          </button>
+        </div>
       </div>
       <input type="hidden" id="mId">
       <div class="form-row">
@@ -947,6 +988,7 @@ function openEditModal(id){
   document.getElementById('memberModal').classList.remove('hidden');
 }
 function closeModal(){
+  closeCamera(); // ปิดกล้องถ้าเปิดอยู่
   document.getElementById('memberModal').classList.add('hidden');
   editingId=null; avatarDataUrl=null; originalPhoto=null;
 }
@@ -1153,7 +1195,84 @@ async function doClearHandicaps(){
   loading(false);
 }
 
-// ── UTILS ──
+// ── CAMERA (กล้องหน้า) ──
+let cameraStream = null;
+let currentFacingMode = 'user'; // 'user' = กล้องหน้า, 'environment' = กล้องหลัง
+
+async function openCamera(){
+  const modal = document.getElementById('cameraModal');
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  await startCamera(currentFacingMode);
+}
+
+async function startCamera(facingMode){
+  // หยุด stream เก่าก่อน
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+  try {
+    const constraints = {
+      video: {
+        facingMode: { ideal: facingMode },
+        width: { ideal: 1280 },
+        height: { ideal: 960 }
+      },
+      audio: false
+    };
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.getElementById('cameraVideo');
+    video.srcObject = cameraStream;
+    // mirror เฉพาะกล้องหน้า
+    video.style.transform = facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+  } catch(e){
+    closeCamera();
+    toast('❌ ไม่สามารถเข้าถึงกล้องได้: '+e.message,'err');
+  }
+}
+
+async function switchCamera(){
+  currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+  await startCamera(currentFacingMode);
+}
+
+function capturePhoto(){
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('cameraCanvas');
+  if(!video.videoWidth){ toast('กล้องยังไม่พร้อม','err'); return; }
+
+  // ขนาดเป้าหมาย (square crop ตรงกลาง)
+  const MAX = 600;
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const size = Math.min(vw, vh);
+  const sx = (vw - size) / 2, sy = (vh - size) / 2;
+  canvas.width = MAX; canvas.height = MAX;
+  const ctx = canvas.getContext('2d');
+  // ถ้ากล้องหน้าต้อง flip ภาพให้ตรงกับที่เห็น
+  if(currentFacingMode === 'user'){
+    ctx.translate(MAX, 0); ctx.scale(-1, 1);
+  }
+  ctx.drawImage(video, sx, sy, size, size, 0, 0, MAX, MAX);
+  avatarDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+  // แสดง preview
+  const pi = document.getElementById('avatarImg');
+  pi.src = avatarDataUrl; pi.style.display = 'block';
+  document.getElementById('avatarPlaceholder').style.display = 'none';
+  document.getElementById('btnRemovePhoto').classList.remove('hidden');
+
+  closeCamera();
+  toast('📸 ถ่ายรูปสำเร็จ','ok');
+}
+
+function closeCamera(){
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+  const modal = document.getElementById('cameraModal');
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
+  const video = document.getElementById('cameraVideo');
+  video.srcObject = null;
+}
+
+
 let tTimer;
 function toast(msg,type=''){
   clearTimeout(tTimer);
